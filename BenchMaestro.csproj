@@ -1,0 +1,324 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net5.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <ApplicationIcon>BenchMaestro.ico</ApplicationIcon>
+    <StartupObject></StartupObject>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
+    <SignAssembly>false</SignAssembly>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <Copyright>GPL 3.0</Copyright>
+    <PackageProjectUrl>https://github.com/mann1x/BenchMaestro</PackageProjectUrl>
+    <RepositoryUrl>https://github.com/mann1x/BenchMaestro</RepositoryUrl>
+    <Description>Bench and test tool</Description>
+    <Deterministic>false</Deterministic>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="images\camera.png" />
+    <None Remove="images\BenchMaestro.ico" />
+    <None Remove="images\max.png" />
+    <None Remove="images\pleasewait.png" />
+    <None Remove="images\sort_down.png" />
+    <None Remove="images\sort_up.png" />
+    <None Remove="Settings\Settings.txt" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Settings\Settings.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AdonisUI" Version="1.17.1" />
+    <PackageReference Include="AdonisUI.ClassicTheme" Version="1.17.1" />
+    <PackageReference Include="Autoupdater.NET.Official" Version="1.7.0" />
+    <PackageReference Include="gong-wpf-dragdrop" Version="3.1.1" />
+    <PackageReference Include="LibreHardwareMonitorLib" Version="0.8.10-pre104" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="protobuf-net" Version="3.0.101" />
+    <PackageReference Include="SharpCompress" Version="0.30.1" />
+    <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
+    <PackageReference Include="System.Management" Version="6.0.0" />
+    <PackageReference Include="System.ObjectModel" Version="4.3.0" />
+    <PackageReference Include="System.Security.AccessControl" Version="6.0.0" />
+    <PackageReference Include="System.ServiceProcess.ServiceController" Version="6.0.0" />
+    <PackageReference Include="System.Threading.AccessControl" Version="6.0.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="images\camera.png" />
+    <Resource Include="images\BenchMaestro.ico" />
+    <Resource Include="images\max.png" />
+    <Resource Include="images\sort_down.png" />
+    <Resource Include="images\sort_up.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <SplashScreen Include="images\pleasewait.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Resources.Designer.cs">
+      <DesignTime>True</DesignTime>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERAVX.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsCPUMINERAVX.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERAVX2.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsCPUMINERAVX2.Designer.cs</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERAVX2.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsCPUMINERAVX2.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERAVX2SHA.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsCPUMINERAVX2SHA.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERAVX2SHAVAES.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsCPUMINERAVX2SHAVAES.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERAVX512.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SettingsCPUMINERAVX512.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERSSE2.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsCPUMINERSSE2.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERSSE42.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsCPUMINERSSE42.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsXMRSTAKRX.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <DependentUpon>SettingsXMRSTAKRX.settings</DependentUpon>
+      <AutoGen>True</AutoGen>
+    </Compile>
+    <Compile Update="Properties\SettingsCPUMINERAVX512SHAVAES.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>SettingsCPUMINERAVX512SHAVAES.settings</DependentUpon>
+    </Compile>
+    <Compile Update="Windows\CPUMINERAVX512Window.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\CPUMINERAVX512SHAVAESWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\CPUMINERAVX2SHAVAESWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\CPUMINERAVX2SHAWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\CPUMINERAVX2Window.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\CPUMINERAVXWindow.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\CPUMINERSSE42Window.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+    <Compile Update="Windows\CPUMINERSSE2Window.xaml.cs">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Update="Properties\Resources.resx">
+      <Generator>ResXFileCodeGenerator</Generator>
+      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    </EmbeddedResource>
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-aes-sse42.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2-sha-vaes.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2-sha.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx512-sha-vaes.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx512.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-sse2.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\libcrypto-1_1-x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\libcurl-4.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\libgcc_s_seh-1.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\libstdc++-6.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\libwinpthread-1.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.6\zlib1.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\xmr-stak-rx-win64-1.0.5\WinRing0x64.sys">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\xmr-stak-rx-win64-1.0.5\xmr-stak-rx.7z">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\xmr-stak-rx-win64-1.0.5\xmr-stak-rx.rar">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="inpoutx64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="LICENSE">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="Properties\SettingsCPUMINERAVX512SHAVAES.settings">
+      <LastGenOutput>SettingsCPUMINERAVX512SHAVAES.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsCPUMINERAVX512.settings">
+      <LastGenOutput>SettingsCPUMINERAVX512.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsCPUMINERAVX2SHAVAES.settings">
+      <LastGenOutput>SettingsCPUMINERAVX512SHAVAES.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsCPUMINERAVX2SHA.settings">
+      <LastGenOutput>SettingsCPUMINERAVX2SHAVAES.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsCPUMINERAVX2.settings">
+      <LastGenOutput>SettingsCPUMINERAVX2SHA.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsCPUMINERAVX.settings">
+      <LastGenOutput>SettingsCPUMINERAVX2.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsCPUMINERSSE42.settings">
+      <LastGenOutput>SettingsCPUMINERAVX.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsCPUMINERSSE2.settings">
+      <LastGenOutput>SettingsCPUMINERSSE42.Designer.cs</LastGenOutput>
+      <Generator>SettingsSingleFileGenerator</Generator>
+    </None>
+    <None Update="Properties\SettingsXMRSTAKRX.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>SettingsCPUMINERSSE2.Designer.cs</LastGenOutput>
+    </None>
+    <None Update="WinIo32.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="WinIo32.sys">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="WinRing0x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="WinRing0x64.sys">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="xmrstakrx_config.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="ZenStates-Core.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Benchmarks\cpuminer-opt-3.19.6\" />
+    <Folder Include="Resources\" />
+    <Folder Include="Theme\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="ZenStates-Core">
+      <HintPath>ZenStates-Core.dll</HintPath>
+      <Private>true</Private>
+    </Reference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Update="Windows\CPUMINERAVX512Window.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\CPUMINERAVX512SHAVAESWindow.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\CPUMINERAVX2SHAVAESWindow.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\CPUMINERAVX2SHAWindow.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\CPUMINERAVX2Window.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\CPUMINERAVXWindow.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\CPUMINERSSE42Window.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Update="Windows\CPUMINERSSE2Window.xaml">
+      <XamlRuntime>$(DefaultXamlRuntime)</XamlRuntime>
+      <SubType>Designer</SubType>
+    </Page>
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,126 @@
+﻿<adonisControls:AdonisWindow xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                             xmlns:adonisUi="clr-namespace:AdonisUI;assembly=AdonisUI"
+                             xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
+                             PlaceTitleBarOverContent="True"
+                             x:Class="BenchMaestro.XMRSTAKRXWindow"
+                            xmlns:adonisExtensions="clr-namespace:AdonisUI.Extensions;assembly=AdonisUI"
+                            adonisExtensions:CursorSpotlightExtension.RelativeSpotlightSize="0"
+                            Title="{Binding WinTitle, RelativeSource={RelativeSource Mode=Self}, Mode=OneWay}"
+                            Height="600"
+                            Width="1000"
+                            WindowStartupLocation="CenterScreen"
+                            FontSize="11"                         
+                            BorderThickness="1"
+                            UseLayoutRounding="True"
+                            BorderBrush="{DynamicResource WindowBorderColor}"
+                            SourceInitialized="Window_SourceInitialized" 
+                            SizeChanged="Window_SizeChanged"
+                            Closing="Window_Closing" Visibility="Visible"                            
+                            >
+
+    <adonisControls:AdonisWindow.TitleBarContent>
+        <StackPanel Orientation="Horizontal"
+                    HorizontalAlignment="Right">
+            <Button
+                            Width="16"
+                            Height="16"
+                            BorderThickness="0"
+                            Padding="0"
+                            Click="ButtonScreenshot_Click"
+                            ForceCursor="True"
+                            Cursor="Hand"
+                            Background="Transparent">
+                <Image Source="../images/camera.png"
+                                Height="16"
+                                Width="16"
+                                Stretch="None"
+                                HorizontalAlignment="Center"
+                                VerticalAlignment="Center" />
+            </Button>
+            <TextBlock Width="10"></TextBlock>
+        </StackPanel>
+    </adonisControls:AdonisWindow.TitleBarContent>
+
+        <StackPanel>
+            <Border Height="{Binding Path=TitleBarActualHeight, RelativeSource={RelativeSource AncestorType={x:Type adonisControls:AdonisWindow}}}" />
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid Grid.Column="1" Grid.ColumnSpan="3">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <ContentControl  x:Name="LoadingCircle" ContentTemplate="{DynamicResource {x:Static adonisUi:Templates.LoadingCircle}}" Grid.Column="0" Grid.RowSpan="2"
+                        Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
+                        Width="30"
+                        Height="30"
+                        Focusable="False"
+                        Visibility="Collapsed"/>
+                    <TextBlock x:Name="MainStatus" Margin="{adonisUi:Space}" Grid.Column="2" Text="Press Start to run the benchmark..." VerticalAlignment="Center" FontWeight="Bold" TextWrapping="WrapWithOverflow">
+                    </TextBlock>
+                    <ProgressBar Grid.Column="2" x:Name="ProgressBar" Visibility="Collapsed" Grid.ColumnSpan="2" Grid.Row="1"
+                         Minimum="0"
+                         Value="0"
+                         Maximum="100"
+                         Padding="0, 2"/>
+                </Grid>
+                <Button Name="BtnStart" Click="StartBench"  Margin="{adonisUi:Space}" Width="Auto">
+                    <TextBlock Name="BtnStartLabel" Margin="{adonisUi:Space}" Text="Start">
+                    </TextBlock>
+                </Button>
+                <TextBlock Grid.Column="0" Grid.Row="2" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right">Config Tag:</TextBlock>
+                <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" Name="ConfigTag" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding Path=settings.ConfigTag, Mode=OneWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" TargetUpdated="UpdateConfigTag" />
+                <TextBlock Grid.Column="2" Grid.Row="2" x:Name="RunSettingsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Visibility="Hidden">Run settings:</TextBlock>
+                <TextBlock Grid.Column="3" Grid.Row="2" x:Name="RunSettingsBlock" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="" />
+                <TextBlock Grid.Column="0" Grid.Row="3" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right">CPU:</TextBlock>
+                <TextBlock Grid.Column="1" Grid.Row="3" Name="CPULabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.CPULabel}"/>
+                <TextBlock Grid.Column="0" Grid.Row="4" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right">Board:</TextBlock>
+                <TextBlock Grid.Column="1" Grid.Row="4" Name="BoardLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.BoardLabel}"/>
+                <TextBlock Grid.Column="2" Grid.Row="3" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Text="Processors:"/>
+                <TextBlock Grid.Column="3" Grid.Row="3" Name="ProcessorsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.ProcessorsLabel}"/>
+                <TextBlock Grid.Column="2" Grid.Row="4" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Text="CPPC Order:"/>
+                <TextBlock Grid.Column="3" Grid.Row="4" Name="CPPCLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.CPPCActiveLabel}"/>
+            </Grid>
+
+                <Grid Grid.Row="5" Grid.ColumnSpan="4" Margin="4,5,4,5" Name="ScoreList">
+                    <Grid.RowDefinitions>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="*"/>
+                    <RowDefinition  Height="Auto"/>
+                    </Grid.RowDefinitions>
+            </Grid>
+        </StackPanel>
+
+</adonisControls:AdonisWindow>
