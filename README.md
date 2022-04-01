@@ -34,6 +34,9 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.4 Alpha
+    - Fix: more retries for Zen PT
+    - Fix: Codepage issue with Win11
 - v1.0.3 Alpha
     - New: First public Alpha
     - Known issue: details box resize with window is messed up
