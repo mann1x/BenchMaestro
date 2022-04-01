@@ -10,6 +10,7 @@ using System.IO;
 using System.Text.RegularExpressions;
 using ZenStates.Core;
 using Octokit;
+using System.Xml.Linq;
 
 namespace BenchMaestro
 {
@@ -59,6 +60,7 @@ namespace BenchMaestro
 		public int ZenVDDP { get; set; }
 		public int ZenVCCD { get; set; }
 		public int ZenVIOD { get; set; }
+		public int ZenVDDG { get; set; }
 		public float ZenMemRatio { get; set; }
 		public bool ZenCOb { get; set; }
 		public int[] ZenCO { get; set; }
@@ -302,45 +304,54 @@ namespace BenchMaestro
 								sb.AppendLine();
 								sb.AppendLine();
 
-								using (var sreader = new StringReader(_rawmessage))
+								XDocument doc = XDocument.Parse(ev.ToXml());
+								Dictionary<string, string> dataDictionary = new Dictionary<string, string>();
+								
+								foreach (XElement element in doc.Descendants().Where(p => p.HasElements == false))
 								{
-									string _message = sreader.ReadLine();
+									int keyInt = 0;
+									string keyName = element.Name.LocalName;
+									while (dataDictionary.ContainsKey(keyName))
+									{
+										keyName = element.Name.LocalName + "_" + keyInt++;
+									}
+									dataDictionary.Add(keyName, element.Value);
+
+									if (element.HasAttributes)
+									{
+										var lmsAttribute = element.FirstAttribute;
+										if (lmsAttribute != null)
+										{
+											dataDictionary.Add($"{keyName}_{lmsAttribute.Name.LocalName}", lmsAttribute.Value);
+										}
+									}
 								}
-								string pattern1 = @"Processor (?<procid>.*) in group (?<procgroup>.*) exposes the following power management capabilities:";
-								string pattern2 = @"Maximum performance percentage: (?<procperf>.*)";
-								Regex rgx1 = new Regex(pattern1, RegexOptions.Multiline);
-								Regex rgx2 = new Regex(pattern2, RegexOptions.Multiline);
-								Match m1 = rgx1.Match(_rawmessage);
-								Match m2 = rgx2.Match(_rawmessage);
-								if (m1.Success && m2.Success)
+								
+								foreach (KeyValuePair<string, string> kvp in dataDictionary)
 								{
-									string[] fields1 = rgx1.GetGroupNames();
-									string[] fields2 = rgx2.GetGroupNames();
-									foreach (var name in fields1)
-									{
-										Group grp = m1.Groups[name];
-										if (name == "procid" && grp.Value.Length > 0) Trace.WriteLine($"{grp.Value.TrimEnd('\r', '\n')}");
-										if (name == "procid" && grp.Value.Length > 0) _procid = Convert.ToInt32(grp.Value.TrimEnd('\r', '\n').Trim());
-										if (name == "procgroup" && grp.Value.Length > 0) Trace.WriteLine($"{grp.Value.TrimEnd('\r', '\n')}");
-										if (name == "procgroup" && grp.Value.Length > 0) _procgroup = Convert.ToInt32(grp.Value.TrimEnd('\r', '\n').Trim());
-									}
-									foreach (var name in fields2)
-									{
-										Group grp = m2.Groups[name];
-										if (name == "procperf" && grp.Value.Length > 0) Trace.WriteLine($"{grp.Value.TrimEnd('\r', '\n')}");
-										if (name == "procperf" && grp.Value.Length > 0) _procperf = Convert.ToInt32(grp.Value.TrimEnd('\r', '\n').Trim());
-									}
-									Trace.WriteLine($"{_procgroup} {_procid} {_procperf}");
-									if (_procid == 0 || !HyperThreading || (HyperThreading && (_procid % 2 == 0)))
-									{
-										int __procid = _procid == 0 ? _procid : HyperThreading ? _procid / 2 : _procid;
-										Trace.WriteLine($"Add Tag={__procid} {_procperf}");
-										CPPCTags[__procid] = _procperf;
-									}
-									Trace.WriteLine($"EmptyTags={EmptyTags()}");
+									sb.AppendLine($"Key = {kvp.Key}, Value = {kvp.Value}");
 								}
+
+								_procid = Convert.ToInt32(dataDictionary["Data_0"]);
+								_procgroup = Convert.ToInt32(dataDictionary["Data"]);
+								_procperf = Convert.ToInt32(dataDictionary["Data_4"]);
+
+								sb.AppendLine();
+								sb.Append($"Group: {_procgroup} Processor: {_procid} Processor: {_procperf}");
+								sb.AppendLine();
+								sb.AppendLine();
+								sb.AppendLine();
+								sb.AppendLine();
+
+								if (_procid == 0 || !HyperThreading || (HyperThreading && (_procid % 2 == 0)))
+								{
+									int __procid = _procid == 0 ? _procid : HyperThreading ? _procid / 2 : _procid;
+									Trace.WriteLine($"Add Tag={__procid} {_procperf}");
+									CPPCTags[__procid] = _procperf;
+								}
+								Trace.WriteLine($"EmptyTags={EmptyTags()}");
+
 								if (EmptyTags() <= 0) break;
-								//Trace.WriteLine(_rawmessage);
 							}
 
 						}
@@ -450,6 +461,7 @@ namespace BenchMaestro
 				ZenUCLK = 0;
 				ZenMCLK = 0;
 				ZenVDDP = 0;
+				ZenVDDG = 0;
 				ZenVCCD = 0;
 				ZenVIOD = 0;
 				ZenCO = new int[CPUCores];
@@ -595,8 +607,8 @@ namespace BenchMaestro
 									ZenMCLK = (int)Zen.powerTable.Table[82];
 									ZenScalar = (int)Zen.GetPBOScalar();
 									ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
-									ZenVCCD = (int)(Zen.powerTable.Table[138] * 1000);
-									ZenVIOD = (int)(Zen.powerTable.Table[139] * 1000);
+									ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
+									ZenVCCD = (int)(Zen.powerTable.Table[139] * 1000);
 
 									App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
 									App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
@@ -658,8 +670,8 @@ namespace BenchMaestro
 									ZenMCLK = (int)Zen.powerTable.Table[82];
 									ZenScalar = (int)Zen.GetPBOScalar();
 									ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
-									ZenVCCD = (int)(Zen.powerTable.Table[138] * 1000);
-									ZenVIOD = (int)(Zen.powerTable.Table[139] * 1000);
+									ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
+									ZenVCCD = (int)(Zen.powerTable.Table[139] * 1000);
 
 									App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
 									App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
@@ -784,8 +796,8 @@ namespace BenchMaestro
 									ZenMCLK = (int)Zen.powerTable.Table[82];
 									ZenScalar = (int)Zen.GetPBOScalar();
 									ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
-									ZenVCCD = (int)(Zen.powerTable.Table[138] * 1000);
-									ZenVIOD = (int)(Zen.powerTable.Table[139] * 1000);
+									ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
+									ZenVCCD = (int)(Zen.powerTable.Table[139] * 1000);
 
 									App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
 									App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
@@ -906,8 +918,7 @@ namespace BenchMaestro
 									ZenMCLK = (int)Zen.powerTable.Table[78];
 									ZenScalar = (int)Zen.GetPBOScalar();
 									ZenVDDP = (int)(Zen.powerTable.Table[125] * 1000);
-									ZenVCCD = (int)(Zen.powerTable.Table[126] * 1000);
-									ZenVIOD = (int)(Zen.powerTable.Table[126] * 1000);
+									ZenVDDG = (int)(Zen.powerTable.Table[126] * 1000);
 
 									App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
 									App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
@@ -968,8 +979,7 @@ namespace BenchMaestro
 									ZenMCLK = (int)Zen.powerTable.Table[78];
 									ZenScalar = (int)Zen.GetPBOScalar();
 									ZenVDDP = (int)(Zen.powerTable.Table[125] * 1000);
-									ZenVCCD = (int)(Zen.powerTable.Table[126] * 1000);
-									ZenVIOD = (int)(Zen.powerTable.Table[126] * 1000);
+									ZenVDDG = (int)(Zen.powerTable.Table[126] * 1000);
 
 									App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
 									App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
@@ -1084,6 +1094,8 @@ namespace BenchMaestro
 				CPUSocket = "N/A";
 				CPULogicalProcessors = 1;
 				HyperThreading = false;
+				CPPCOrder = new int[CPUCores];
+				CPPCOrder1 = new int[CPUCores];
 
 				Trace.WriteLine("WMI System Exception: " + e);
 			}
@@ -1096,7 +1108,15 @@ namespace BenchMaestro
 			{
 				CPULabel += $"\nPPT: {string.Format("{0:N0}W", ZenPPT)} TDC: {string.Format("{0:N0}A", ZenTDC)} EDC: {string.Format("{0:N0}A", ZenEDC)} Scalar: {ZenScalar}x THM: {string.Format("{0:N0}°C", ZenTHM)}";
 				CPULabel += $"\nMCLK/FCLK/UCLK: {ZenMCLK}/{ZenFCLK}/{ZenUCLK} MHz Boost Clock: {ZenBoost} MHz";
-				CPULabel += $"\nVDDP: {ZenVDDP}mV VDDG CCD: {ZenVCCD}mV VDDG IOD: {ZenVIOD}mV";
+				if (ZenVDDP > 0 || ZenVCCD > 0 || ZenVIOD > 0 || ZenVDDG > 0)
+				{
+					CPULabel += $"\n";
+					if (ZenVDDP > 0) CPULabel += $"VDDP: {ZenVDDP}mV ";
+					if (ZenVDDG > 0) CPULabel += $"VDDG: {ZenVDDG}mV ";
+					if (ZenVCCD > 0) CPULabel += $"VDDG CCD: {ZenVCCD}mV ";
+					if (ZenVIOD > 0) CPULabel += $"VDDG IOD: {ZenVIOD}mV ";
+
+				}
 				CPULabel += $"\nSMU Version: {ZenSMUVer} Power Table: 0x{Zen.GetTableVersion():X}";
 			}
 		}

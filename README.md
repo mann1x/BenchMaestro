@@ -34,6 +34,9 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.6 Alpha
+    - Fix: Switched VDDG CCD/IOD voltages
+    - Fix: Reading CPPC tags from localized Windows
 - v1.0.5 Alpha
     - Fix: Autoupdater bug
 - v1.0.4 Alpha
