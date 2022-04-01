@@ -199,9 +199,6 @@ namespace BenchMaestro
                 BtnNewZenPT.Visibility = Visibility.Visible;
             }
 
-            var name = Assembly.GetExecutingAssembly().GetName();
-            App._versionInfo = string.Format($"{name.Version.Major:0}.{name.Version.Minor:0}.{name.Version.Build:0}");
-
             AutoUpdater.ReportErrors = false;
             AutoUpdater.InstalledVersion = new Version(App._versionInfo);
             AutoUpdater.DownloadPath = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);

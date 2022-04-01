@@ -34,6 +34,8 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.5 Alpha
+    - Fix: Autoupdater bug
 - v1.0.4 Alpha
     - Fix: more retries for Zen PT
     - Fix: Codepage issue with Win11

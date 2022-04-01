@@ -278,6 +278,7 @@ namespace BenchMaestro
 
 			Version _version = Assembly.GetExecutingAssembly().GetName().Version;
 			version = string.Format("v{0}.{1}.{2}", _version.Major, _version.Minor, _version.Build);
+			_versionInfo = string.Format("{0}.{1}.{2}", _version.Major, _version.Minor, _version.Build);
 			systemInfo.AppVersion = version;
 
 			SettingsInit();
