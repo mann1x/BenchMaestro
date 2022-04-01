@@ -18,6 +18,8 @@ An installer will be available at some point.
 
 ## Usage
 
+## **BENCHMARKS WITH MINERS WILL NEED WHITELISTING OF BENCHMAESTRO DIRECTORY IN AV OR MS DEFENDER**
+
 "CPPC Custom:" You can define your custom CPPC order for thread scheduling by moving with drag & drop the cores in the desired order and checking "Enable"
 
 **Please use the Issues tab on GitHub if you find issues or have a request**
