@@ -1,14 +1,14 @@
 {
   "version": "1.0.3",
-  "url": "https://github.com/mann1x/BenchMaestro/releases/download/v1.0.3/BenchMaestro_v1.0.3.zip",
+  "url": "https://github.com/mann1x/BenchMaestro/releases/download/v1.0.4/BenchMaestro_v1.0.4.zip",
   "changelog": "https://github.com/mann1x/BenchMaestro/releases",
   "mandatory": {
     "value": false,
-    "minVersion": "1.0.3",
+    "minVersion": "1.0.4",
     "mode": 1
   },
   "checksum": {
-    "value": "2a33a7c9403194026d31eab3ba5cceedd965b8b499ba0fcd5e6802ac814500a1",
+    "value": "621795b9936e6a1399497d665db86332fdf6be89dbace9c4c6b569848755822e",
     "hashingAlgorithm": "SHA256"
   }
 }

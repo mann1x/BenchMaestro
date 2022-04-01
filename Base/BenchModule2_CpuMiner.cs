@@ -292,7 +292,7 @@ namespace BenchMaestro
                             UseShellExecute = false,
                             RedirectStandardOutput = true,
                             CreateNoWindow = true,
-                            StandardOutputEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage)
+                            StandardOutputEncoding = Encoding.GetEncoding(850)
                             //StandardErrorEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage)
                         }
                     };

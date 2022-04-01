@@ -545,11 +545,11 @@ namespace BenchMaestro
 
 							if (status != SMU.Status.OK)
 							{
-								for (int r = 0; r < 10; ++r)
+								for (int r = 0; r < 80; ++r)
 								{
-									Thread.Sleep(50);
+									Thread.Sleep(25);
 									status = Zen.RefreshPowerTable();
-									if (status == SMU.Status.OK) r = 10;
+									if (status == SMU.Status.OK) r = 80;
 								}
 							}
 
