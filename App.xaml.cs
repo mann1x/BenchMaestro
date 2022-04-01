@@ -15,11 +15,11 @@ using System.Windows;
 using System.Windows.Data;
 using System.Threading;
 using System.Timers;
-using ZenStates.Core;
 using System.Windows.Media;
 using SharpCompress.Archives.SevenZip;
 using SharpCompress.Common;
 using SharpCompress.Archives;
+using ZenStates.Core;
 
 namespace BenchMaestro
 {
@@ -63,7 +63,7 @@ namespace BenchMaestro
 		public static SystemInfo systemInfo;
 		public static string version;
 		public static string ss_filename;
-		static string _versionInfo;
+		public static string _versionInfo;
 
 		public static string ZenPTSubject = "";
 		public static string ZenPTBody = "";
@@ -291,17 +291,6 @@ namespace BenchMaestro
 				systemInfo
 			};
 
-			var name = Assembly.GetExecutingAssembly().GetName();
-			_versionInfo = string.Format($"{name.Version.Major:0}.{name.Version.Minor:0}.{name.Version.Build:0}");
-
-			AutoUpdater.ReportErrors = false;
-			AutoUpdater.InstalledVersion = new Version(_versionInfo);
-			AutoUpdater.DownloadPath = Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
-			AutoUpdater.RunUpdateAsAdmin = false;
-			AutoUpdater.Synchronous = true;
-			AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
-			AutoUpdater.Start("https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro.json");
-
 			HWMonitor.Init();
 
 			InitColors();
@@ -391,28 +380,6 @@ namespace BenchMaestro
 			thisprocess.ProcessorAffinity = (IntPtr)(1L << App.GetLastThread(0));
 
 		}
-		private void AutoUpdaterOnParseUpdateInfoEvent(ParseUpdateInfoEventArgs args)
-		{
-			dynamic json = JsonConvert.DeserializeObject(args.RemoteData);
-			args.UpdateInfo = new UpdateInfoEventArgs
-			{
-				CurrentVersion = json.version,
-				ChangelogURL = json.changelog,
-				DownloadURL = json.url,
-				Mandatory = new Mandatory
-				{
-					Value = json.mandatory.value,
-					UpdateMode = json.mandatory.mode,
-					MinimumVersion = json.mandatory.minVersion
-				},
-				CheckSum = new CheckSum
-				{
-					Value = json.checksum.value,
-					HashingAlgorithm = json.checksum.hashingAlgorithm
-				}
-			};
-		}
-
 		private static void Monitor_ElapsedEventHandler(object sender, ElapsedEventArgs e)
 		{
 			//Trace.WriteLine("HWM ELAPSED");

@@ -20,6 +20,9 @@ using BenchMaestro.Windows;
 using System.IO;
 using System.Runtime.Intrinsics.X86;
 using System.Web;
+using System.Reflection;
+using AutoUpdaterDotNET;
+using Newtonsoft.Json;
 
 namespace BenchMaestro
 {
@@ -54,7 +57,6 @@ namespace BenchMaestro
             Loaded += MainWindow_Loaded;
 
         }
-
         private void TextBox_KeyEnterUpdate(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
@@ -196,6 +198,38 @@ namespace BenchMaestro
             {
                 BtnNewZenPT.Visibility = Visibility.Visible;
             }
+
+            var name = Assembly.GetExecutingAssembly().GetName();
+            App._versionInfo = string.Format($"{name.Version.Major:0}.{name.Version.Minor:0}.{name.Version.Build:0}");
+
+            AutoUpdater.ReportErrors = false;
+            AutoUpdater.InstalledVersion = new Version(App._versionInfo);
+            AutoUpdater.DownloadPath = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
+            AutoUpdater.RunUpdateAsAdmin = false;
+            AutoUpdater.Synchronous = false;
+            AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
+            AutoUpdater.Start("https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json");
+        }
+        private void AutoUpdaterOnParseUpdateInfoEvent(ParseUpdateInfoEventArgs args)
+        {
+            dynamic json = JsonConvert.DeserializeObject(args.RemoteData);
+            args.UpdateInfo = new UpdateInfoEventArgs
+            {
+                CurrentVersion = json.version,
+                ChangelogURL = json.changelog,
+                DownloadURL = json.url,
+                Mandatory = new Mandatory
+                {
+                    Value = json.mandatory.value,
+                    UpdateMode = json.mandatory.mode,
+                    MinimumVersion = json.mandatory.minVersion
+                },
+                CheckSum = new CheckSum
+                {
+                    Value = json.checksum.value,
+                    HashingAlgorithm = json.checksum.hashingAlgorithm
+                }
+            };
         }
 
         private void RadioMode(object sender, RoutedEventArgs e)
