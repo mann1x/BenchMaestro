@@ -8,12 +8,20 @@
     <StartupObject></StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <SignAssembly>false</SignAssembly>
-    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <AssemblyVersion>1.0.2.0</AssemblyVersion>
     <Copyright>GPL 3.0</Copyright>
     <PackageProjectUrl>https://github.com/mann1x/BenchMaestro</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mann1x/BenchMaestro</RepositoryUrl>
-    <Description>Bench and test tool</Description>
+    <Description>CPU &amp; GPU Benchmarking and tools utility</Description>
     <Deterministic>false</Deterministic>
+    <FileVersion>1.0.2.0</FileVersion>
+    <Version>1.0.2</Version>
+    <PackageIcon>BenchMaestro.ico</PackageIcon>
+    <PackageIconUrl />
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
@@ -24,6 +32,10 @@
     <None Remove="images\sort_down.png" />
     <None Remove="images\sort_up.png" />
     <None Remove="Settings\Settings.txt" />
+    <None Include="BenchMaestro.ico">
+      <Pack>True</Pack>
+      <PackagePath></PackagePath>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -272,6 +284,9 @@
     <None Update="ZenStates-Core.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="ZenStates-Core.pdb">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 
   <ItemGroup>
@@ -283,8 +298,7 @@
 
   <ItemGroup>
     <Reference Include="ZenStates-Core">
-      <HintPath>ZenStates-Core.dll</HintPath>
-      <Private>true</Private>
+      <HintPath>..\ZenStates-Core\bin\Release\netcoreapp3.1\ZenStates-Core.dll</HintPath>
     </Reference>
   </ItemGroup>
 

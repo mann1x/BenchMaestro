@@ -465,9 +465,17 @@ namespace BenchMaestro
 				{
 					if (CPUSocket == "AM4")
 					{
-						Zen = new Cpu();
-						bool smucheck = Zen.smu.Version != 0U;
-						Trace.WriteLine($"Test SMU for Zen: {smucheck}");
+						bool smucheck = false;
+						try
+						{
+							Zen = new Cpu();
+							smucheck = Zen.smu.Version != 0U;
+							Trace.WriteLine($"Test SMU for Zen: {smucheck}");
+						}
+						catch
+						{
+							Trace.WriteLine($"ZenCore DLL couldn't be loaded");
+						}
 
 						if (smucheck)
 						{
@@ -1015,24 +1023,31 @@ namespace BenchMaestro
 
 								if (!ZenPTKnown)
 								{
-									string ZenPTSubject = $"Support for Zen PowerTable [0x{ZenPTVersion:X}]";
-									string ZenPTBody = sb.ToString();
+									try
+									{
+										string ZenPTSubject = $"Support for Zen PowerTable [0x{ZenPTVersion:X}]";
+										string ZenPTBody = sb.ToString();
 
-									var client = new GitHubClient(new ProductHeaderValue("BenchMaestro"));
-									var issues = client.Issue.GetAllForRepository("BenchMaestro", "mann1x");
-									issues.Wait();
-									bool _newpt = true;
-									if (issues.IsCompleted)
-									{
-										foreach (Issue issue in issues.Result)
+										var client = new GitHubClient(new ProductHeaderValue("BenchMaestro"));
+										var issues = client.Issue.GetAllForRepository("BenchMaestro", "mann1x");
+										issues.Wait();
+										bool _newpt = true;
+										if (issues.IsCompleted)
 										{
-											if (issue.Title == ZenPTSubject) _newpt = false;
-										}										
+											foreach (Issue issue in issues.Result)
+											{
+												if (issue.Title == ZenPTSubject) _newpt = false;
+											}
+										}
+										if (_newpt && issues.IsCompletedSuccessfully)
+										{
+											App.ZenPTBody = ZenPTBody;
+											App.ZenPTSubject = ZenPTSubject;
+										}
 									}
-									if (_newpt && issues.IsCompletedSuccessfully)
+									catch (Exception ex)
 									{
-										App.ZenPTBody = ZenPTBody;
-										App.ZenPTSubject = ZenPTSubject;
+										Trace.WriteLine($"Failed to get GitHub Issues: {ex}");
 									}
 								}
 
@@ -1151,9 +1166,6 @@ namespace BenchMaestro
 				return false;
 			}
 		}
-		/// <summary>
-		/// Provides CPU information
-		/// </summary>
 
 	}
 }

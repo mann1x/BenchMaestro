@@ -82,6 +82,7 @@ namespace BenchMaestro
         public string ExitStatus { get; set; }
         public string ConfigTag { get; set; }
         public string OutputLog { get; set; }
+        public string RunLog { get; set; }
         public string Features { get; set; }
         public string CPUFeatures { get; set; }
         public string SWFeatures { get; set; }
@@ -160,6 +161,7 @@ namespace BenchMaestro
             CPULogicalsLoad = new List<DetailsGrid>();
             ExitStatus = "";
             OutputLog = "";
+            RunLog = "";
             StartedTemp = -999;
             RunCores = new List<int>();
             RunLogicals = new List<int>();

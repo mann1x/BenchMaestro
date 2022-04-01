@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,9 @@ using System.Windows.Threading;
 
 namespace BenchMaestro
 {
+    
+    //XMRSTAKRX
+    //CPUMINER
     static class BenchModule1
     {
         public static void UpdateMonitoring2(Grid ScoreList)
@@ -481,6 +485,13 @@ namespace BenchMaestro
                 _gridblock = App.CurrentRun.DetailsGrid;
                 _gridblock.MinHeight = 200;
 
+                _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+
                 _row = 0;
 
                 void AddDetails(List<DetailsGrid> _thislist, string _header)
@@ -500,13 +511,6 @@ namespace BenchMaestro
                         _gridblock.Visibility = Visibility.Visible;
                         _textblock.Visibility = Visibility.Collapsed;
 
-                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
-                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
-                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
-                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
-                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
-                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
-
                         _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
 
                         TextBlock _tbh = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -518,8 +522,6 @@ namespace BenchMaestro
                         _gridblock.Children.Add(_tbh);
 
                         _row++;
-
-
 
                         int _colspan = 1;
                         if (_thislist.Count == 1) _colspan = 2;
@@ -590,6 +592,52 @@ namespace BenchMaestro
 
                 }
 
+                void AddDetailAvgMax(double _avg, double _max, string _header, string _unit, string _format)
+                {
+
+                    Trace.WriteLine($"Start {_header}");
+
+                    Thickness dthickness = new Thickness(4, 3, 4, 3);
+                    GridLength _rowheigth = new GridLength(1, GridUnitType.Star);
+                    _stackpanel.Visibility = Visibility.Visible;
+                    _scroller.Visibility = Visibility.Visible;
+                    _gridblock.Visibility = Visibility.Visible;
+                    _textblock.Visibility = Visibility.Collapsed;
+
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+
+                    int _colspan = 6;
+                    int _col = 0;
+
+                    string Label = _header.ToString();
+
+                    string Val1 = String.Format(CultureInfo.InvariantCulture, "{0:" + _format + "}", _avg);
+                    string Val2 = String.Format(CultureInfo.InvariantCulture, "{0:" + _format + "}", _max);
+                    if (Val1 == "-999") Val1 = "N/A";
+                    if (Val2 == "-999") Val2 = "N/A";
+
+
+                    TextBlock _tbh = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                    _tbh.Inlines.Add(new Run { Text = _header, FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tbh.Inlines.Add(new Run { Text = $" Avg: ", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tbh.Inlines.Add(new Run { Text = Val1, FontSize = 9, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    _tbh.Inlines.Add(new Run { Text = $"{_unit}", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tbh.Inlines.Add(new Run { Text = $" Max: ", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tbh.Inlines.Add(new Run { Text = Val2, FontSize = 9, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    _tbh.Inlines.Add(new Run { Text = $"{_unit}", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    Grid.SetColumn(_tbh, _col);
+                    Grid.SetRow(_tbh, _row);
+                    Grid.SetColumnSpan(_tbh, _colspan);
+                    _tbh.TextAlignment = TextAlignment.Center;
+                    _gridblock.Children.Add(_tbh);
+
+                    _row++;
+
+                    Trace.WriteLine($"Finish {_header}");
+
+                }
+
+                if (App.CurrentRun.CPUFSBAvg > -999) AddDetailAvgMax(App.CurrentRun.CPUFSBAvg, App.CurrentRun.CPUFSBMax, $"CPU FSB Clock", " MHz", "0.00");
                 if (App.CurrentRun.CPUCoresClocks.Any()) AddDetails(App.CurrentRun.CPUCoresClocks, $"Cores Clocks MHz [ Core - Average - Max ]");
                 if (App.CurrentRun.CPUCoresEffClocks.Any()) AddDetails(App.CurrentRun.CPUCoresEffClocks, $"Cores Effective Clocks MHz [ Core - Average - Max ]");
                 if (App.CurrentRun.CPUCoresStretch.Any()) AddDetails(App.CurrentRun.CPUCoresStretch, $"Cores Clock Stretching MHz [ Core - Average - Max ]");

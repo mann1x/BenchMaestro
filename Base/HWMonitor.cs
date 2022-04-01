@@ -502,9 +502,9 @@ namespace BenchMaestro
                     App.CurrentRun.CCD1AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1Temp);
                     Trace.WriteLine($"CPU AVG CCD1 {App.CurrentRun.CCD1AvgTemp} MAX {App.CurrentRun.CCD1MaxTemp}");
 
-                    App.CurrentRun.CCD2AvgTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD2Temp);
+                    App.CurrentRun.CCD2MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD2Temp);
                     App.CurrentRun.CCD2AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD2Temp);
-                    Trace.WriteLine($"CPU AVG CCD2 {App.CurrentRun.CCD2AvgTemp} MAX {App.CurrentRun.CCD2AvgTemp}");
+                    Trace.WriteLine($"CPU AVG CCD2 {App.CurrentRun.CCD2AvgTemp} MAX {App.CurrentRun.CCD2MaxTemp}");
 
                     App.CurrentRun.CCDSAvgTemp = (double)App.hwsensors.GetMax(HWSensorName.CCDSTemp);
                     Trace.WriteLine($"CPU AVG CCDS {App.CurrentRun.CCDSAvgTemp}");
