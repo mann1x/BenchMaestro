@@ -99,6 +99,57 @@ namespace BenchMaestro
     }
     public static class HWSensors
     {
+        public static void InitZen(this List<HWSensorItem> _sensors, HWSensorName _name, int _offset, int _multi = 1, bool _enabled = true)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        _sensor.Source = HWSensorSource.Zen;
+                        _sensor.Enabled = _enabled;
+                        _sensor.ZenMulti = _multi;
+                        _sensor.ZenPTOffset = _offset;
+                        Trace.WriteLine($"Zen Added {_name} Offset {_offset}");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor InitZen Exception: {ex}");
+            }
+        }
+        public static void InitZenMulti(this List<HWSensorItem> _sensors, HWSensorName _name, int _offset, int _index, int _multi = 1, bool _enabled = true)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        _sensor.Source = HWSensorSource.Zen;
+                        _sensor.Enabled = _enabled;
+                        _sensor.ZenMulti = _multi;
+                        _sensor.ZenPTOffset = _offset;
+
+                        if (_sensor.SensorValues != HWSensorValues.Single)
+                        {
+                            _sensor.MultiValues.Add(new HWSensorMultiValues());
+                            _sensor.MultiValues[_index - 1].ZenPTOffset = _offset;
+                            Trace.WriteLine($"ZenMulti Added {_name} Index {_index - 1} Offset {_offset}");
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor InitZenMulti Exception: {ex}");
+            }
+        }
+
         public static void InitLibre(this List<HWSensorItem> _sensors, HWSensorName _name, string _libreId, string _libreLabel)
         {
             try
@@ -110,6 +161,7 @@ namespace BenchMaestro
                         _sensor.Enabled = true;
                         _sensor.LibreIdentifier = _libreId;
                         _sensor.LibreLabel = _libreLabel;
+                        Trace.WriteLine($"Libre Added {_name} Label {_libreLabel} Id {_libreId}");
                     }
                 }
 
@@ -117,6 +169,37 @@ namespace BenchMaestro
             catch (Exception ex)
             {
                 Trace.WriteLine($"HWSensor InitLibre Exception: {ex}");
+            }
+        }
+
+        public static void InitLibreMulti(this List<HWSensorItem> _sensors, HWSensorName _name, string _libreId, string _libreLabel, int _index, string _libreMultiId, string _libreMultiLabel)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors.Where(sensorItem => sensorItem.Source == HWSensorSource.Libre))
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        _sensor.Enabled = true;
+                        _sensor.LibreIdentifier = _libreId;
+                        _sensor.LibreLabel = _libreLabel;
+
+                        if (_sensor.SensorValues != HWSensorValues.Single)
+                        {
+                            _sensor.MultiValues.Add(new HWSensorMultiValues());
+                            _sensor.MultiValues[_index - 1].LibreIdentifier = _libreMultiId;
+                            _sensor.MultiValues[_index - 1].LibreLabel = _libreMultiLabel;
+                            Trace.WriteLine($"Libre Added {_name} Index {_index - 1} Label {_libreMultiLabel} Id {_libreMultiId}");
+                        }
+
+
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor InitLibreMulti Exception: {ex}");
             }
         }
         public static bool IsEnabled(this List<HWSensorItem> _sensors, HWSensorName _name)
@@ -138,6 +221,40 @@ namespace BenchMaestro
                 return false;
             }
         }
+        public static bool IsAny(this List<HWSensorItem> _sensors, HWSensorName _name, int _cpu = -1)
+        {
+            int _count = 0;
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name && _sensor.Enabled)
+                    {
+                        if (_sensor.SensorValues == HWSensorValues.Single)
+                        {
+                            if (_sensor.Values.Any())
+                            {
+                                return true;
+                            }
+                        }
+                        else
+                        {
+                            _count = _sensor.MultiValues.Count;
+                            if (_sensor.MultiValues[_cpu].Values.Any())
+                            {
+                                return true;
+                            }
+                        }
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor IsAny Exception {_name} cpu={_cpu}/{_count}: {ex}");
+                return false;
+            }
+        }
         public static float? GetValue(this List<HWSensorItem> _sensors, HWSensorName _name, int _cpu = -1)
         {
             int _count = 0;
@@ -149,21 +266,27 @@ namespace BenchMaestro
                     {
                         if (_sensor.SensorValues == HWSensorValues.Single)
                         {
-                            return _sensor.Values.Last();
+                            if (_sensor.Values.Any())
+                            {
+                                return _sensor.Values.Last();
+                            }
                         }
                         else
                         {
                             _count = _sensor.MultiValues.Count;
-                            return _sensor.MultiValues[_cpu].Values.Last();
+                            if (_sensor.MultiValues[_cpu].Values.Any())
+                            {
+                                return _sensor.MultiValues[_cpu].Values.Last();
+                            }
                         }
                     }
                 }
-                return -999;
+                return -99999;
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"HWSensor GetValue Exception {_name} cpu={_cpu}/{_count}: {ex}");
-                return -999;
+                return -99999;
             }
         }
         public static float? GetMax(this List<HWSensorItem> _sensors, HWSensorName _name, int _cpu = -1)
@@ -176,20 +299,27 @@ namespace BenchMaestro
                     {
                         if (_sensor.SensorValues == HWSensorValues.Single)
                         {
-                            return _sensor.Values.Max();
+                            if (_sensor.Values.Any())
+                            {
+                                return _sensor.Values.Max();
+                            }
                         }
+                            
                         else
                         {
-                            return _sensor.MultiValues[_cpu].Values.Max();
+                            if (_sensor.MultiValues[_cpu].Values.Any())
+                            {
+                                return _sensor.MultiValues[_cpu].Values.Max();
+                            }
                         }
                     }
                 }
-                return -999;
+                return -99999;
             }
             catch (Exception ex)
             {
                 Trace.WriteLine($"HWSensor GetMax Exception: {ex}");
-                return -999;
+                return -99999;
             }
         }
 
@@ -203,22 +333,53 @@ namespace BenchMaestro
                     {
                         if (_sensor.SensorValues == HWSensorValues.Single)
                         {
-                            return _sensor.Values.Average();
+                            if (_sensor.Values.Any())
+                            {
+                                return _sensor.Values.Average();
+                            }
                         }
                         else
                         {
-                            return _sensor.MultiValues[_cpu].Values.Average();
+                            if (_sensor.MultiValues[_cpu].Values.Any())
+                            {
+                                return _sensor.MultiValues[_cpu].Values.Average();
+                            }
                         }
                     }
                 }
-                return -999;
+                return -99999;
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"HWSensor GetMax Exception: {ex}");
-                return -999;
+                Trace.WriteLine($"HWSensor GetAvg Exception: {ex}");
+                return -99999;
             }
         }
+        public static float? GetLastAvgMulti(this List<HWSensorItem> _sensors, HWSensorName _name)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name && _sensor.Enabled && _sensor.SensorValues != HWSensorValues.Single)
+                    {
+                        List<float?> _avg = new List<float?>();
+                        foreach (var _sensorValues in _sensor.MultiValues)
+                        {
+                            _avg.Add(_sensorValues.Values.Last());
+                        }
+                        return _avg.Average();
+                    }
+                }
+                return -99999;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor GetLastAvgMulti Exception: {ex}");
+                return -99999;
+            }
+        }
+
         public static void UpdateSensor(this List<HWSensorItem> _sensors, string _Identifier, float? _value)
         {
             try
@@ -250,35 +411,25 @@ namespace BenchMaestro
                 Trace.WriteLine($"HWSensor UpdateSensor Exception: {ex}");
             }
         }
-
-        public static void InitLibreMulti(this List<HWSensorItem> _sensors, HWSensorName _name, string _libreId, string _libreLabel, int _index, string _libreMultiId, string _libreMultiLabel)
+        public static void UpdateZenSensor(this List<HWSensorItem> _sensors, HWSensorName _name, float? _value, int _core = -1)
         {
             try
             {
-                foreach (var _sensor in _sensors.Where(sensorItem => sensorItem.Source == HWSensorSource.Libre))
+                foreach (var _sensor in _sensors.Where(sensorItem => sensorItem.Source == HWSensorSource.Zen && sensorItem.Name == _name))
                 {
-                    if (_sensor.Name == _name)
+                    if (_sensor.SensorValues != HWSensorValues.Single)
                     {
-                        _sensor.Enabled = true;
-                        _sensor.LibreIdentifier = _libreId;
-                        _sensor.LibreLabel = _libreLabel;
-
-                        if (_sensor.SensorValues != HWSensorValues.Single)
-                        {
-                            _sensor.MultiValues.Add(new HWSensorMultiValues());
-                            _sensor.MultiValues[_index-1].LibreIdentifier = _libreMultiId;
-                            _sensor.MultiValues[_index-1].LibreLabel = _libreMultiLabel;
-                            Trace.WriteLine($"Libre Added {_name} Index {_index-1} Label {_libreMultiLabel} Id {_libreMultiId}");
-                        }
-
-
+                        _sensor.MultiValues[_core].Values.Add(_value);
+                    }
+                    else
+                    {
+                        _sensor.Values.Add(_value);
                     }
                 }
-
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"HWSensor Exception: {ex}");
+                Trace.WriteLine($"HWSensor UpdateZenSensor Exception: {ex}");
             }
         }
 
@@ -314,6 +465,7 @@ namespace BenchMaestro
         public List<float?> Values { get; set; }
         public string LibreLabel { get; set; }
         public string LibreIdentifier { get; set; }
+        public int ZenPTOffset { get; set; }
         public void Reset()
         {
             Values.Clear();
@@ -340,37 +492,34 @@ namespace BenchMaestro
         public string ManialLibreIdentifier { get; set; }
         
         public int ZenPTOffset { get; set; }
+        public int ZenMulti { get; set; }
 
         public HWSensorConfig ConfigType { get; set; }
         public HWSensorValues SensorValues { get; set; }
         public HWSensorType SensorType { get; set; }
         public HWSensorName Name { get; set; }
+        public HWSensorDevice Device { get; set; }
 
-        public HWSensorItem(HWSensorName _name, HWSensorValues _values, HWSensorConfig _config, HWSensorDevice _device, HWSensorType _type)
+        public HWSensorItem(HWSensorName _name, HWSensorValues _values, HWSensorConfig _config, HWSensorDevice _device, HWSensorType _type, HWSensorSource _source = HWSensorSource.Libre)
         {
-            Trace.WriteLine($"Adding {_name}");
             Name = _name;
             SensorValues = _values;
             ConfigType = _config;
-            if (App.systemInfo.ZenStates && _device == HWSensorDevice.CPU)
-            {
-                Source = HWSensorSource.Zen;
-            }
-            else
-            {
-                Source = HWSensorSource.Libre;
-            }
+            Device = _device;
+            Source = _source;
             SensorType = _type;
             Enabled = false;
             LibreLabel = "";
             LibreIdentifier = "";
             ZenPTOffset = 0;
+            ZenMulti = 1;
             Values = new();
 
             if (_values != HWSensorValues.Single)
             {
                 MultiValues = new();
             }
+
             Trace.WriteLine($"Added {_name}");
         }
     }
@@ -401,6 +550,7 @@ namespace BenchMaestro
         Clock,
         Voltage,
         Power,
+        Amperage,
         Load,
         Temperature
 
@@ -431,9 +581,16 @@ namespace BenchMaestro
         CPUCoresVoltages,
         CPUCoresClocks,
         CPUCoresEffClocks,
+        CPUCoresStretch,
         CPUCoresPower,
         CPUCoresTemps,
-        CPULogicalsLoad
+        CPUCoresC0,
+        CPULogicalsLoad,
+        CPUPPT,
+        CPUTDC,
+        CPUEDC,
+        CCD1L3Temp,
+        CCD2L3Temp,
     }
     public class DetailsGrid
     {

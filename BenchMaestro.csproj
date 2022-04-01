@@ -39,8 +39,9 @@
     <PackageReference Include="gong-wpf-dragdrop" Version="3.1.1" />
     <PackageReference Include="LibreHardwareMonitorLib" Version="0.8.10-pre104" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+    <PackageReference Include="Octokit" Version="0.50.0" />
     <PackageReference Include="protobuf-net" Version="3.0.101" />
-    <PackageReference Include="SharpCompress" Version="0.30.1" />
+    <PackageReference Include="SharpCompress" Version="0.31.0" />
     <PackageReference Include="System.IO.FileSystem.AccessControl" Version="5.0.0" />
     <PackageReference Include="System.Management" Version="6.0.0" />
     <PackageReference Include="System.ObjectModel" Version="4.3.0" />
@@ -275,6 +276,7 @@
 
   <ItemGroup>
     <Folder Include="Benchmarks\cpuminer-opt-3.19.6\" />
+    <Folder Include="Common\LibreHardwareMonitor\" />
     <Folder Include="Resources\" />
     <Folder Include="Theme\" />
   </ItemGroup>

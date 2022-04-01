@@ -204,6 +204,20 @@ namespace BenchMaestro
                 SaveWinPos();
             }
 
+            SystemParameters.StaticPropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(SystemParameters.WorkArea))
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        MaxHeight = SystemParameters.WorkArea.Height;
+                        Height = SystemParameters.WorkArea.Height;
+                        WindowState = WindowState.Normal;  // Updates the windows new sizes
+                        WindowState = WindowState.Maximized;
+                    });
+                }
+            };
+
         }
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {

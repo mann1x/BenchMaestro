@@ -56,47 +56,47 @@
                 <TextBlock Text="{Binding systemInfo.AppVersion}" FontWeight="DemiBold" HorizontalAlignment="Center" VerticalAlignment="Top">
                 </TextBlock>
                 <Border Height="5" />
-                <Button Name="BtnBenchXMRSTAKRX" Click="NewBenchXMRSTAKRX" ToolTip="Runtime below 180 seconds will produce unreliable scores">
+                <Button x:Name="BtnBenchXMRSTAKRX" Click="NewBenchXMRSTAKRX" ToolTip="Runtime below 180 seconds will produce unreliable scores">
                     <TextBlock Margin="{adonisUi:Space}" Text="XMR-STAK-RX">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERSSE2" Click="NewBenchCPUMINERSSE2" ToolTip="Architecture: Generic x86_64 with SSE2, Core2, Nehalem">
+                <Button x:Name="BtnBenchCPUMINERSSE2" Click="NewBenchCPUMINERSSE2" ToolTip="Architecture: Generic x86_64 with SSE2, Core2, Nehalem">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER SSE2">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERSSE42" Click="NewBenchCPUMINERSSE42" ToolTip="Architecture: Westmere">
+                <Button x:Name="BtnBenchCPUMINERSSE42" Click="NewBenchCPUMINERSSE42" ToolTip="Architecture: Westmere">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER SSE4.2">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERAVX" Click="NewBenchCPUMINERAVX" ToolTip="Architecture: Sandybridge, Ivybridge">
+                <Button x:Name="BtnBenchCPUMINERAVX" Click="NewBenchCPUMINERAVX" ToolTip="Architecture: Sandybridge, Ivybridge">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER AVX">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERAVX2" Click="NewBenchCPUMINERAVX2" ToolTip="Architecture: Haswell, Skylake, Kabylake, Coffeelake, Cometlake">
+                <Button x:Name="BtnBenchCPUMINERAVX2" Click="NewBenchCPUMINERAVX2" ToolTip="Architecture: Haswell, Skylake, Kabylake, Coffeelake, Cometlake">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER AVX2">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERAVX2SHA" Click="NewBenchCPUMINERAVX2SHA" ToolTip="Architecture: AMD Zen1, Zen2">
+                <Button x:Name="BtnBenchCPUMINERAVX2SHA" Click="NewBenchCPUMINERAVX2SHA" ToolTip="Architecture: AMD Zen1, Zen2">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER AVX2-SHA">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERAVX2SHAVAES" Click="NewBenchCPUMINERAVX2SHAVAES" ToolTip="Architecture: Intel Alderlake*, AMD Zen3">
+                <Button x:Name="BtnBenchCPUMINERAVX2SHAVAES" Click="NewBenchCPUMINERAVX2SHAVAES" ToolTip="Architecture: Intel Alderlake*, AMD Zen3">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER AVX2-SHA-VAES">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERAVX512" Click="NewBenchCPUMINERAVX512" ToolTip="Architecture: Intel HEDT Skylake-X, Cascadelake, AlderLake with AVX-512">
+                <Button x:Name="BtnBenchCPUMINERAVX512" Click="NewBenchCPUMINERAVX512" ToolTip="Architecture: Intel HEDT Skylake-X, Cascadelake, AlderLake with AVX-512">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER AVX-512">
                     </TextBlock>
                 </Button>
                 <Border Height="5" />
-                <Button Name="BtnBenchCPUMINERAVX512SHAVAES" Click="NewBenchCPUMINERAVX512SHAVAES" ToolTip="Architecture: Icelake, Tigerlake, Rocketlake">
+                <Button x:Name="BtnBenchCPUMINERAVX512SHAVAES" Click="NewBenchCPUMINERAVX512SHAVAES" ToolTip="Architecture: Icelake, Tigerlake, Rocketlake">
                     <TextBlock Margin="{adonisUi:Space}" Text="CPUMINER AVX-512-SHA-VAES">
                     </TextBlock>
                 </Button>
@@ -128,6 +128,7 @@
                                     <ColumnDefinition Width="*" adonisExtensions:LayerExtension.Layer="1"/>
                                 </Grid.ColumnDefinitions>
                                 <Grid.RowDefinitions>
+                                    <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
@@ -296,7 +297,11 @@
                                             <TextBlock Text="Max"/>
                                         </CheckBox>
                                     </Grid>
+                                    
                                 </StackPanel>
+                                <Button x:Name="BtnNewZenPT" Grid.Column="0" Grid.Row="12" Grid.ColumnSpan="2" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Center"  VerticalAlignment="Center" Click="BtnNewZenPT_Click" Visibility="Collapsed">
+                                    Unknown Zen Power Table, please click here to open an issue on GitHub, thanks!
+                                </Button>
                             </Grid>
                         </TabItem>
                         
@@ -331,17 +336,8 @@
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
                                         <RowDefinition Height="*"/>
+                                        <RowDefinition Height="*"/>
                                     </Grid.RowDefinitions>
-
-                                    <Button Grid.Column="0" Grid.ColumnSpan="1" Grid.Row="6" Name="ResetSettings" Click="ButtonReset" VerticalAlignment="Center" Padding="3 0 3 0" HorizontalAlignment="Center">
-                                        <TextBlock Margin="{adonisUi:Space}" Text="Reset settings">
-                                        </TextBlock>
-                                    </Button>
-
-                                    <Button Grid.Column="0" Grid.ColumnSpan="1" Grid.Row="1" Name="SaveSettings" VerticalAlignment="Center" Padding="3 0 3 0" HorizontalAlignment="Center">
-                                        <TextBlock Margin="{adonisUi:Space}" Text="Save settings">
-                                        </TextBlock>
-                                    </Button>
 
                                     <TextBlock Grid.Column="0" Grid.Row="2" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center">Idling Test Period (s):</TextBlock>
                                     <TextBox Grid.Column="1" Grid.Row="2" Name="IdleStableTime" Width="50" Margin="{adonisUi:Space}" adonisExtensions:ValidationExtension.ErrorMessagePlacement="Bottom" HorizontalAlignment="Left"  VerticalAlignment="Center" Text="{Binding Path=settings.IdleStableTime, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="TextBox_KeyEnterUpdate"  ToolTip="How much time to wait for stable CPU temperature and load before stating a bench iteration"/>
@@ -357,6 +353,30 @@
 
                                     <TextBlock Grid.Column="0" Grid.Row="5" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center">CPUMINER Runtime (s):</TextBlock>
                                     <TextBox Grid.Column="1" Grid.Row="5" Name="RuntimeCPUMINER" Width="50" Margin="{adonisUi:Space}" adonisExtensions:ValidationExtension.ErrorMessagePlacement="Bottom" HorizontalAlignment="Left"  VerticalAlignment="Center" Text="{Binding Path=settings.RunTimeCPUMINER, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" KeyUp="TextBox_KeyEnterUpdate"  ToolTip="Recommended at least 80 seconds"/>
+
+                                    <TextBlock Grid.Column="0" Grid.Row="6" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center">CPU Sensors Source:</TextBlock>
+                                    <TextBlock Grid.Column="1" Grid.Row="6" Name="CPUSourceLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Padding="5" VerticalAlignment="Center" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
+                                       Text="{Binding systemInfo.CPUSensorsSource}"/>
+
+                                    <Grid Grid.Column="0" Grid.Row="7" Grid.ColumnSpan="4" Margin="4 4 4 4">
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Button Grid.Column="0" Grid.Row="0" Name="ResetSettings" Click="ButtonReset" VerticalAlignment="Center" Padding="3 0 3 0" HorizontalAlignment="Right" Margin="10 4 10 4">
+                                            <TextBlock Margin="{adonisUi:Space}" Text="Reset settings">
+                                            </TextBlock>
+                                        </Button>
+
+                                        <Button Grid.Column="1" Grid.Row="0" Name="SaveSettings" VerticalAlignment="Center" Padding="3 0 3 0" HorizontalAlignment="Left" Margin="10 4 10 4">
+                                            <TextBlock Margin="{adonisUi:Space}" Text="Save settings">
+                                            </TextBlock>
+                                        </Button>
+
+                                    </Grid>
                                 </Grid>
                             </StackPanel>
 
@@ -384,7 +404,7 @@
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     OCN: Veii</Hyperlink>
                             <LineBreak/>
-                            Thanks for Zen CO - <Hyperlink 
+                            Thanks for help, code, Zen CO - <Hyperlink 
                                     NavigateUri="https://www.overclock.net/members/pjvol.622816/"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     OCN: PJVol</Hyperlink>
@@ -394,7 +414,7 @@
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     Patreon: 1usmus</Hyperlink>
                             <LineBreak/>
-                            Credits to Irusanov's Zentimings
+                            Credits to Irusanov's Zentimings, ZenCore
                             GitHub Project: <Hyperlink 
                                     NavigateUri="https://github.com/irusanov/ZenTimings"
                                     RequestNavigate="Hyperlink_RequestNavigate">

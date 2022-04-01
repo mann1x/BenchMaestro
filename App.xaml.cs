@@ -16,6 +16,7 @@ using System.Windows.Data;
 using System.Threading;
 using System.Timers;
 using ZenStates.Core;
+using System.Windows.Media;
 
 namespace BenchMaestro
 {
@@ -26,6 +27,10 @@ namespace BenchMaestro
 
     public partial class App : Application
     {
+
+        internal const string mutexName = "Local\\BenchMaestro";
+        internal static Mutex instanceMutex;
+        internal bool bMutex;
 
         public static int InterlockBench = 0;
         public static int InterlockHWM = 0;
@@ -56,11 +61,31 @@ namespace BenchMaestro
         public static string ss_filename;
         static string _versionInfo;
 
+        public static string ZenPTSubject;
+        public static string ZenPTBody;
+
         public static List<HWSensorItem> hwsensors;
 
+        public static SolidColorBrush boxbrush1 = new SolidColorBrush();
+        public static SolidColorBrush boxbrush2 = new SolidColorBrush();
+        public static SolidColorBrush scorebrush = new SolidColorBrush();
+        public static SolidColorBrush thrbgbrush = new SolidColorBrush();
+        public static SolidColorBrush thrbrush1 = new SolidColorBrush();
+        public static SolidColorBrush thrbrush2 = new SolidColorBrush();
+        public static SolidColorBrush maxbrush = new SolidColorBrush();
+        public static SolidColorBrush tempbrush = new SolidColorBrush();
+        public static SolidColorBrush voltbrush = new SolidColorBrush();
+        public static SolidColorBrush clockbrush1 = new SolidColorBrush();
+        public static SolidColorBrush clockbrush2 = new SolidColorBrush();
+        public static SolidColorBrush powerbrush = new SolidColorBrush();
+        public static SolidColorBrush additionbrush = new SolidColorBrush();
+        public static SolidColorBrush detailsbrush = new SolidColorBrush();
+        public static SolidColorBrush blackbrush = new SolidColorBrush();
+        public static SolidColorBrush whitebrush = new SolidColorBrush();
+        public static Thickness thickness;
 
-        // Sleep Control
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+                // Sleep Control
+                [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         static extern EXECUTION_STATE SetThreadExecutionState(EXECUTION_STATE esFlags);
 
         [FlagsAttribute]
@@ -138,6 +163,18 @@ namespace BenchMaestro
             }
             return _thr;
         }
+        public static void SetCPUSource(HWSensorSource _source)
+        {
+            HWMonitor.CPUSource = _source;
+            if (_source == HWSensorSource.Zen)
+            {
+				App.systemInfo.CPUSensorsSource = "Zen PowerTable";
+            }
+            if (_source == HWSensorSource.Libre)
+            {
+                App.systemInfo.CPUSensorsSource = "LibreHardwareMonitor";
+            }
+        }
 
         public static int GetRuntime(string BenchName)
         {
@@ -181,6 +218,19 @@ namespace BenchMaestro
 
         protected override void OnStartup(StartupEventArgs e)
         {
+
+            instanceMutex = new Mutex(true, mutexName, out bMutex);
+
+            if (!bMutex)
+            {
+                InteropMethods.PostMessage((IntPtr)InteropMethods.HWND_BROADCAST, InteropMethods.WM_SHOWME,
+                    IntPtr.Zero, IntPtr.Zero);
+                Current.Shutdown();
+                Environment.Exit(0);
+            }
+
+            GC.KeepAlive(instanceMutex);
+
             WindowsIdentity identity = WindowsIdentity.GetCurrent();
             WindowsPrincipal principal = new WindowsPrincipal(identity);
 
@@ -238,6 +288,8 @@ namespace BenchMaestro
             AutoUpdater.Start("https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro.json");
 
             HWMonitor.Init();
+
+            InitColors();
 
             HWMStart();
 
@@ -381,6 +433,44 @@ namespace BenchMaestro
             benchcts.Dispose();
             
             SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
+        }
+        private void InitColors()
+        {
+            // BOX BACKGROUND ODD
+            boxbrush1 = (SolidColorBrush)new BrushConverter().ConvertFrom("#B6CECE");
+            // BOX BACKGROUND EVEN
+            boxbrush2 = (SolidColorBrush)new BrushConverter().ConvertFrom("#B6CECE");
+            // BOX BACKGROUND THREADS
+            thrbgbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#2F4F4F");
+            // FONT SCORE RESULT
+            scorebrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#007300");
+            // FONT NUM THREADS
+            thrbrush1 = (SolidColorBrush)new BrushConverter().ConvertFrom("#CEEDE2");
+            // FONT t THREADS
+            thrbrush2 = (SolidColorBrush)new BrushConverter().ConvertFrom("#C3E0D6");
+            // FONT ALL Max VALUES
+            maxbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#A10008");
+            // FONT CPU TEMP
+            tempbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#115C6B");
+            // FONT VOLTAGES
+            voltbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#C51B54");
+            // FONT AVERAGE CLOCK
+            clockbrush1 = (SolidColorBrush)new BrushConverter().ConvertFrom("#251AED");
+            // FONT MAX CLOCK
+            clockbrush2 = (SolidColorBrush)new BrushConverter().ConvertFrom("#8300A3");
+            // FONT POWER 
+            powerbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#750E17");
+            // FONT ADDITIONAL BOX (CCDS)
+            additionbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#431571");
+            // FONT EXPANDER DETAILS
+            detailsbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#F2DFC2");
+            // FONT ALL BLACK (N/A, STARTED, FINISHED, LOAD, SCORE UNITS)
+            blackbrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#2A2B34");
+            // FONT ALL WHITE (BOX SCORE BG)
+            whitebrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#F4F5F6");
+
+            thickness = new Thickness(4, 3, 4, 3);
+
         }
 
     }

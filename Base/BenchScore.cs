@@ -27,6 +27,8 @@ namespace BenchMaestro
         public double CPUAvgEffClock { get; set; }
         public double CPUMaxLoad { get; set; }
         public double CPUAvgLoad { get; set; }
+        public double CPUMaxStretch { get; set; }
+        public double CPUAvgStretch { get; set; }
         public Grid CPUPowerGrid { get; set; }
         public TextBlock CPUPowerBox { get; set; }
         public double CPUMaxPower { get; set; }
@@ -52,6 +54,8 @@ namespace BenchMaestro
         public double CPUFSBMax { get; set; }
         public double SOCAvgVoltage { get; set; }
         public double SOCMaxVoltage { get; set; }
+        public double L3AvgTemp { get; set; }
+        public double L3MaxTemp { get; set; }
         public double CCD1AvgTemp { get; set; }
         public double CCD1MaxTemp { get; set; }
         public double CCD2AvgTemp { get; set; }
@@ -64,9 +68,11 @@ namespace BenchMaestro
         public List<DetailsGrid> CPUCoresVoltages { get; set; }
         public List<DetailsGrid> CPUCoresClocks { get; set; }
         public List<DetailsGrid> CPUCoresEffClocks { get; set; }
+        public List<DetailsGrid> CPUCoresStretch { get; set; }
         public List<DetailsGrid> CPUCoresPower { get; set; }
         public List<DetailsGrid> CPUCoresScores { get; set; }
         public List<DetailsGrid> CPUCoresTemps { get; set; }
+        public List<DetailsGrid> CPUCoresC0 { get; set; }
         public List<DetailsGrid> CPULogicalsLoad { get; set; }
         public TextBlock StartedBox { get; set; }
         public DateTime Started { get; set; }
@@ -104,6 +110,8 @@ namespace BenchMaestro
             CPUMaxClock = -999;
             CPUMaxEffClock = -999;
             CPUAvgEffClock = -999;
+            CPUMaxStretch = -99999;
+            CPUAvgStretch = -99999;
             CPUMaxLoad = -999;
             CPUAvgLoad = -999;
             CPUMaxPower = -999;
@@ -122,6 +130,8 @@ namespace BenchMaestro
             CPUFSBMax = -999;
             SOCAvgVoltage = -999;
             SOCMaxVoltage = -999;
+            L3AvgTemp = -999;
+            L3MaxTemp = -999;
             CCD1AvgTemp = -999;
             CCD1MaxTemp = -999;
             CCD2AvgTemp = -999;
@@ -141,9 +151,12 @@ namespace BenchMaestro
             Algo = "";
             CPUCoresVoltages = new List<DetailsGrid>();
             CPUCoresClocks = new List<DetailsGrid>();
+            CPUCoresEffClocks = new List<DetailsGrid>();
+            CPUCoresStretch = new List<DetailsGrid>();
             CPUCoresPower = new List<DetailsGrid>();
             CPUCoresScores = new List<DetailsGrid>();
             CPUCoresTemps = new List<DetailsGrid>();
+            CPUCoresC0 = new List<DetailsGrid>();
             CPULogicalsLoad = new List<DetailsGrid>();
             ExitStatus = "";
             OutputLog = "";

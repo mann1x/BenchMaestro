@@ -39,6 +39,7 @@ namespace BenchMaestro
         string BenchArgs = $" --noTest --benchmark 255 --benchwait 0 --benchwork ###runtime### -c xmrstakrx_config.txt --currency randomx -o pool.usxmrpool.com:3333 -u benchmark -p \"\" -r BenchMaestro --cpu xmrstakrx_cpu.txt";
 
         bool BenchArchived = true;
+        bool EndCheckLowLoad = true;
 
         DateTime TSRunStart = DateTime.Now;
 
@@ -153,8 +154,6 @@ namespace BenchMaestro
             // FONT ALL WHITE (BOX SCORE BG)
             whitebrush = (SolidColorBrush)new BrushConverter().ConvertFrom("#F4F5F6");
 
-
-
             DataContext = new
             {
                 //runs = VM,
@@ -164,7 +163,19 @@ namespace BenchMaestro
                 ProgressBar
             };
 
-
+            SystemParameters.StaticPropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(SystemParameters.WorkArea))
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        MaxHeight = SystemParameters.WorkArea.Height;
+                        Height = SystemParameters.WorkArea.Height;
+                        WindowState = WindowState.Normal;  // Updates the windows new sizes
+                        WindowState = WindowState.Maximized;
+                    });
+                }
+            };
         }
         private void CenterWindowOnScreen()
         {
@@ -1445,6 +1456,7 @@ namespace BenchMaestro
             try
             {
                 App.TaskRunning = true;
+                HWMonitor.EndCheckLowLoad = EndCheckLowLoad;
 
                 CancellationToken benchtoken = new CancellationToken();
                 benchtoken = (CancellationToken)App.benchcts.Token;

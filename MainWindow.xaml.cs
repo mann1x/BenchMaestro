@@ -18,6 +18,8 @@ using System.Collections;
 using System.Collections.Specialized;
 using BenchMaestro.Windows;
 using System.IO;
+using System.Runtime.Intrinsics.X86;
+using System.Web;
 
 namespace BenchMaestro
 {
@@ -71,7 +73,9 @@ namespace BenchMaestro
             SetValue(MinWidthProperty, Width);
             SetValue(MinHeightProperty, Height);
             ClearValue(SizeToContentProperty);
-            
+            App.systemInfo.WinMaxSize = System.Windows.SystemParameters.WorkArea.Height;
+
+
             if (Properties.Settings.Default.Initialized)
             {
                 Trace.WriteLine($"Restoring Window Position {Properties.Settings.Default.Top} {Properties.Settings.Default.Left} {Properties.Settings.Default.Height} {Properties.Settings.Default.Width} {Properties.Settings.Default.Maximized}");
@@ -170,6 +174,27 @@ namespace BenchMaestro
             {
                 COCounts.Visibility = Visibility.Visible;
                 COCountsLabel.Visibility = Visibility.Visible;
+            }
+            if (!Avx.IsSupported)
+            {
+                BtnBenchCPUMINERAVX.Visibility = Visibility.Collapsed;
+                BtnBenchCPUMINERAVX2SHA.Visibility = Visibility.Collapsed;
+                BtnBenchCPUMINERAVX2SHAVAES.Visibility = Visibility.Collapsed;
+            }
+            if (!Avx2.IsSupported)
+            {
+                BtnBenchCPUMINERAVX2.Visibility = Visibility.Collapsed;
+                BtnBenchCPUMINERAVX2SHA.Visibility = Visibility.Collapsed;
+                BtnBenchCPUMINERAVX2SHAVAES.Visibility = Visibility.Collapsed;
+            }
+            if (!Sse42.IsSupported)
+            {
+                BtnBenchCPUMINERSSE42.Visibility = Visibility.Collapsed;
+            }
+
+            if (App.ZenPTSubject.Length > 0)
+            {
+                BtnNewZenPT.Visibility = Visibility.Visible;
             }
         }
 
@@ -485,6 +510,25 @@ namespace BenchMaestro
             }
             CPUMINERAVX512SHAVAESWin.Show();
 
+        }
+
+        private void BtnNewZenPT_Click(object sender, RoutedEventArgs e)
+        {
+            Clipboard.SetText(App.ZenPTBody);
+            string url = $"https://github.com/mann1x/BSManager/issues/new?title={HttpUtility.UrlEncode(App.ZenPTSubject)}&body={HttpUtility.UrlEncode("Please paste from Clipboard (Ctrl+V) the content of the PowerTable")})";
+            try 
+            {
+                Process.Start(new ProcessStartInfo(url) { UseShellExecute = true });
+            }
+            catch (System.ComponentModel.Win32Exception noBrowser)
+            {
+                if (noBrowser.ErrorCode == -2147467259)
+                    MessageBox.Show(noBrowser.Message);
+            }
+            catch (System.Exception other)
+            {
+                MessageBox.Show(other.Message);
+            }
         }
     }
 }

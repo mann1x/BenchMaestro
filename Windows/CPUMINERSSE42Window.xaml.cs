@@ -38,6 +38,7 @@ namespace BenchMaestro
         string BenchArchive = @".\Benchmarks\cpuminer-opt-3.19.6\cpuminer-aes-sse42.7z";
         string BenchPath = @".\Benchmarks\cpuminer-opt-3.19.6\";
         string BenchArgs = $" --benchmark --no-color --time-limit=###runtime### --threads=###threads### --cpu-affinity ###affinity### --algo=scrypt:512 --no-redirect --no-extranonce --no-stratum --no-gbt --no-getwork --no-longpoll --stratum-keepalive";
+        
         bool BenchArchived = true;
 
         DateTime TSRunStart = DateTime.Now;
@@ -160,6 +161,20 @@ namespace BenchMaestro
                 systemInfo = App.systemInfo,
                 benchsettings = Properties.SettingsCPUMINERSSE42.Default,
                 ProgressBar
+            };
+
+            SystemParameters.StaticPropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(SystemParameters.WorkArea))
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        MaxHeight = SystemParameters.WorkArea.Height;
+                        Height = SystemParameters.WorkArea.Height;
+                        WindowState = WindowState.Normal;  // Updates the windows new sizes
+                        WindowState = WindowState.Maximized;
+                    });
+                }
             };
 
 

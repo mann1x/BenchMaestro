@@ -163,8 +163,22 @@ namespace BenchMaestro
             };
 
 
+            SystemParameters.StaticPropertyChanged += (sender, args) =>
+            {
+                if (args.PropertyName == nameof(SystemParameters.WorkArea))
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        MaxHeight = SystemParameters.WorkArea.Height;
+                        Height = SystemParameters.WorkArea.Height;
+                        WindowState = WindowState.Normal;  // Updates the windows new sizes
+                        WindowState = WindowState.Maximized;
+                    });
+                }
+            };
+
         }
-        
+
         private void CenterWindowOnScreen()
         {
             double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;

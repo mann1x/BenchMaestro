@@ -9,6 +9,7 @@
                             Title="{Binding WinTitle, RelativeSource={RelativeSource Mode=Self}, Mode=OneWay}"
                             Height="600"
                             Width="1000"
+                            MaxHeight="{Binding Height, Source={x:Static SystemParameters.WorkArea}}"
                             WindowStartupLocation="CenterScreen"
                             FontSize="11"                         
                             BorderThickness="1"
