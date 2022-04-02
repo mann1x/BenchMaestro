@@ -378,7 +378,7 @@ namespace BenchMaestro
 
                     HWMonitor.MonitoringPause = true;
 
-                    HWMonitor.ReInit(false);
+                    HWMonitor.ReInit(true);
 
                     HWMonitor.MonitoringPause = false;
 

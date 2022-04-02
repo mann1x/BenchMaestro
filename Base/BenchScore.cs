@@ -35,6 +35,10 @@ namespace BenchMaestro
         public double CPUAvgPower { get; set; }
         public double CPUMaxVoltage { get; set; }
         public double CPUAvgVoltage { get; set; }
+        public double CPUSAMaxVoltage { get; set; }
+        public double CPUSAAvgVoltage { get; set; }
+        public double CPUIOMaxVoltage { get; set; }
+        public double CPUIOAvgVoltage { get; set; }
         public double CoresAvgVoltage { get; set; }
         public double CoresMaxVoltage { get; set; }
         public double CoresMaxPower { get; set; }
@@ -131,6 +135,10 @@ namespace BenchMaestro
             CPUAvgPower = -999;
             CPUMaxVoltage = -999;
             CPUAvgVoltage = -999;
+            CPUSAMaxVoltage = -999;
+            CPUSAAvgVoltage = -999;
+            CPUIOMaxVoltage = -999;
+            CPUIOAvgVoltage = -999;
             CoresAvgVoltage = -999;
             CoresMaxVoltage = -999;
             CoresMaxPower = -999;

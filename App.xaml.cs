@@ -281,6 +281,8 @@ namespace BenchMaestro
 			_versionInfo = string.Format("{0}.{1}.{2}", _version.Major, _version.Minor, _version.Build);
 			systemInfo.AppVersion = version;
 
+			Trace.WriteLine($"BenchMaestro Version {_versionInfo}");
+
 			SettingsInit();
 
 			RunsViewModel runs = new RunsViewModel();

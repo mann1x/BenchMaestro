@@ -8,14 +8,14 @@
     <StartupObject></StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <SignAssembly>false</SignAssembly>
-    <AssemblyVersion>1.0.8.0</AssemblyVersion>
+    <AssemblyVersion>1.0.10.0</AssemblyVersion>
     <Copyright>GPL 3.0</Copyright>
     <PackageProjectUrl>https://github.com/mann1x/BenchMaestro</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mann1x/BenchMaestro</RepositoryUrl>
     <Description>CPU &amp; GPU Benchmarking and tools utility</Description>
     <Deterministic>false</Deterministic>
-    <FileVersion>1.0.8.0</FileVersion>
-    <Version>1.0.8</Version>
+    <FileVersion>1.0.10.0</FileVersion>
+    <Version>1.0.10</Version>
     <PackageIcon>BenchMaestro.ico</PackageIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <PackageIconUrl />
@@ -170,46 +170,76 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-aes-sse42.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-aes-sse42.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2-sha-vaes.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx2-sha-vaes.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2-sha.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx2-sha.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx2.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx512-sha-vaes.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx512-sha-vaes.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx512.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx512.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\cpuminer-sse2.7z">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\cpuminer-sse2.7z">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\libcrypto-1_1-x64.dll">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libcrypto-1_1-x64.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\libcurl-4.dll">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libcurl-4.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\libgcc_s_seh-1.dll">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libgcc_s_seh-1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\libstdc++-6.dll">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libstdc++-6.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\libwinpthread-1.dll">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libwinpthread-1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
-    <None Update="Benchmarks\cpuminer-opt-3.19.6\zlib1.dll">
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\zlib1.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libcrypto-1_1-x64.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libcurl-4.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libgcc_s_seh-1.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libstdc++-6.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\libwinpthread-1.dll">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\README.md">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\README.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\RELEASE_NOTES">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\verthash-help.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+    <None Update="Benchmarks\cpuminer-opt-3.19.7\zlib1.dll">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
     <None Update="Benchmarks\xmr-stak-rx-win64-1.0.5\WinRing0x64.sys">
@@ -291,7 +321,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Benchmarks\cpuminer-opt-3.19.6\" />
+    <Folder Include="Benchmarks\cpuminer-opt-3.19.7\" />
     <Folder Include="Common\LibreHardwareMonitor\" />
     <Folder Include="Resources\" />
     <Folder Include="Theme\" />

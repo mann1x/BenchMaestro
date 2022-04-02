@@ -635,6 +635,8 @@ namespace BenchMaestro
         CPUEDCLimit,
         CCD1L3Temp,
         CCD2L3Temp,
+        CPUSAVoltage,
+        CPUIOVoltage,
     }
     public class DetailsGrid
     {

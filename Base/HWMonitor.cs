@@ -59,6 +59,8 @@ namespace BenchMaestro
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUMBTemp, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.MainBoard, HWSensorType.Temperature));
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CPULoad, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Load));
             App.hwsensors.Add(new HWSensorItem(HWSensorName.SOCVoltage, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Voltage));
+            App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUSAVoltage, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Voltage));
+            App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUIOVoltage, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Voltage));
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CCD1Temp, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Temperature));
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CCD2Temp, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Temperature));
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CCDSTemp, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Temperature));
@@ -112,7 +114,7 @@ namespace BenchMaestro
 
         }
 
-        public static void ReInit(bool _board = false, bool _gpu = false)
+        public static void ReInit(bool _board = true, bool _gpu = false)
         {
             computer = new Computer
             {
@@ -231,7 +233,7 @@ namespace BenchMaestro
         public static void UpdateSensor(ISensor sensor)
         {
 
-            if (sensor.SensorType == SensorType.Clock && sensor.Name.StartsWith("Core #"))
+            if (sensor.SensorType == SensorType.Clock && sensor.Name.Contains("Core #"))
             {
                 foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Name == HWSensorName.CPUCoresClocks && sensorItem.Source == HWSensorSource.Libre))
                 {
@@ -242,7 +244,7 @@ namespace BenchMaestro
                 }
             }
 
-            else if (sensor.SensorType == SensorType.Power && sensor.Name.StartsWith("Core #"))
+            else if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("Core #"))
             {
                 foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Name == HWSensorName.CPUCoresPower && sensorItem.Source == HWSensorSource.Libre))
                 {
@@ -253,7 +255,7 @@ namespace BenchMaestro
                 }
             }
 
-            else if (sensor.SensorType == SensorType.Voltage && sensor.Name.StartsWith("Core #"))
+            else if (sensor.SensorType == SensorType.Voltage && sensor.Name.Contains("Core #"))
             {
                 foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Name == HWSensorName.CPUCoresVoltages && sensorItem.Source == HWSensorSource.Libre))
                 {
@@ -264,16 +266,16 @@ namespace BenchMaestro
                 }
             }
 
-            else if (sensor.SensorType == SensorType.Load && sensor.Name.StartsWith("CPU Core #"))
+            else if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Core #"))
             {
-                foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Name == HWSensorName.CPULoad && sensorItem.Source == HWSensorSource.Libre))
+                foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Name == HWSensorName.CPULogicalsLoad && sensorItem.Source == HWSensorSource.Libre))
                 {
                     List<HWSensorMultiValues> _sensorValues2 = _sensor.MultiValues;
-                    Trace.WriteLine($"1 = Sensor update {_sensor.Name} c={_sensorValues2.Count} {sensor.Identifier}={sensor.Value}");
+                    //Trace.WriteLine($"1 = Sensor update {_sensor.Name} c={_sensorValues2.Count} {sensor.Identifier}={sensor.Value}");
                     foreach (HWSensorMultiValues _sensorValues in _sensorValues2)
                     {
                         if (_sensorValues.LibreIdentifier == sensor.Identifier.ToString()) { 
-                            Trace.WriteLine($"Sensor update {sensor.Identifier}={sensor.Value}");
+                            //Trace.WriteLine($"Sensor update {sensor.Identifier}={sensor.Value}");
                             _sensorValues.Values.Add(sensor.Value);
                         }
                     }
@@ -330,7 +332,7 @@ namespace BenchMaestro
                     Trace.WriteLine($"Libre CPU MB Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
-                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name.StartsWith("Core (Tctl/Tdie)") && CPUSource == HWSensorSource.Libre)
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && (sensor.Name.StartsWith("Core (Tctl") || sensor.Name.Contains("CPU Package")) && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUTemp, sensor.Identifier.ToString(), sensor.Name);
                     Trace.WriteLine($"Libre CPU Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
@@ -342,7 +344,7 @@ namespace BenchMaestro
                     Trace.WriteLine($"Libre CPU Load Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
-                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Power && sensor.Name == "Package" && CPUSource == HWSensorSource.Libre)
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Power && (sensor.Name == "Package" || sensor.Name == "CPU Package") && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUPower, sensor.Identifier.ToString(), sensor.Name);
                     Trace.WriteLine($"Libre CPU Power Sensor added {sensor.Identifier} HW={hardware.Identifier}");
@@ -351,6 +353,24 @@ namespace BenchMaestro
                 if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Voltage && sensor.Name == "Core (SVI2 TFN)" && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUVoltage, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage && sensor.Name == "Vcore" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUVoltage, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage && sensor.Name == "CPU SA" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUSAVoltage, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage && sensor.Name == "CPU I/O" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUIOVoltage, sensor.Identifier.ToString(), sensor.Name);
                     Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
@@ -384,9 +404,9 @@ namespace BenchMaestro
                     Trace.WriteLine($"Libre CPU FSB Clock Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
-                if (sensor.SensorType == SensorType.Clock && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
+                if (sensor.SensorType == SensorType.Clock && sensor.Name.Contains("Core #") && CPUSource == HWSensorSource.Libre)
                 {
-                    Match match = Regex.Match(sensor.Name, @"Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                    Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
                         string _core = match.Groups[1].Value;
@@ -397,9 +417,9 @@ namespace BenchMaestro
                     }
                 }
 
-                if (sensor.SensorType == SensorType.Power && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
+                if (sensor.SensorType == SensorType.Power && sensor.Name.Contains("Core #") && CPUSource == HWSensorSource.Libre)
                 {
-                    Match match = Regex.Match(sensor.Name, @"Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                    Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
                         string _core = match.Groups[1].Value;
@@ -410,9 +430,9 @@ namespace BenchMaestro
                     }
                 }
 
-                if (sensor.SensorType == SensorType.Voltage && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
+                if (sensor.SensorType == SensorType.Voltage && sensor.Name.Contains("Core #") && CPUSource == HWSensorSource.Libre)
                 {
-                    Match match = Regex.Match(sensor.Name, @"Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                    Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
                         string _core = match.Groups[1].Value;
@@ -423,17 +443,47 @@ namespace BenchMaestro
                     }
                 }
 
-                if (sensor.SensorType == SensorType.Load && sensor.Name.StartsWith("CPU Core #") && CPUSource == HWSensorSource.Libre)
+                if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core #") && CPUSource == HWSensorSource.Libre)
                 {
-                    Match match = Regex.Match(sensor.Name, @"CPU Core #(?<cpu>\d+).*$", RegexOptions.IgnoreCase);
+                    Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
                     if (match.Success)
                     {
-                        string _cpu = match.Groups[1].Value;
-                        Trace.WriteLine($"Libre CPU Cores Load #{_cpu}");
-                        int _index = Int32.Parse(_cpu);
-                        App.hwsensors.InitLibreMulti(HWSensorName.CPULogicalsLoad, hardware.Identifier.ToString(), "CPU Cores Load", _index, sensor.Identifier.ToString(), sensor.Name);
-                        Trace.WriteLine($"Libre CPU Cores Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                        string _core = match.Groups[1].Value;
+                        Trace.WriteLine($"Libre CPU Cores Temperature #{_core}");
+                        int _index = Int32.Parse(_core);
+                        App.hwsensors.InitLibreMulti(HWSensorName.CPUCoresTemps, hardware.Identifier.ToString(), "CPU Cores Temperature", _index, sensor.Identifier.ToString(), sensor.Name);
+                        Trace.WriteLine($"Libre CPU Cores Temperature #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
                     }
+                }
+
+                if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Core #") && CPUSource == HWSensorSource.Libre)
+                {
+                    Match matcht = Regex.Match(sensor.Name, @".*Core #(?<cpu>\d+) Thread #(?<cpu>\d+).*$", RegexOptions.IgnoreCase);
+                    if (matcht.Success)
+                    {
+                        Match matchid = Regex.Match(sensor.Identifier.ToString(), @".*cpu/\d+/load/(?<cpu>\d+)$", RegexOptions.IgnoreCase);
+                        if (matchid.Success)
+                        {
+                            string _cpu = matchid.Groups[1].Value;
+                            Trace.WriteLine($"Libre CPU Cores w/Thread Load #{_cpu}");
+                            int _index = Int32.Parse(_cpu);
+                            App.hwsensors.InitLibreMulti(HWSensorName.CPULogicalsLoad, hardware.Identifier.ToString(), "CPU Cores Load", _index, sensor.Identifier.ToString(), sensor.Name);
+                            Trace.WriteLine($"Libre CPU Cores w/Thread Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                        }
+                    }
+                    else
+                    {
+                        Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                        if (match.Success)
+                        {
+                            string _cpu = match.Groups[1].Value;
+                            Trace.WriteLine($"Libre CPU Cores Load #{_cpu}");
+                            int _index = Int32.Parse(_cpu);
+                            App.hwsensors.InitLibreMulti(HWSensorName.CPULogicalsLoad, hardware.Identifier.ToString(), "CPU Cores Load", _index, sensor.Identifier.ToString(), sensor.Name);
+                            Trace.WriteLine($"Libre CPU Cores Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                        }
+                    }
+
                 }
             }
             catch (Exception ex)
@@ -518,6 +568,14 @@ namespace BenchMaestro
                     App.CurrentRun.CPUMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUVoltage);
                     App.CurrentRun.CPUAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUVoltage);
                     Trace.WriteLine($"CPU AVG VOLTAGE {App.CurrentRun.CPUAvgVoltage} MAX {App.CurrentRun.CPUMaxVoltage}");
+
+                    App.CurrentRun.CPUIOMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUIOVoltage);
+                    App.CurrentRun.CPUIOAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUIOVoltage);
+                    Trace.WriteLine($"CPUIO AVG VOLTAGE {App.CurrentRun.CPUIOAvgVoltage} MAX {App.CurrentRun.CPUIOMaxVoltage}");
+
+                    App.CurrentRun.CPUSAMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUSAVoltage);
+                    App.CurrentRun.CPUSAAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUSAVoltage);
+                    Trace.WriteLine($"CPUSA AVG VOLTAGE {App.CurrentRun.CPUSAAvgVoltage} MAX {App.CurrentRun.CPUSAMaxVoltage}");
 
                     App.CurrentRun.SOCMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.SOCVoltage);
                     App.CurrentRun.SOCAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.SOCVoltage);

@@ -404,6 +404,62 @@ namespace BenchMaestro
 
                 _row = 0;
 
+                if (App.CurrentRun.CPUSAAvgVoltage > 0)
+                {
+                    if (_gridblock.ColumnDefinitions.Count == 0)
+                    {
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength1 });
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                    }
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1a.Inlines.Add(new Run { Text = $"CPU SA: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUSAAvgVoltage, 3)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = " V ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
+                    Grid.SetColumn(_tb1a, 0);
+                    Grid.SetRow(_tb1a, _row);
+                    _tb1a.TextAlignment = TextAlignment.Right;
+                    _gridblock.Children.Add(_tb1a);
+
+                    TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUSAMaxVoltage, 3)} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    Grid.SetColumn(_tb1b, 1);
+                    Grid.SetRow(_tb1b, _row);
+                    _tb1b.TextAlignment = TextAlignment.Left;
+                    _gridblock.Children.Add(_tb1b);
+
+                    _row++;
+                }
+
+                if (App.CurrentRun.CPUIOAvgVoltage > 0)
+                {
+                    if (_gridblock.ColumnDefinitions.Count == 0)
+                    {
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength1 });
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                    }
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1a.Inlines.Add(new Run { Text = $"CPU I/O: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUIOAvgVoltage, 3)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = " V ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
+                    Grid.SetColumn(_tb1a, 0);
+                    Grid.SetRow(_tb1a, _row);
+                    _tb1a.TextAlignment = TextAlignment.Right;
+                    _gridblock.Children.Add(_tb1a);
+
+                    TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUIOMaxVoltage, 3)} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    Grid.SetColumn(_tb1b, 1);
+                    Grid.SetRow(_tb1b, _row);
+                    _tb1b.TextAlignment = TextAlignment.Left;
+                    _gridblock.Children.Add(_tb1b);
+
+                    _row++;
+                }
+
                 if (App.CurrentRun.CCDSAvgTemp > 0)
                 {
                     if (_gridblock.ColumnDefinitions.Count == 0)

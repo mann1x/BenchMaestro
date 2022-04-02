@@ -23,9 +23,9 @@ namespace BenchMaestro
     {
         static string Benchname = "CPUMINERSSE2";
 
-        string BenchBinary = @".\Benchmarks\cpuminer-opt-3.19.6\cpuminer-sse2.exe";
-        string BenchArchive = @".\Benchmarks\cpuminer-opt-3.19.6\cpuminer-sse2.7z";
-        string BenchPath = @".\Benchmarks\cpuminer-opt-3.19.6\";
+        string BenchBinary = @".\Benchmarks\cpuminer-opt-3.19.7\cpuminer-sse2.exe";
+        string BenchArchive = @".\Benchmarks\cpuminer-opt-3.19.7\cpuminer-sse2.7z";
+        string BenchPath = @".\Benchmarks\cpuminer-opt-3.19.7\";
         string BenchArgs = $" --benchmark --no-color --time-limit=###runtime### --threads=###threads### --cpu-affinity ###affinity### --algo=scrypt:512 --no-redirect --no-extranonce --no-stratum --no-gbt --no-getwork --no-longpoll --stratum-keepalive";
         bool BenchArchived = true;
         bool EndCheckLowLoad = false;

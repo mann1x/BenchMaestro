@@ -34,6 +34,11 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.10 Alpha
+    - New: Fixed version of cpuminer-opt binaries thx to JayDDee, all binaries now are using same algo
+    - Fix: Zen restored missing SMU and PT version
+    - Fix: Support for Alder Lake
+    - Fix: Fix for Zen1 temperature
 - v1.0.8 Alpha
     - New: Zen early support for 1000s CPU 
     - New: Zen improved CO counts display with + for positive

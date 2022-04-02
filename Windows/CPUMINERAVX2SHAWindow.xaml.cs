@@ -37,10 +37,10 @@ namespace BenchMaestro
     {
         static string Benchname = "CPUMINERAVX2SHA";
 
-        string BenchBinary = @".\Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2-sha.exe";
-        string BenchArchive = @".\Benchmarks\cpuminer-opt-3.19.6\cpuminer-avx2-sha.7z";
-        string BenchPath = @".\Benchmarks\cpuminer-opt-3.19.6\";
-        string BenchArgs = $" --benchmark --no-color --time-limit=###runtime### --threads=###threads### --cpu-affinity ###affinity### --algo=x25x --no-redirect --no-extranonce --no-stratum --no-gbt --no-getwork --no-longpoll --stratum-keepalive";
+        string BenchBinary = @".\Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx2-sha.exe";
+        string BenchArchive = @".\Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx2-sha.7z";
+        string BenchPath = @".\Benchmarks\cpuminer-opt-3.19.7\";
+        string BenchArgs = $" --benchmark --no-color --time-limit=###runtime### --threads=###threads### --cpu-affinity ###affinity### --algo=scrypt:512 --no-redirect --no-extranonce --no-stratum --no-gbt --no-getwork --no-longpoll --stratum-keepalive";
         bool BenchArchived = true;
         bool EndCheckLowLoad = false;
 

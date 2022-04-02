@@ -472,6 +472,8 @@ namespace BenchMaestro
 				ZenCoreMap = new int[CPUCores];
 				ZenCOb = false;
 				ZenCOLabel = "";
+				ZenSMUVer = "N/A";
+				ZenPTVersion = 0;
 
 				CPUSensorsSource = "LibreHardwareMonitor";
 				HWMonitor.CPUSource = HWSensorSource.Libre;
@@ -543,6 +545,8 @@ namespace BenchMaestro
 
 							int last = ZenCCD_Total * 8;
 
+							ZenRefreshCO();
+
 							for (int i = 0, k = 0; i < ZenCCD_Total * 8; cores_t = cores_t >> 1)
 							{
 								ZenCoreMapLabel += (i == 0) ? "[" : (i % 8 != 0) ? "." : "";
@@ -561,8 +565,6 @@ namespace BenchMaestro
 
 							Trace.WriteLine($"ZenCoreMap: {string.Join(", ", ZenCoreMap)}");
 							Trace.WriteLine($"ZenCoreMapLabel: {ZenCoreMapLabel}");
-
-							ZenRefreshCO();
 
 							bool _refreshpt = ZenRefreshPowerTable();
 
@@ -1081,8 +1083,6 @@ namespace BenchMaestro
 									sw.WriteLine(sb.ToString());
 								}
 
-								ZenPTKnown = false;
-
 								if (!ZenPTKnown)
 								{
 									try
@@ -1419,6 +1419,8 @@ namespace BenchMaestro
 				if (ZenVIOD > 0) _CPULabel += $"VDDG IOD: {ZenVIOD}mV ";
 
 				if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
+			
+				CPULabel += $"\nSMU Version: {ZenSMUVer} Power Table: 0x{ZenPTVersion:X}";
 
 				ProcessorsLabel += $"\nZen CoreMap: {ZenCoreMapLabel}";
 
