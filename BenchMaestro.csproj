@@ -8,14 +8,14 @@
     <StartupObject></StartupObject>
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <SignAssembly>false</SignAssembly>
-    <AssemblyVersion>1.0.7.0</AssemblyVersion>
+    <AssemblyVersion>1.0.8.0</AssemblyVersion>
     <Copyright>GPL 3.0</Copyright>
     <PackageProjectUrl>https://github.com/mann1x/BenchMaestro</PackageProjectUrl>
     <RepositoryUrl>https://github.com/mann1x/BenchMaestro</RepositoryUrl>
     <Description>CPU &amp; GPU Benchmarking and tools utility</Description>
     <Deterministic>false</Deterministic>
-    <FileVersion>1.0.7.0</FileVersion>
-    <Version>1.0.7</Version>
+    <FileVersion>1.0.8.0</FileVersion>
+    <Version>1.0.8</Version>
     <PackageIcon>BenchMaestro.ico</PackageIcon>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
     <PackageIconUrl />

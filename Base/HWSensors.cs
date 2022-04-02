@@ -355,6 +355,24 @@ namespace BenchMaestro
                 return -99999;
             }
         }
+        public static void SetValueOffset(this List<HWSensorItem> _sensors, HWSensorName _name, float? _offset)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        _sensor.ValueOffset = _offset;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor SetValueOffset Exception: {ex}");
+            }
+        }
+
         public static float? GetLastAvgMulti(this List<HWSensorItem> _sensors, HWSensorName _name)
         {
             try
@@ -377,6 +395,25 @@ namespace BenchMaestro
             {
                 Trace.WriteLine($"HWSensor GetLastAvgMulti Exception: {ex}");
                 return -99999;
+            }
+        }
+        public static float? GetOffset(this List<HWSensorItem> _sensors, HWSensorName _name)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        return _sensor.ValueOffset;
+                    }
+                }
+                return 0;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor GetOffset Exception: {ex}");
+                return 0;
             }
         }
 
@@ -476,6 +513,7 @@ namespace BenchMaestro
         {
             LibreLabel = "";
             LibreIdentifier = "";
+            ZenPTOffset = -1;
             Values = new();
         }
     }
@@ -490,7 +528,8 @@ namespace BenchMaestro
         public string LibreIdentifier { get; set; }
         public string ManualLibreLabel { get; set; }
         public string ManialLibreIdentifier { get; set; }
-        
+
+        public float? ValueOffset { get; set; }
         public int ZenPTOffset { get; set; }
         public int ZenMulti { get; set; }
 
@@ -513,6 +552,7 @@ namespace BenchMaestro
             LibreIdentifier = "";
             ZenPTOffset = 0;
             ZenMulti = 1;
+            ValueOffset = 0;
             Values = new();
 
             if (_values != HWSensorValues.Single)

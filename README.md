@@ -34,6 +34,13 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.8 Alpha
+    - New: Zen early support for 1000s CPU 
+    - New: Zen improved CO counts display with + for positive
+    - Fix: Zen CoreMap display fix
+    - Fix: Zen CPU details display fix
+    - Fix: Submit unknown Zen PowerTable
+    - Fix: Tentative fix for Alder Lake
 - v1.0.7 Alpha
     - New: Zen monitoring PBO PPT/TDC/EDC with Limits
     - New: Zen CoreMap display, shows if and which cores are burned

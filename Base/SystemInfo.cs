@@ -66,6 +66,7 @@ namespace BenchMaestro
 		public bool ZenCOb { get; set; }
 		public int[] ZenCO { get; set; }
 		public int[] ZenCoreMap { get; set; }
+		public string ZenCoreMapLabel { get; set; }
 		public int[] CPPCTags { get; set; }
 		public double WinMaxSize { get; set; }
 		public string ZenCOLabel { get; set; }
@@ -514,31 +515,52 @@ namespace BenchMaestro
 								Trace.WriteLine($"Failed SMU check for BoostClock: {status}");
 							}
 
-							uint ZenCCD_Fuse = Zen.ReadDword(381464U);
-							uint ZenCore_Fuse1 = Zen.ReadDword(805838232U);
-							uint ZenCore_Fuse2 = Zen.ReadDword(839392664U);
-							uint ZenCCD_Total = BitSlice(ZenCCD_Fuse, 22, 23);
+							uint ZenCCD_Fuse = Zen.ReadDword(0x5D218);
+							uint ZenCore_Fuse1 = Zen.ReadDword(0x30081D98);
+							uint ZenCore_Fuse2 = Zen.ReadDword(0x32081D98);
+							uint ZenCCDS_Total = BitSlice(ZenCCD_Fuse, 22, 23);
 							uint ZenCCD_Disabled = BitSlice(ZenCCD_Fuse, 30, 31);
 							uint ZenCCD1_Fuse = BitSlice(ZenCore_Fuse1, 0, 7);
 							uint ZenCCD2_Fuse = BitSlice(ZenCore_Fuse2, 0, 7);
-							uint ZenCore_Layout = ZenCCD1_Fuse | ZenCCD2_Fuse << 8 | 4294901760U;
+							uint ZenCore_Layout = ZenCCD1_Fuse | ZenCCD2_Fuse << 8 | 0xFFFF0000;
+							int ZenCores_per_ccd = (ZenCCD1_Fuse == 0 || ZenCCD2_Fuse == 0) ? 8 : 6;
+							int ZenCCD_Total = CountSetBits(ZenCCDS_Total);
 
 							uint cores_t = ZenCore_Layout;
 
-							int i = 0;
-							int j = 0;
+							Trace.WriteLine($"ZenCCD_Total {ZenCCD_Total}");
+							Trace.WriteLine($"ZenCore_Fuse1 {ZenCore_Fuse1:X}");
+							Trace.WriteLine($"ZenCore_Fuse2 {ZenCore_Fuse2:X}");
+							Trace.WriteLine($"ZenCCD_Disabled {ZenCCD_Disabled}");
+							Trace.WriteLine($"ZenCCD_Fuse {ZenCCD_Fuse:X}");
+							Trace.WriteLine($"ZenCCD1_Fuse {ZenCCD1_Fuse:X}");
+							Trace.WriteLine($"ZenCCD2_Fuse {ZenCCD2_Fuse:X}");
+							Trace.WriteLine($"ZenCore_Layout {ZenCore_Layout:X}");
+							Trace.WriteLine($"ZenCores_per_ccd {ZenCores_per_ccd}");
 
-							while (i < ZenCCD_Total * 8)
+
+							ZenCoreMap = new int[CountSetBits(~ZenCore_Layout)];
+
+							int last = ZenCCD_Total * 8;
+
+							for (int i = 0, k = 0; i < ZenCCD_Total * 8; cores_t = cores_t >> 1)
 							{
-								bool flag = (cores_t & 1U) == 0U;
-								if (flag)
+								ZenCoreMapLabel += (i == 0) ? "[" : (i % 8 != 0) ? "." : "";
+								if ((cores_t & 1) == 0)
 								{
-									ZenCoreMap[j++] = i;
+									ZenCoreMap[k++] = i;
+									ZenCoreMapLabel += $"{i}";
+								}
+								else
+								{
+									ZenCoreMapLabel += "x";
 								}
 								i++;
-								cores_t >>= 1;
+								ZenCoreMapLabel += (i % 8 == 0 && i != last) ? "][" : i == last ? "]" : "";
 							}
+
 							Trace.WriteLine($"ZenCoreMap: {string.Join(", ", ZenCoreMap)}");
+							Trace.WriteLine($"ZenCoreMapLabel: {ZenCoreMapLabel}");
 
 							ZenRefreshCO();
 
@@ -989,6 +1011,58 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+								}
+								else if (ZenPTVersion == 0x0 && ZenSMUVer == "25.86.0")
+								{
+									ZenPTKnown = true;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] Zen1");
+
+									int _maxcores = 8;
+
+									CPUSensorsSource = "Zen PowerTable";
+									HWMonitor.CPUSource = HWSensorSource.Zen;
+
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresC0, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Load, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresEffClocks, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Clock, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresStretch, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Clock, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUPPT, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Power, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUTDC, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Amperage, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUPPTLimit, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Percentage, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUTDCLimit, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Percentage, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CCD1L3Temp, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Temperature, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CCD2L3Temp, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Temperature, HWSensorSource.Zen));
+
+									ZenRefreshStatic(false);
+
+									App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
+									App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
+									App.hwsensors.InitZen(HWSensorName.CPUPPTLimit, -1, 1, false);
+									App.hwsensors.InitZen(HWSensorName.CPUTDCLimit, -1, 1, false);
+									App.hwsensors.InitZen(HWSensorName.CPUPower, 22);
+									int _vsoc = (int)Zen.powerTable.Table[45] == 0 ? 44 : 45;
+									App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
+									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 158);
+									App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 159);
+									App.hwsensors.InitZen(HWSensorName.CPUFSB, 66);
+									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
+									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
+									App.hwsensors.InitZen(HWSensorName.CPULoad, -1);
+
+									for (int _core = 1; _core <= CPUCores; ++_core)
+									{
+										int _coreoffset = _core - 1;
+										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 41 + _coreoffset, _core);
+										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 57 + _coreoffset, _core);
+										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 65 + _coreoffset, _core);
+										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 81 + _coreoffset, _core, 1000);
+										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 89 + _coreoffset, _core, 1000);
+										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
+										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 97 + _coreoffset, _core);
+									}
+									App.hwsensors.SetValueOffset(HWSensorName.CPUTemp, -20);
+									App.hwsensors.SetValueOffset(HWSensorName.CPUCoresTemps, -20);
 
 								}
 
@@ -1007,6 +1081,8 @@ namespace BenchMaestro
 									sw.WriteLine(sb.ToString());
 								}
 
+								ZenPTKnown = false;
+
 								if (!ZenPTKnown)
 								{
 									try
@@ -1015,7 +1091,7 @@ namespace BenchMaestro
 										string ZenPTBody = sb.ToString();
 
 										var client = new GitHubClient(new ProductHeaderValue("BenchMaestro"));
-										var issues = client.Issue.GetAllForRepository("BenchMaestro", "mann1x");
+										var issues = client.Issue.GetAllForRepository("mann1x", "BenchMaestro");
 										issues.Wait();
 										bool _newpt = true;
 										if (issues.IsCompleted)
@@ -1078,6 +1154,16 @@ namespace BenchMaestro
 
 			RefreshLabels();
 
+		}
+		static int CountSetBits(uint n)
+		{
+			uint count = 0;
+			while (n > 0)
+			{
+				count += n & 1;
+				n >>= 1;
+			}
+			return (int)count;
 		}
 		private uint BitSlice(uint arg, int start, int end)
 		{
@@ -1250,6 +1336,15 @@ namespace BenchMaestro
 				ZenVDDP = (int)(Zen.powerTable.Table[125] * 1000);
 				ZenVDDG = (int)(Zen.powerTable.Table[126] * 1000);
 			}
+			else if (ZenPTVersion == 0x0 && ZenSMUVer == "25.86.0")
+			{
+				ZenPPT = (int)Zen.powerTable.Table[0];
+				ZenTDC = (int)Zen.powerTable.Table[2];
+				ZenTHM = (int)Zen.powerTable.Table[4];
+				ZenFCLK = (int)Zen.powerTable.Table[33];
+				ZenUCLK = (int)Zen.powerTable.Table[33];
+				ZenMCLK = (int)Zen.powerTable.Table[33];
+			}
 			Trace.WriteLine($"ZenRefreshStatic done");
 			return true;
 		}
@@ -1283,7 +1378,7 @@ namespace BenchMaestro
 				}
 				for (int ic = 0; ic < CPUCores; ic++)
 				{
-					ZenCOLabel += String.Format("{0}#{1} ", ic, ZenCO[ic]);
+					ZenCOLabel += String.Format("{0}#{1} ", ic, ZenCO[ic].ToString("+#;-#;0"));
 					if (ic != CPUCores - 1) ZenCOLabel += ", ";
 				}
 				ZenCOb = true;
@@ -1300,34 +1395,32 @@ namespace BenchMaestro
 			if (HyperThreading) ProcessorsLabel += $" [Threads: {CPULogicalProcessors}]";
 			if (ZenStates)
 			{
-				CPULabel += $"\nPPT: {string.Format("{0:N0}W", ZenPPT)} TDC: {string.Format("{0:N0}A", ZenTDC)} EDC: {string.Format("{0:N0}A", ZenEDC)} Scalar: {ZenScalar}x THM: {string.Format("{0:N0}°C", ZenTHM)}";
-				CPULabel += $"\nMCLK/FCLK/UCLK: {ZenMCLK}/{ZenFCLK}/{ZenUCLK} MHz Boost Clock: {ZenBoost} MHz";
-				if (ZenVDDP > 0 || ZenVCCD > 0 || ZenVIOD > 0 || ZenVDDG > 0)
-				{
-					CPULabel += $"\n";
-					if (ZenVDDP > 0) CPULabel += $"VDDP: {ZenVDDP}mV ";
-					if (ZenVDDG > 0) CPULabel += $"VDDG: {ZenVDDG}mV ";
-					if (ZenVCCD > 0) CPULabel += $"VDDG CCD: {ZenVCCD}mV ";
-					if (ZenVIOD > 0) CPULabel += $"VDDG IOD: {ZenVIOD}mV ";
+				string _CPULabel = "";
+				if (ZenPPT > 0) _CPULabel += $"PPT: {string.Format("{0:N0}W", ZenPPT)} ";
+				if (ZenTDC > 0) _CPULabel += $"TDC: {string.Format("{0:N0}A", ZenTDC)} ";
+				if (ZenEDC > 0) _CPULabel += $"EDC: {string.Format("{0:N0}A", ZenEDC)} ";
+				if (ZenScalar > 0) _CPULabel += $"Scalar: {ZenScalar}x ";
+				if (ZenTHM > 0) _CPULabel += $"THM: {string.Format("{0:N0}°C", ZenTHM)} ";
 
-				}
-				string _coremap = "";
-				for (int c = 0; c < CPUCores; ++c)
-				{
-					for (int cm = c; cm <= ZenCoreMap[c]; ++cm)
-					{
-						if (cm == ZenCoreMap[c])
-						{
-							_coremap += c;
-						}
-						else
-						{
-							_coremap += "x";
-						}
-						if (c != CPUCores-1) _coremap += ".";
-					}
-				}
-				ProcessorsLabel += $"\nZen CoreMap: [{_coremap}]";
+				if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
+
+				_CPULabel = "";
+
+				if (ZenMCLK > 0 || ZenFCLK > 0 || ZenUCLK > 0) _CPULabel += $"MCLK/FCLK/UCLK: {ZenMCLK}/{ZenFCLK}/{ZenUCLK} ";
+				if (ZenBoost > 0) _CPULabel += $"Boost Clock: {ZenBoost} MHz ";
+
+				if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
+
+				_CPULabel = "";
+
+				if (ZenVDDP > 0) _CPULabel += $"VDDP: {ZenVDDP}mV ";
+				if (ZenVDDG > 0) _CPULabel += $"VDDG: {ZenVDDG}mV ";
+				if (ZenVCCD > 0) _CPULabel += $"VDDG CCD: {ZenVCCD}mV ";
+				if (ZenVIOD > 0) _CPULabel += $"VDDG IOD: {ZenVIOD}mV ";
+
+				if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
+
+				ProcessorsLabel += $"\nZen CoreMap: {ZenCoreMapLabel}";
 
 			}
 			OnChange("CPULabel");

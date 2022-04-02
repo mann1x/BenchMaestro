@@ -9,6 +9,7 @@ using System.Timers;
 using System.Diagnostics;
 using System.IO;
 using ZenStates.Core;
+using System.Text.RegularExpressions;
 
 namespace BenchMaestro
 {
@@ -315,106 +316,129 @@ namespace BenchMaestro
         public static void CheckSensor(IHardware hardware, ISensor sensor)
         {
 
-            //string _subhardware = "NULL";
-            //if (subhardware != null) _subhardware = subhardware.Identifier.ToString();
-
-            string line = $"Name: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
-            Trace.WriteLine($"\tLibre Checking Sensor {line} HW={hardware.Identifier}");
-
-            if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Temperature && sensor.Name == "CPU" && BoardSource == HWSensorSource.Libre)
+            try
             {
-                App.hwsensors.InitLibre(HWSensorName.CPUMBTemp, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU MB Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");               
+                //string _subhardware = "NULL";
+                //if (subhardware != null) _subhardware = subhardware.Identifier.ToString();
+
+                string line = $"Name: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
+                Trace.WriteLine($"\tLibre Checking Sensor {line} HW={hardware.Identifier}");
+
+                if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Temperature && sensor.Name == "CPU" && BoardSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUMBTemp, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU MB Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name.StartsWith("Core (Tctl/Tdie)") && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUTemp, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPULoad, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU Load Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Power && sensor.Name == "Package" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUPower, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU Power Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Voltage && sensor.Name == "Core (SVI2 TFN)" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUVoltage, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Voltage && sensor.Name == "SoC (SVI2 TFN)" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.SOCVoltage, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU SOC Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name == "CCD1 (Tdie)" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CCD1Temp, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU CCD1 Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name == "CCD2 (Tdie)" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CCD2Temp, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU CCD2 Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name == "CCDs Average (Tdie)" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CCDSTemp, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU CCDs Average Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Clock && sensor.Name == "Bus Speed" && CPUSource == HWSensorSource.Libre)
+                {
+                    App.hwsensors.InitLibre(HWSensorName.CPUFSB, sensor.Identifier.ToString(), sensor.Name);
+                    Trace.WriteLine($"Libre CPU FSB Clock Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                }
+
+                if (sensor.SensorType == SensorType.Clock && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
+                {
+                    Match match = Regex.Match(sensor.Name, @"Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        string _core = match.Groups[1].Value;
+                        Trace.WriteLine($"Libre CPU Cores Clocks #{_core}");
+                        int _index = Int32.Parse(_core);
+                        App.hwsensors.InitLibreMulti(HWSensorName.CPUCoresClocks, hardware.Identifier.ToString(), "Cores Clock", _index, sensor.Identifier.ToString(), sensor.Name);
+                        Trace.WriteLine($"Libre CPU Cores Clocks #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                    }
+                }
+
+                if (sensor.SensorType == SensorType.Power && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
+                {
+                    Match match = Regex.Match(sensor.Name, @"Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        string _core = match.Groups[1].Value;
+                        Trace.WriteLine($"Libre CPU Cores Power #{_core}");
+                        int _index = Int32.Parse(_core);
+                        App.hwsensors.InitLibreMulti(HWSensorName.CPUCoresPower, hardware.Identifier.ToString(), "CPU Cores Power", _index, sensor.Identifier.ToString(), sensor.Name);
+                        Trace.WriteLine($"Libre CPU Cores Power #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                    }
+                }
+
+                if (sensor.SensorType == SensorType.Voltage && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
+                {
+                    Match match = Regex.Match(sensor.Name, @"Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        string _core = match.Groups[1].Value;
+                        Trace.WriteLine($"Libre CPU Cores Voltage #{_core}");
+                        int _index = Int32.Parse(_core);
+                        App.hwsensors.InitLibreMulti(HWSensorName.CPUCoresVoltages, hardware.Identifier.ToString(), "CPU Cores Voltage", _index, sensor.Identifier.ToString(), sensor.Name);
+                        Trace.WriteLine($"Libre CPU Cores Voltage #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                    }
+                }
+
+                if (sensor.SensorType == SensorType.Load && sensor.Name.StartsWith("CPU Core #") && CPUSource == HWSensorSource.Libre)
+                {
+                    Match match = Regex.Match(sensor.Name, @"CPU Core #(?<cpu>\d+).*$", RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        string _cpu = match.Groups[1].Value;
+                        Trace.WriteLine($"Libre CPU Cores Load #{_cpu}");
+                        int _index = Int32.Parse(_cpu);
+                        App.hwsensors.InitLibreMulti(HWSensorName.CPULogicalsLoad, hardware.Identifier.ToString(), "CPU Cores Load", _index, sensor.Identifier.ToString(), sensor.Name);
+                        Trace.WriteLine($"Libre CPU Cores Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                    }
+                }
             }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name.StartsWith("Core (Tctl/Tdie)") && CPUSource == HWSensorSource.Libre)
+            catch (Exception ex)
             {
-                App.hwsensors.InitLibre(HWSensorName.CPUTemp, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Load && sensor.Name == "CPU Total" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.CPULoad, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Load Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Power && sensor.Name == "Package" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.CPUPower, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Power Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Voltage && sensor.Name == "Core (SVI2 TFN)" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.CPUVoltage, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Voltage && sensor.Name == "SoC (SVI2 TFN)" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.SOCVoltage, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU SOC Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name == "CCD1 (Tdie)" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.CCD1Temp, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU CCD1 Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name == "CCD2 (Tdie)" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.CCD2Temp, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU CCD2 Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && sensor.Name == "CCDs Average (Tdie)" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.CCDSTemp, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU CCDs Average Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Clock && sensor.Name == "Bus Speed" && CPUSource == HWSensorSource.Libre)
-            {
-                App.hwsensors.InitLibre(HWSensorName.CPUFSB, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU FSB Clock Sensor added {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (sensor.SensorType == SensorType.Clock && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
-            {
-                string _indexstr = sensor.Name[6..];
-                Trace.WriteLine($"Libre CPU Cores Clocks #{_indexstr}");
-                int _index = Int32.Parse(_indexstr);
-                App.hwsensors.InitLibreMulti(HWSensorName.CPUCoresClocks, hardware.Identifier.ToString(), "Cores Clock", _index, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Cores Clocks #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (sensor.SensorType == SensorType.Power && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
-            {
-                string _indexstr = sensor.Name[6..^5];
-                Trace.WriteLine($"Libre CPU Cores Power #{_indexstr}");
-                int _index = Int32.Parse(_indexstr);
-                App.hwsensors.InitLibreMulti(HWSensorName.CPUCoresPower, hardware.Identifier.ToString(), "CPU Cores Power", _index, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Cores Power #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (sensor.SensorType == SensorType.Voltage && sensor.Name.StartsWith("Core #") && CPUSource == HWSensorSource.Libre)
-            {
-                string _indexstr = sensor.Name[6..^3];
-                Trace.WriteLine($"Libre CPU Cores Voltage #{_indexstr}");
-                int _index = Int32.Parse(_indexstr);
-                App.hwsensors.InitLibreMulti(HWSensorName.CPUCoresVoltages, hardware.Identifier.ToString(), "CPU Cores Voltage", _index, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Cores Voltage #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
-            }
-
-            if (sensor.SensorType == SensorType.Load && sensor.Name.StartsWith("CPU Core #") && CPUSource == HWSensorSource.Libre)
-            {
-                string _indexstr = sensor.Name[10..];
-                Trace.WriteLine($"Libre CPU Cores Load #{_indexstr}");                
-                int _index = Int32.Parse(_indexstr);
-                App.hwsensors.InitLibreMulti(HWSensorName.CPULogicalsLoad, hardware.Identifier.ToString(), "CPU Cores Load", _index, sensor.Identifier.ToString(), sensor.Name);
-                Trace.WriteLine($"Libre CPU Cores Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                Trace.WriteLine($"Libre CheckSensor Exception: {ex}");
             }
 
         }
@@ -483,8 +507,8 @@ namespace BenchMaestro
 
                     Trace.WriteLine($"GET STATS FOR {App.CurrentRun.RunCores.Count} CORES");
 
-                    App.CurrentRun.CPUMaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CPUTemp);
-                    App.CurrentRun.CPUAvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CPUTemp);
+                    App.CurrentRun.CPUMaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CPUTemp) + App.hwsensors.GetOffset(HWSensorName.CPUTemp));
+                    App.CurrentRun.CPUAvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CPUTemp) + App.hwsensors.GetOffset(HWSensorName.CPUTemp));
                     Trace.WriteLine($"CPU AVG TEMP {App.CurrentRun.CPUAvgTemp} MAX {App.CurrentRun.CPUMaxTemp}");
 
                     App.CurrentRun.CPUMaxPower = (double)App.hwsensors.GetMax(HWSensorName.CPUPower);
@@ -607,8 +631,8 @@ namespace BenchMaestro
 
                         if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresTemps))
                         {
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresTemps, _core);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresTemps, _core);
+                            _sensoravg = (double)(App.hwsensors.GetAvg(HWSensorName.CPUCoresTemps, _core) + App.hwsensors.GetOffset(HWSensorName.CPUCoresTemps));
+                            _sensormax = (double)(App.hwsensors.GetMax(HWSensorName.CPUCoresTemps, _core) + App.hwsensors.GetOffset(HWSensorName.CPUCoresTemps));
                             if (_bold)
                             {
                                 if (_coresmaxt < _sensormax && _sensormax > -99999) _coresmaxt = _sensormax;

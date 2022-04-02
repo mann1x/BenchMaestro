@@ -50,7 +50,7 @@ namespace BenchMaestro
         }
 
         public static readonly DependencyProperty WinTitleProperty =
-            DependencyProperty.Register("WinTitle", typeof(string), typeof(MainWindow), new UIPropertyMetadata($"BenchMaestro-{Benchname}"));
+            DependencyProperty.Register("WinTitle", typeof(string), typeof(MainWindow), new UIPropertyMetadata($"BenchMaestro-{App.version}-{Benchname}"));
         public MainWindow()
         {
             InitializeComponent();

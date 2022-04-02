@@ -52,7 +52,7 @@ namespace BenchMaestro
 
         // Using a DependencyProperty as the backing store for MyTitle.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty WinTitleProperty =
-            DependencyProperty.Register("WinTitle", typeof(string), typeof(CPUMINERAVX2SHAWindow), new UIPropertyMetadata($"BenchMaestro-{Benchname}"));
+            DependencyProperty.Register("WinTitle", typeof(string), typeof(CPUMINERAVX2SHAWindow), new UIPropertyMetadata($"BenchMaestro-{App.version}-{Benchname}"));
         public CPUMINERAVX2SHAWindow()
         {
             InitializeComponent();
