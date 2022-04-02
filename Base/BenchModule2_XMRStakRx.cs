@@ -51,7 +51,7 @@ namespace BenchMaestro
         }
 
 
-        public static (bool, string, double, string, string) ParseLogLine(string _line)
+        public static (bool, string, float?, string, string) ParseLogLine(string _line)
         {
             Trace.WriteLine($"BENCH LINE=={_line}");
             if (_line.Contains("invalid config"))
@@ -90,10 +90,9 @@ namespace BenchMaestro
 
                 if (score.Length > 0 && scoreunit.Length > 0)
                 {
-                    score = score.Replace(".", ",");
-                    Trace.WriteLine($"LogLine End Result: {score} {scoreunit}");
-                    double dscore = Convert.ToDouble(score);
-                    return (true, "END", dscore, scoreunit, "");
+                    float? fscore = float.Parse(score, CultureInfo.InvariantCulture.NumberFormat);
+                    Trace.WriteLine($"LogLine End Result: {score} {scoreunit} fscore: {fscore}");
+                    return (true, "END", fscore, scoreunit, "");
                 }
                 else
                 {
@@ -141,7 +140,7 @@ namespace BenchMaestro
 
                 bool parseStatus = true;
                 string parseMsg = "";
-                double parseDouble = 0;
+                float? parseFloat = 0;
                 string parseString1 = "";
                 string parseString2 = "";
 
@@ -168,6 +167,7 @@ namespace BenchMaestro
                 App.BenchIterations = threads.Count();
                 App.IterationPretime = App.GetIdleStableTime();
                 App.IterationRuntime = App.GetRuntime(Benchname);
+                int _runtime = App.GetRuntime(Benchname);
                 App.IterationPostime = 5;
                 BenchCurrentIteration = 0;
 
@@ -188,7 +188,7 @@ namespace BenchMaestro
                     App.CurrentRun = _scoreRun;
 
                     _scoreRun.ClearRun();
-                    _scoreRun.Runtime = App.IterationRuntime;
+                    _scoreRun.Runtime = _runtime;
 
                     UpdateProgress(-1);
 
@@ -414,7 +414,7 @@ namespace BenchMaestro
 
                     parseStatus = true;
                     parseMsg = "";
-                    parseDouble = 0;
+                    parseFloat = 0;
                     parseString1 = "";
                     parseString2 = "";
                     App.benchrunning = true;
@@ -431,7 +431,7 @@ namespace BenchMaestro
                         {
                             string _line = e.Data.ToString();
                             App.CurrentRun.RunLog += _line;
-                            (parseStatus, parseMsg, parseDouble, parseString1, parseString2) = ParseLogLine(_line);
+                            (parseStatus, parseMsg, parseFloat, parseString1, parseString2) = ParseLogLine(_line);
 
                             if (!parseStatus)
                             {
@@ -458,7 +458,7 @@ namespace BenchMaestro
                                     TimeSpan _runtimespan = DateTime.Now - App.IterationRuntimeTS;
                                     App.IterationRuntime = (int)_runtimespan.TotalSeconds;
                                     App.IterationPostimeTS = DateTime.Now;
-                                    _scoreRun.Score = parseDouble;
+                                    _scoreRun.Score = parseFloat;
                                     _scoreRun.ScoreUnit = parseString1;
                                     UpdateScore("");
                                     UpdateMainStatus("Benchmark finished");

@@ -181,8 +181,9 @@ namespace BenchMaestro
                         if (_value > 98)
                         {
                             int _core = ProcessorInfo.PhysicalCore(i);
-                            Trace.WriteLine($"Test Stretch CPU={i} [{_core}]");
-                            if (App.hwsensors.IsAny(HWSensorName.CPUCoresClocks,_core) && App.hwsensors.IsAny(HWSensorName.CPUCoresEffClocks, _core))
+                            float? _c0 = App.hwsensors.GetValue(HWSensorName.CPUCoresC0, _core);
+                            Trace.WriteLine($"Test Stretch CPU={i} [{_core}] C0={_c0}");
+                            if (App.hwsensors.IsAny(HWSensorName.CPUCoresClocks,_core) && App.hwsensors.IsAny(HWSensorName.CPUCoresEffClocks, _core) && _c0 >= 99)
                             {
                                 float? _stretch = App.hwsensors.GetValue(HWSensorName.CPUCoresClocks, _core) - App.hwsensors.GetValue(HWSensorName.CPUCoresEffClocks, _core);
                                 Trace.WriteLine($"Stretch {_stretch} MHz");
@@ -513,6 +514,18 @@ namespace BenchMaestro
                     App.CurrentRun.CPUFSBMax = (double)App.hwsensors.GetMax(HWSensorName.CPUFSB);
                     Trace.WriteLine($"CPU AVG FSB {App.CurrentRun.CPUFSBAvg} MAX {App.CurrentRun.CPUFSBMax}");
 
+                    App.CurrentRun.CPUPPTMax = (double)App.hwsensors.GetMax(HWSensorName.CPUPPT);
+                    App.CurrentRun.CPUPPTAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUPPT);
+                    Trace.WriteLine($"CPU AVG PPT {App.CurrentRun.CPUPPTAvg} MAX {App.CurrentRun.CPUPPTMax}");
+
+                    App.CurrentRun.CPUTDCMax = (double)App.hwsensors.GetMax(HWSensorName.CPUTDC);
+                    App.CurrentRun.CPUTDCAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUTDC);
+                    Trace.WriteLine($"CPU AVG TDC {App.CurrentRun.CPUTDCAvg} MAX {App.CurrentRun.CPUTDCMax}");
+
+                    App.CurrentRun.CPUEDCMax = (double)App.hwsensors.GetMax(HWSensorName.CPUEDC);
+                    App.CurrentRun.CPUEDCAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUEDC);
+                    Trace.WriteLine($"CPU AVG EDC {App.CurrentRun.CPUEDCAvg} MAX {App.CurrentRun.CPUEDCMax}");
+
                     double _sensoravg = 0;
                     double _sensormax = 0;
 
@@ -656,6 +669,23 @@ namespace BenchMaestro
                     {
                         App.CurrentRun.L3AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp);
                         App.CurrentRun.L3MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD1L3Temp);
+                    }
+
+                    if (App.systemInfo.ZenPPT > 0) {
+                        App.CurrentRun.CPUPPTAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUPPTAvg) / App.systemInfo.ZenPPT);
+                        App.CurrentRun.CPUPPTMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUPPTMax) / App.systemInfo.ZenPPT);
+                    }
+
+                    if (App.systemInfo.ZenTDC > 0)
+                    {
+                        App.CurrentRun.CPUTDCAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUTDCAvg) / App.systemInfo.ZenTDC);
+                        App.CurrentRun.CPUTDCMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUTDCMax) / App.systemInfo.ZenTDC);
+                    }
+
+                    if (App.systemInfo.ZenEDC > 0)
+                    {
+                        App.CurrentRun.CPUEDCAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUEDCAvg) / App.systemInfo.ZenEDC);
+                        App.CurrentRun.CPUEDCMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUEDCMax) / App.systemInfo.ZenEDC);
                     }
 
                     Trace.WriteLine($"MonitoringParsed");

@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -64,6 +65,8 @@ namespace BenchMaestro
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
+
+                    _row++;
                 }
 
                 if (App.CurrentRun.CoresAvgTemp > 0)
@@ -74,7 +77,6 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"Cores: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
@@ -91,6 +93,7 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
                 }
 
                 ScoreList.Children.Add(_gridblock);
@@ -103,7 +106,9 @@ namespace BenchMaestro
                 _gridblock = App.CurrentRun.CPUClockGrid;
                 _gridblock.VerticalAlignment = VerticalAlignment.Center;
 
-                if (App.CurrentRun.CPUAvgClock > 0)
+                _row = 0;
+
+                if (App.CurrentRun.CPUAvgClock > 0 && App.CurrentRun.CPUAvgEffClock < 0)
                 {
                     if (_gridblock.ColumnDefinitions.Count == 0)
                     {
@@ -116,7 +121,7 @@ namespace BenchMaestro
                     _tb1a.Inlines.Add(new Run { Text = $"{App.CurrentRun.CPUAvgClock}", FontSize = 17, FontWeight = FontWeights.Bold, Foreground = App.clockbrush1 });
                     _tb1a.Inlines.Add(new Run { Text = $" MHz", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = App.clockbrush1 });
                     Grid.SetColumn(_tb1a, 0);
-                    Grid.SetRow(_tb1a, 0);
+                    Grid.SetRow(_tb1a, _row);
                     _tb1a.TextAlignment = TextAlignment.Right;
                     _gridblock.Children.Add(_tb1a);
 
@@ -126,18 +131,19 @@ namespace BenchMaestro
                         _tb1b.Inlines.Add(new Run { Text = $" {avgchar} {Math.Round(App.CurrentRun.CPUAvgLoad, 2)}%", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
                         _tb1b.Inlines.Add(new Run { Text = " Load", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
                         Grid.SetColumn(_tb1b, 1);
-                        Grid.SetRow(_tb1b, 0);
+                        Grid.SetRow(_tb1b, _row);
                         _tb1b.TextAlignment = TextAlignment.Left;
                         _gridblock.Children.Add(_tb1b);
                     }
 
                     _gridblock.RowDefinitions.Add(new RowDefinition { });
+                    _row++;
 
                     TextBlock _tb2a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                     _tb2a.Inlines.Add(new Run { Text = $"{App.CurrentRun.CPUMaxClock}", FontSize = 12, FontWeight = FontWeights.Bold, Foreground = App.clockbrush2 });
                     _tb2a.Inlines.Add(new Run { Text = $" MHz {maxchar}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.clockbrush2 });
                     Grid.SetColumn(_tb2a, 0);
-                    Grid.SetRow(_tb2a, 1);
+                    Grid.SetRow(_tb2a, _row);
                     _tb2a.TextAlignment = TextAlignment.Right;
                     _gridblock.Children.Add(_tb2a);
 
@@ -146,7 +152,7 @@ namespace BenchMaestro
                         TextBlock _tb2b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                         _tb2b.Inlines.Add(new Run { Text = $" {Math.Round(App.CurrentRun.CPUMaxLoad, 1)} % Load", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
                         Grid.SetColumn(_tb2b, 1);
-                        Grid.SetRow(_tb2b, 1);
+                        Grid.SetRow(_tb2b, _row);
                         _tb2b.TextAlignment = TextAlignment.Left;
                         _gridblock.Children.Add(_tb2b);
                     }
@@ -162,44 +168,75 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"Eff: ", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = App.clockbrush1 });
-                    _tb1a.Inlines.Add(new Run { Text = $"{App.CurrentRun.CPUAvgEffClock}", FontSize = 17, FontWeight = FontWeights.Bold, Foreground = App.clockbrush1 });
+                    _tb1a.Inlines.Add(new Run { Text = $"{App.CurrentRun.CPUAvgEffClock} / {App.CurrentRun.CPUAvgClock}", FontSize = 17, FontWeight = FontWeights.Bold, Foreground = App.clockbrush1 });
                     _tb1a.Inlines.Add(new Run { Text = $" MHz", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = App.clockbrush1 });
                     Grid.SetColumn(_tb1a, 0);
-                    Grid.SetRow(_tb1a, 2);
+                    Grid.SetRow(_tb1a, _row);
                     _tb1a.TextAlignment = TextAlignment.Right;
                     _gridblock.Children.Add(_tb1a);
 
-                    _value = App.CurrentRun.CPUAvgStretch > -99999 ? App.CurrentRun.CPUAvgStretch.ToString() : "None";
-
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $" {avgchar} Stretch: {_value}", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
-                    if (_value != "None") _tb1b.Inlines.Add(new Run { Text = " MHz", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $" {avgchar} Eff/Ref", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.clockbrush1 });
+                    if (App.CurrentRun.CPUAvgLoad > 0)
+                    {
+                        _tb1b.Inlines.Add(new Run { Text = $" @ ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                        _tb1b.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUAvgLoad, 0)} %", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                        _tb1b.Inlines.Add(new Run { Text = $" Load", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    }
                     Grid.SetColumn(_tb1b, 1);
-                    Grid.SetRow(_tb1b, 2);
+                    Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
                     _gridblock.RowDefinitions.Add(new RowDefinition { });
+                    _row++;
 
                     TextBlock _tb2a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb2a.Inlines.Add(new Run { Text = $"Eff: ", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.clockbrush1 });
-                    _tb2a.Inlines.Add(new Run { Text = $"{App.CurrentRun.CPUMaxEffClock}", FontSize = 12, FontWeight = FontWeights.Bold, Foreground = App.clockbrush2 });
-                    _tb2a.Inlines.Add(new Run { Text = $" MHz {maxchar}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.clockbrush2 });
+                    _tb2a.Inlines.Add(new Run { Text = $"{App.CurrentRun.CPUMaxEffClock} / {App.CurrentRun.CPUMaxClock}", FontSize = 12, FontWeight = FontWeights.Bold, Foreground = App.clockbrush2 });
+                    _tb2a.Inlines.Add(new Run { Text = $" MHz", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.clockbrush2 });
                     Grid.SetColumn(_tb2a, 0);
-                    Grid.SetRow(_tb2a, 3);
+                    Grid.SetRow(_tb2a, _row);
                     _tb2a.TextAlignment = TextAlignment.Right;
                     _gridblock.Children.Add(_tb2a);
 
-                    _value = App.CurrentRun.CPUMaxStretch > -99999 ? App.CurrentRun.CPUMaxStretch.ToString() : "None";
-
                     TextBlock _tb2b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb2b.Inlines.Add(new Run { Text = $" Stretch: {_value}", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
-                    if (_value != "None") _tb2b.Inlines.Add(new Run { Text = " MHz", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tb2b.Inlines.Add(new Run { Text = $" {maxchar} Eff/Ref", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.clockbrush1 });
+                    if (App.CurrentRun.CPUMaxLoad > 0)
+                    {
+                        _tb2b.Inlines.Add(new Run { Text = $" @ ", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                        _tb2b.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUMaxLoad, 0)} %", FontSize = 9, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                        _tb2b.Inlines.Add(new Run { Text = $" Load", FontSize = 9, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    }
                     Grid.SetColumn(_tb2b, 1);
-                    Grid.SetRow(_tb2b, 3);
+                    Grid.SetRow(_tb2b, _row);
                     _tb2b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb2b);
+                    
+
+                    _gridblock.RowDefinitions.Add(new RowDefinition { });
+                    _row++;
+
+                    _value = App.CurrentRun.CPUAvgStretch > -99999 ? App.CurrentRun.CPUAvgStretch.ToString() : "None";
+
+                    TextBlock _tb3a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb3a.Inlines.Add(new Run { Text = $"{avgchar} Stretch: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tb3a.Inlines.Add(new Run { Text = $"{_value}", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    if (_value != "None") _tb3a.Inlines.Add(new Run { Text = " MHz", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    Grid.SetColumn(_tb3a, 0);
+                    Grid.SetRow(_tb3a, _row);
+                    _tb3a.TextAlignment = TextAlignment.Right;
+                    _gridblock.Children.Add(_tb3a);
+
+                    _value = App.CurrentRun.CPUMaxStretch > -99999 ? App.CurrentRun.CPUMaxStretch.ToString() : "None";
+
+                    TextBlock _tb3b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb3b.Inlines.Add(new Run { Text = $" {maxchar} Stretch: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    _tb3b.Inlines.Add(new Run { Text = $"{_value}", FontSize = 9, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    if (_value != "None") _tb3b.Inlines.Add(new Run { Text = " MHz", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    Grid.SetColumn(_tb3b, 1);
+                    Grid.SetRow(_tb3b, _row);
+                    _tb3b.TextAlignment = TextAlignment.Left;
+                    _gridblock.Children.Add(_tb3b);
                 }
 
                 ScoreList.Children.Add(_gridblock);
@@ -240,7 +277,7 @@ namespace BenchMaestro
                         _tb1b.TextAlignment = TextAlignment.Left;
                         _gridblock.Children.Add(_tb1b);
                     }
-
+                    _row++;
                 }
 
                 if (App.CurrentRun.CoresAvgPower > 0)
@@ -251,7 +288,6 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"Cores: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.powerbrush });
@@ -269,6 +305,7 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
                 }
 
                 if (App.CurrentRun.CPUAvgVoltage > 0)
@@ -279,7 +316,6 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"vCore: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
@@ -297,6 +333,7 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
                 }
 
                 if (App.CurrentRun.CoresAvgVoltage > 0)
@@ -307,7 +344,6 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"VIDs: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
@@ -325,6 +361,7 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
                 }
 
                 if (App.CurrentRun.SOCAvgVoltage > 0)
@@ -335,7 +372,6 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"SoC: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
@@ -352,6 +388,8 @@ namespace BenchMaestro
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
+
+                    _row++;
                 }
 
                 ScoreList.Children.Add(_gridblock);
@@ -389,6 +427,8 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
+
                 }
 
                 if (App.CurrentRun.CCD1AvgTemp > 0)
@@ -399,7 +439,6 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"CCD1: {Math.Round(App.CurrentRun.CCD1AvgTemp, 1)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
@@ -416,6 +455,7 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
                 }
 
                 if (App.CurrentRun.CCD2AvgTemp > 0)
@@ -426,7 +466,6 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"CCD2: {Math.Round(App.CurrentRun.CCD2AvgTemp, 1)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
@@ -443,6 +482,7 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
                 }
 
                 if (App.CurrentRun.L3AvgTemp > -999)
@@ -453,10 +493,9 @@ namespace BenchMaestro
                         _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                     }
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
-                    _row++;
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"L3: {Math.Round(App.CurrentRun.L3AvgTemp, 1)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $" L3: {Math.Round(App.CurrentRun.L3AvgTemp, 1)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     _tb1a.Inlines.Add(new Run { Text = $" {degrees} ", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -470,7 +509,114 @@ namespace BenchMaestro
                     _tb1b.TextAlignment = TextAlignment.Left;
                     _gridblock.Children.Add(_tb1b);
 
+                    _row++;
                 }
+
+                if (App.CurrentRun.CPUPPTAvg > -999)
+                {
+                    if (_gridblock.ColumnDefinitions.Count == 0)
+                    {
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength1 });
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                    }
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1a.Inlines.Add(new Run { Text = $" PPT: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUPPTAvg, 0)}W ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    if (App.CurrentRun.CPUPPTAvgLimit > 0)
+                    {
+                        _tb1a.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUPPTAvgLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    }
+                    Grid.SetColumn(_tb1a, 0);
+                    Grid.SetRow(_tb1a, _row);
+                    _tb1a.TextAlignment = TextAlignment.Right;
+                    _gridblock.Children.Add(_tb1a);
+
+                    TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUPPTMax, 0)}W", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    if (App.CurrentRun.CPUPPTMaxLimit > 0)
+                    {
+                        _tb1b.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUPPTMaxLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    }
+                    Grid.SetColumn(_tb1b, 1);
+                    Grid.SetRow(_tb1b, _row);
+                    _tb1b.TextAlignment = TextAlignment.Left;
+                    _gridblock.Children.Add(_tb1b);
+
+                    _row++;
+                }
+
+                if (App.CurrentRun.CPUTDCAvg > -999)
+                {
+                    if (_gridblock.ColumnDefinitions.Count == 0)
+                    {
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength1 });
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                    }
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1a.Inlines.Add(new Run { Text = $" TDC: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUTDCAvg, 0)}A ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    if (App.CurrentRun.CPUTDCAvgLimit > 0)
+                    {
+                        _tb1a.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUTDCAvgLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    }
+                    Grid.SetColumn(_tb1a, 0);
+                    Grid.SetRow(_tb1a, _row);
+                    _tb1a.TextAlignment = TextAlignment.Right;
+                    _gridblock.Children.Add(_tb1a);
+
+                    TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUTDCMax, 0)}A", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    if (App.CurrentRun.CPUTDCMaxLimit > 0)
+                    {
+                        _tb1b.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUTDCMaxLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    }
+                    Grid.SetColumn(_tb1b, 1);
+                    Grid.SetRow(_tb1b, _row);
+                    _tb1b.TextAlignment = TextAlignment.Left;
+                    _gridblock.Children.Add(_tb1b);
+
+                    _row++;
+                }
+
+                if (App.CurrentRun.CPUEDCAvg > -999)
+                {
+                    if (_gridblock.ColumnDefinitions.Count == 0)
+                    {
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength1 });
+                        _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
+                    }
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
+
+                    TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1a.Inlines.Add(new Run { Text = $" EDC: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUEDCAvg, 0)}A ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    if (App.CurrentRun.CPUEDCAvgLimit > 0)
+                    {
+                        _tb1a.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUEDCAvgLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    }
+                    Grid.SetColumn(_tb1a, 0);
+                    Grid.SetRow(_tb1a, _row);
+                    _tb1a.TextAlignment = TextAlignment.Right;
+                    _gridblock.Children.Add(_tb1a);
+
+                    TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
+                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUEDCMax, 0)}A", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    if (App.CurrentRun.CPUEDCMaxLimit > 0)
+                    {
+                        _tb1b.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUEDCMaxLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    }
+                    Grid.SetColumn(_tb1b, 1);
+                    Grid.SetRow(_tb1b, _row);
+                    _tb1b.TextAlignment = TextAlignment.Left;
+                    _gridblock.Children.Add(_tb1b);
+
+                    _row++;
+                }
+
 
                 ScoreList.Children.Add(_gridblock);
 

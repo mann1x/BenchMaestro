@@ -15,9 +15,9 @@ namespace BenchMaestro
         public string ProgressBar { get; set; }
         public Window RunWindow { get; set; }
         public TextBlock ScoreBox { get; set; }
-        public double Score { get; set; }
-        public double ScoreMax { get; set; }
-        public double[] Scores { get; set; }
+        public float? Score { get; set; }
+        public float? ScoreMax { get; set; }
+        public float?[] Scores { get; set; }
         public string ScoreUnit { get; set; }
         public Grid CPUClockGrid { get; set; }
         public TextBlock CPUClockBox { get; set; }
@@ -61,6 +61,18 @@ namespace BenchMaestro
         public double CCD2AvgTemp { get; set; }
         public double CCD2MaxTemp { get; set; }
         public double CCDSAvgTemp { get; set; }
+        public double CPUPPTMax { get; set; }
+        public double CPUPPTAvg { get; set; }
+        public int CPUPPTMaxLimit { get; set; }
+        public int CPUPPTAvgLimit { get; set; }
+        public double CPUTDCMax { get; set; }
+        public double CPUTDCAvg { get; set; }
+        public int CPUTDCMaxLimit { get; set; }
+        public int CPUTDCAvgLimit { get; set; }
+        public double CPUEDCMax { get; set; }
+        public double CPUEDCAvg { get; set; }
+        public int CPUEDCMaxLimit { get; set; }
+        public int CPUEDCAvgLimit { get; set; }
         public string CPUCores { get; set; }
         public Grid AdditionalGrid { get; set; }
         public TextBlock AdditionalBox { get; set; }
@@ -104,7 +116,7 @@ namespace BenchMaestro
             ProgressBar = "";
             Score = -999;
             ScoreMax = -999;
-            Scores = new double[] { };
+            Scores = new float?[] { };
             ScoreUnit = "";
             CPUMaxClock = -999;
             CPUAvgClock = -999;
@@ -138,9 +150,19 @@ namespace BenchMaestro
             CCD2AvgTemp = -999;
             CCD2MaxTemp = -999;
             CCDSAvgTemp = -999;
+            CPUPPTMax = -999;
+            CPUPPTAvg = -999;
+            CPUPPTMaxLimit = -999;
+            CPUPPTAvgLimit = -999;
+            CPUTDCMax = -999;
+            CPUTDCAvg = -999;
+            CPUTDCMaxLimit = -999;
+            CPUTDCAvgLimit = -999;
+            CPUEDCMax = -999;
+            CPUEDCAvg = -999;
+            CPUEDCMaxLimit = -999;
+            CPUEDCAvgLimit = -999;
             CPUCores = "";
-            CCD1MaxTemp = -999;
-            CCD1MaxTemp = -999;
             CPUCores = "";
             ExitStatus = "";
             ConfigTag = "";

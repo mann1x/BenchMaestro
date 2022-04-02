@@ -34,6 +34,16 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.7 Alpha
+    - New: Zen monitoring PBO PPT/TDC/EDC with Limits
+    - New: Zen CoreMap display, shows if and which cores are burned
+    - New: Zen clock stretching detection slightly improved with C0 state
+    - New: Better layout display for Effective/Reference/Stretching clocks
+    - Fix: Converion decimal issue which resulted in 10x scores
+    - Fix: Zen missing clocks and stats for samples with burned cores/ccds
+    - Fix: Fixed again switched VDDG CCD/IOD voltages
+    - Fix: Score grid row issues
+    - Fix: Wrong settings runtime shown
 - v1.0.6 Alpha
     - Fix: Switched VDDG CCD/IOD voltages
     - Fix: Reading CPPC tags from localized Windows

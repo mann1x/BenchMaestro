@@ -206,6 +206,7 @@ namespace BenchMaestro
             AutoUpdater.Synchronous = false;
             AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
             AutoUpdater.Start("https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json");
+         
         }
         private void AutoUpdaterOnParseUpdateInfoEvent(ParseUpdateInfoEventArgs args)
         {
@@ -560,6 +561,13 @@ namespace BenchMaestro
             {
                 MessageBox.Show(other.Message);
             }
+        }
+
+        private void btnRefreshInfo_Click(object sender, RoutedEventArgs e)
+        {
+            App.systemInfo.ZenRefreshStatic(true);
+            App.systemInfo.ZenRefreshCO();
+            App.systemInfo.RefreshLabels();
         }
     }
 }

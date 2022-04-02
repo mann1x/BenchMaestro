@@ -552,7 +552,8 @@ namespace BenchMaestro
         Power,
         Amperage,
         Load,
-        Temperature
+        Temperature,
+        Percentage
 
     }
     public enum HWSensorDevice
@@ -589,6 +590,9 @@ namespace BenchMaestro
         CPUPPT,
         CPUTDC,
         CPUEDC,
+        CPUPPTLimit,
+        CPUTDCLimit,
+        CPUEDCLimit,
         CCD1L3Temp,
         CCD2L3Temp,
     }

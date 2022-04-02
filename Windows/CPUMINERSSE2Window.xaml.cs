@@ -318,7 +318,7 @@ namespace BenchMaestro
                 _textblock.Text = "";
                 if (_score.Length == 0)
                 {
-                    _score = $"{Math.Round(App.CurrentRun.Score, 2)}";
+                    _score = $"{Math.Round((decimal)App.CurrentRun.Score, 2)}";
                     _textblock.Inlines.Add(new Run { Text = $"{_score}", FontSize = 20, FontWeight = FontWeights.Bold, Foreground = Brushes.Green });
                     _textblock.Inlines.Add(new Run { Text = $"  {App.CurrentRun.ScoreUnit}", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = Brushes.Black });
                 }
