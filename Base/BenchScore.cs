@@ -48,6 +48,7 @@ namespace BenchMaestro
         public double CPUMaxTemp { get; set; }
         public double CPUAvgTemp { get; set; }
         public Grid DetailsGrid { get; set; }
+        public Expander DetailsExpander { get; set; }
         public StackPanel DetailsPanel { get; set; }
         public StackPanel DetailsPPanel { get; set; }
         public TextBlock DetailsBox { get; set; }

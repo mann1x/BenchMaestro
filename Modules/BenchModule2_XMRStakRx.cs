@@ -14,9 +14,9 @@ using System.Windows.Documents;
 
 namespace BenchMaestro
 {
-    //CPUMINER
+    //XMRSTAKRX
     using Module1 = BenchModule1;
-    class BenchModule2_CpuMiner
+    class BenchModule2_XMRStakRx
     {
         public static void UpdateProgress2(int value, ProgressBar ProgressBar)
         {
@@ -48,13 +48,6 @@ namespace BenchMaestro
             RunSettingsLabel.Visibility = Visibility.Visible;
             RunSettingsBlock.Inlines.Clear();
             if (App.CurrentRun.Runtime > 0) RunSettingsBlock.Inlines.Add(new Run { Text = $"Runtime {App.CurrentRun.Runtime} seconds" });
-            if (App.CurrentRun.Algo.Length > 0)
-            {
-                RunSettingsBlock.Inlines.Add(new LineBreak());
-                RunSettingsBlock.Inlines.Add(new Run { Text = $"Algo: {App.CurrentRun.Algo} with: {App.CurrentRun.AlgoFeatures} using: {App.CurrentRun.Features}" });
-                RunSettingsBlock.Inlines.Add(new LineBreak());
-                RunSettingsBlock.Inlines.Add(new Run { Text = $"Features CPU: {App.CurrentRun.CPUFeatures} SW: {App.CurrentRun.SWFeatures}" });
-            }
         }
 
 
@@ -65,41 +58,14 @@ namespace BenchMaestro
             {
                 return (false, "CONFIG", 0, "", "");
             }
-            string cpufeat_pattern = @"^CPU features: (?<cpufeatures>.*)";
-            string algofeat_pattern = @"^Algo features: (?<algofeatures>.*)";
-            string swfeat_pattern = @"^SW features: (?<swfeatures>.*)";
-            string feat_pattern = @"^Starting miner with (?<features>.*)...";
-            string start_pattern = @"^\[.*\] \d+ of \d+ miner threads started using '(?<algo>.*)' algorithm";
-            string end_pattern = @"^\[.*\] Benchmark: (?<score>.*) (?<scoreunit>.*)";
+            string start_pattern = @"^\[.*\] : Start a (?<seconds>.*) second benchmark...";
+            string end_pattern = @"^\[.*\] : Benchmark Total: (?<score>.*) (?<scoreunit>.*)";
+
             Regex start_rgx = new Regex(start_pattern, RegexOptions.Multiline);
             Match start_m = start_rgx.Match(_line);
             if (start_m.Success)
             {
                 return (true, "START", 0, start_m.Groups[1].Value, "");
-            }
-            Regex feat_rgx = new Regex(feat_pattern, RegexOptions.Multiline);
-            Match feat_m = feat_rgx.Match(_line);
-            if (feat_m.Success)
-            {
-                return (true, "FEATURES", 0, feat_m.Groups[1].Value, "");
-            }
-            Regex cpufeat_rgx = new Regex(cpufeat_pattern, RegexOptions.Multiline);
-            Match cpufeat_m = cpufeat_rgx.Match(_line);
-            if (cpufeat_m.Success)
-            {
-                return (true, "CPUFEATURES", 0, cpufeat_m.Groups[1].Value, "");
-            }
-            Regex swfeat_rgx = new Regex(swfeat_pattern, RegexOptions.Multiline);
-            Match swfeat_m = swfeat_rgx.Match(_line);
-            if (swfeat_m.Success)
-            {
-                return (true, "SWFEATURES", 0, swfeat_m.Groups[1].Value, "");
-            }
-            Regex algofeat_rgx = new Regex(algofeat_pattern, RegexOptions.Multiline);
-            Match algofeat_m = algofeat_rgx.Match(_line);
-            if (algofeat_m.Success)
-            {
-                return (true, "ALGOFEATURES", 0, algofeat_m.Groups[1].Value, "");
             }
             Regex end_rgx = new Regex(end_pattern, RegexOptions.Multiline);
             Match end_m = end_rgx.Match(_line);
@@ -238,50 +204,55 @@ namespace BenchMaestro
                     HWMonitor.MonitoringStarted = false;
                     HWMonitor.MonitoringStopped = false;
 
+                    string path = @".\xmrstakrx_cpu.txt";
+                    if (!File.Exists(path)) File.Delete(path);
+
                     string CPPCOrder = String.Join(", ", CPPC);
 
                     Trace.WriteLine($"CPPC: {CPPCOrder}");
 
-
-                    int _cpu = 0;
-                    int bitMask = 0;
-
-                    for (int i = 0; i < _thrds; i++)
+                    using (StreamWriter sw = File.CreateText(path))
                     {
-                        int _cppcidx = i;
+                        sw.WriteLine("\"cpu_threads_conf\" :");
+                        sw.WriteLine("[");
 
-                        if (i > CPUCores - 1) _cppcidx = i - CPUCores;
+                        int _cpu = 0;
 
-                        int _core = CPPC[_cppcidx] + 1;
-
-                        if (App.systemInfo.HyperThreading)
+                        for (int i = 0; i < _thrds; i++)
                         {
-                            _cpu = i < CPUCores ? CPPC[_cppcidx] * 2 : (CPPC[_cppcidx] * 2) + 1;
+                            int _cppcidx = i;
+
+                            if (i > CPUCores - 1) _cppcidx = i - CPUCores;
+
+                            int _core = CPPC[_cppcidx] + 1;
+
+                            if (App.systemInfo.HyperThreading)
+                            {
+                                _cpu = i < CPUCores ? CPPC[_cppcidx] * 2 : (CPPC[_cppcidx] * 2) + 1;
+                            }
+                            else
+                            {
+                                _cpu = CPPC[i];
+                                if (!_scoreRun.RunCores.Contains(_cpu)) _scoreRun.RunCores.Add(_cpu);
+                            }
+
+
+                            int _cpu1 = _cpu + 1;
+
+                            if (!_scoreRun.RunCores.Contains(_core)) _scoreRun.RunCores.Add(_core);
+                            if (!_scoreRun.RunLogicals.Contains(_cpu1)) _scoreRun.RunLogicals.Add(_cpu1);
+
+                            sw.WriteLine($"{{ \"low_power_mode\" : false, \"affine_to_cpu\" : {_cpu} }},");
+                            Trace.WriteLine($"Affinity (0 based) : {_cpu} (1): {_cpu1}");
+
                         }
-                        else
-                        {
-                            _cpu = CPPC[i];
-                            if (!_scoreRun.RunCores.Contains(_cpu)) _scoreRun.RunCores.Add(_cpu);
-                        }
-
-                        int _cpu1 = _cpu + 1;
-
-                        if (!_scoreRun.RunCores.Contains(_core)) _scoreRun.RunCores.Add(_core);
-                        if (!_scoreRun.RunLogicals.Contains(_cpu1)) _scoreRun.RunLogicals.Add(_cpu1);
-
-                        bitMask |= 1 << (_cpu);
-
-                        Trace.WriteLine($"BitMask {bitMask}");
-                        Trace.WriteLine($"Affinity (0 based) : {_cpu} (1): {_cpu1}");
-
+                        sw.WriteLine("]");
                     }
 
                     Trace.WriteLine($"RunCores: {string.Join(", ", _scoreRun.RunCores.ToArray())}");
                     Trace.WriteLine($"RunLogicals: {string.Join(", ", _scoreRun.RunLogicals.ToArray())}");
 
-                    string _args = BenchArgs.Replace("###runtime###", App.GetRuntime(Benchname).ToString());
-                    _args = _args.Replace("###threads###", _thrds.ToString());
-                    _args = _args.Replace("###affinity###", "0x" + bitMask.ToString("X8"));
+                    string _args = BenchArgs.Replace("###runtime###", App.CurrentRun.Runtime.ToString());
 
                     App.BenchProc = new Process
                     {
@@ -354,7 +325,7 @@ namespace BenchMaestro
                                     throw new OperationCanceledException();
                                 }
                                 UpdateProgress(-1);
-                                Trace.WriteLine($"Sleeping for waiting static {HWMonitor.IdleStaticWait} ms");
+                                Trace.WriteLine($"Seelping for staticwait");
                                 Thread.Sleep(100);
                             }
                             IamIdling = true;
@@ -390,8 +361,12 @@ namespace BenchMaestro
                                 Trace.WriteLine($"Check idling temp higher the absolute minimum: {HWMonitor.IdleCurrentCPUTemp}");
                             }
                             TimeSpan _idlestable = DateTime.Now - TSIdleUpdated;
-                            Trace.WriteLine($"Waiting for idling CPU temperature: {HWMonitor.IdleCurrentCPUTemp} °C, still {Math.Round(IdleStableTime - _idlestable.TotalSeconds),0} seconds before start");
-                            UpdateMainStatus($"Waiting for CPU idling : {HWMonitor.IdleCurrentCPUTemp} °C @ {HWMonitor.IdleCurrentCPULoad}% load, {Math.Round(IdleStableTime - _idlestable.TotalSeconds),0} seconds to start");
+                            TimeSpan _idleruntime = DateTime.Now - TSIdleStart;
+                            int _stillseconds = IdleStableTime - (int)_idlestable.TotalSeconds;
+                            int _tilltimeoutseconds = IdleStartTimeout - (int)_idleruntime.TotalSeconds;
+                            if (_stillseconds > _tilltimeoutseconds) _stillseconds = _tilltimeoutseconds;
+                            Trace.WriteLine($"Waiting for idling CPU temperature: {HWMonitor.IdleCurrentCPUTemp}°C, still {_stillseconds} seconds before start till={_tilltimeoutseconds}");
+                            UpdateMainStatus($"Waiting for CPU idling : {HWMonitor.IdleCurrentCPUTemp}°C @ {HWMonitor.IdleCurrentCPULoad}% load, {_stillseconds} seconds to start");
                             if (_idlestable.TotalSeconds > IdleStableTime)
                             {
                                 _scoreRun.StartedTemp = HWMonitor.IdleCurrentCPUTemp;
@@ -480,32 +455,6 @@ namespace BenchMaestro
                                     UpdateScore("Running...");
                                     UpdateMainStatus($"Benchmark {_thrds}t running...");
                                     Trace.WriteLine("Benchmark START");
-                                    App.CurrentRun.Algo = parseString1.Trim();
-                                    UpdateRunSettings();
-                                    parseMsg = "";
-                                }
-                                if (parseMsg == "FEATURES")
-                                {
-                                    Trace.WriteLine($"Features: {parseString1}");
-                                    App.CurrentRun.Features = parseString1.Trim();
-                                    parseMsg = "";
-                                }
-                                if (parseMsg == "CPUFEATURES")
-                                {
-                                    Trace.WriteLine($"CPU Features: {parseString1}");
-                                    App.CurrentRun.CPUFeatures = parseString1.Trim();
-                                    parseMsg = "";
-                                }
-                                if (parseMsg == "SWFEATURES")
-                                {
-                                    Trace.WriteLine($"SW Features: {parseString1}");
-                                    App.CurrentRun.SWFeatures = parseString1.Trim();
-                                    parseMsg = "";
-                                }
-                                if (parseMsg == "ALGOFEATURES")
-                                {
-                                    Trace.WriteLine($"ALGO Features: {parseString1}");
-                                    App.CurrentRun.AlgoFeatures = parseString1.Trim();
                                     parseMsg = "";
                                 }
                                 if (parseMsg == "END")

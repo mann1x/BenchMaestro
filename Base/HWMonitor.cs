@@ -509,6 +509,381 @@ namespace BenchMaestro
 
         }
 
+        public static void DumpHWM(bool _debug)
+        {
+            if (_debug || _dumphwm && !MonitoringIdle)
+            {
+
+                StringBuilder sb = new StringBuilder();
+                string line = "";
+
+                foreach (IHardware hardware in computer.Hardware)
+                {
+                    line = $"Hardware: {hardware.Name} identifier: {hardware.Identifier}";
+                    Trace.WriteLine(line);
+                    if (_dumphwm) sb.AppendLine(line);
+
+                    foreach (IHardware subhardware in hardware.SubHardware)
+                    {
+                        line = $"\tSubhardware: {subhardware.Name} identifier: {subhardware.Identifier}";
+                        Trace.WriteLine(line);
+                        if (_dumphwm) sb.AppendLine(line);
+
+                        foreach (ISensor sensor in subhardware.Sensors)
+                        {
+                            line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
+                            Trace.WriteLine(line);
+                            if (_dumphwm) sb.AppendLine(line);
+
+                            foreach (IParameter parameter in sensor.Parameters)
+                            {
+                                line = $"\t\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
+                                Trace.WriteLine(line);
+                                if (_dumphwm) sb.AppendLine(line);
+                            }
+                        }
+                    }
+
+                    foreach (ISensor sensor in hardware.Sensors)
+                    {
+                        line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
+                        Trace.WriteLine(line);
+                        if (_dumphwm) sb.AppendLine(line);
+
+                        foreach (IParameter parameter in sensor.Parameters)
+                        {
+                            line = $"\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
+                            Trace.WriteLine(line);
+                            if (_dumphwm) sb.AppendLine(line);
+                        }
+                    }
+                }
+                if (_dumphwm)
+                {
+                    string path = @".\dumphwm.txt";
+                    if (!File.Exists(path)) File.Delete(path);
+
+                    using (StreamWriter sw = File.CreateText(path))
+                    {
+                        sw.WriteLine(sb.ToString());
+                    }
+                }
+                _dumphwm = false;
+            }
+
+            if ((_debug || _dumphwmidle) && MonitoringIdle)
+            {
+
+                StringBuilder sb = new StringBuilder();
+                string line = "";
+
+                foreach (IHardware hardware in computer.Hardware)
+                {
+                    line = $"Hardware: {hardware.Name} identifier: {hardware.Identifier}";
+                    Trace.WriteLine(line);
+                    if (_dumphwmidle) sb.AppendLine(line);
+
+                    foreach (IHardware subhardware in hardware.SubHardware)
+                    {
+                        line = $"\tSubhardware: {subhardware.Name} identifier: {subhardware.Identifier}";
+                        Trace.WriteLine(line);
+                        if (_dumphwmidle) sb.AppendLine(line);
+
+                        foreach (ISensor sensor in subhardware.Sensors)
+                        {
+                            line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
+                            Trace.WriteLine(line);
+                            if (_dumphwmidle) sb.AppendLine(line);
+
+                            foreach (IParameter parameter in sensor.Parameters)
+                            {
+                                line = $"\t\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
+                                Trace.WriteLine(line);
+                                if (_dumphwmidle) sb.AppendLine(line);
+                            }
+                        }
+                    }
+
+                    foreach (ISensor sensor in hardware.Sensors)
+                    {
+                        line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
+                        Trace.WriteLine(line);
+                        if (_dumphwmidle) sb.AppendLine(line);
+
+                        foreach (IParameter parameter in sensor.Parameters)
+                        {
+                            line = $"\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
+                            Trace.WriteLine(line);
+                            if (_dumphwmidle) sb.AppendLine(line);
+                        }
+                    }
+                }
+                if (_dumphwmidle)
+                {
+                    string path = @".\dumphwmidle.txt";
+                    if (!File.Exists(path)) File.Delete(path);
+
+                    using (StreamWriter sw = File.CreateText(path))
+                    {
+                        sw.WriteLine(sb.ToString());
+                    }
+                }
+                _dumphwmidle = false;
+            }
+
+        }
+
+        public static void ParseMonitoring()
+        {
+            TimeSpan _deltarun = MonitoringStart - MonitoringEnd;
+
+            Thread.Sleep(250);
+
+            double _coresmaxt = -99999;
+            double _coresavgt = -99999;
+            double _coresmaxc = -99999;
+            double _coresavgc = -99999;
+            double _coresmaxec = -99999;
+            double _coresavgec = -99999;
+            double _coresmaxst = -99999;
+            double _coresavgst = -99999;
+            double _coresmaxv = -99999;
+            double _coresavgv = -99999;
+            double _coresmaxp = -99999;
+            double _coresavgp = -99999;
+            double _coresmaxl = -99999;
+            double _coresavgl = -99999;
+
+            Trace.WriteLine($"GET STATS FOR {App.CurrentRun.RunCores.Count} CORES");
+
+            App.CurrentRun.CPUMaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CPUTemp) + App.hwsensors.GetOffset(HWSensorName.CPUTemp));
+            App.CurrentRun.CPUAvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CPUTemp) + App.hwsensors.GetOffset(HWSensorName.CPUTemp));
+            Trace.WriteLine($"CPU AVG TEMP {App.CurrentRun.CPUAvgTemp} MAX {App.CurrentRun.CPUMaxTemp}");
+
+            App.CurrentRun.CPUMaxPower = (double)App.hwsensors.GetMax(HWSensorName.CPUPower);
+            App.CurrentRun.CPUAvgPower = (double)App.hwsensors.GetAvg(HWSensorName.CPUPower);
+            Trace.WriteLine($"CPU AVG POWER {App.CurrentRun.CPUAvgPower} MAX {App.CurrentRun.CPUMaxPower}");
+
+            App.CurrentRun.CPUMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUVoltage);
+            App.CurrentRun.CPUAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUVoltage);
+            Trace.WriteLine($"CPU AVG VOLTAGE {App.CurrentRun.CPUAvgVoltage} MAX {App.CurrentRun.CPUMaxVoltage}");
+
+            App.CurrentRun.CPUIOMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUIOVoltage);
+            App.CurrentRun.CPUIOAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUIOVoltage);
+            Trace.WriteLine($"CPUIO AVG VOLTAGE {App.CurrentRun.CPUIOAvgVoltage} MAX {App.CurrentRun.CPUIOMaxVoltage}");
+
+            App.CurrentRun.CPUSAMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUSAVoltage);
+            App.CurrentRun.CPUSAAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUSAVoltage);
+            Trace.WriteLine($"CPUSA AVG VOLTAGE {App.CurrentRun.CPUSAAvgVoltage} MAX {App.CurrentRun.CPUSAMaxVoltage}");
+
+            App.CurrentRun.SOCMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.SOCVoltage);
+            App.CurrentRun.SOCAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.SOCVoltage);
+            Trace.WriteLine($"CPU AVG SOC {App.CurrentRun.SOCAvgVoltage} MAX {App.CurrentRun.SOCMaxVoltage}");
+
+            App.CurrentRun.CCD1MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD1Temp);
+            App.CurrentRun.CCD1AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1Temp);
+            Trace.WriteLine($"CPU AVG CCD1 {App.CurrentRun.CCD1AvgTemp} MAX {App.CurrentRun.CCD1MaxTemp}");
+
+            App.CurrentRun.CCD2MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD2Temp);
+            App.CurrentRun.CCD2AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD2Temp);
+            Trace.WriteLine($"CPU AVG CCD2 {App.CurrentRun.CCD2AvgTemp} MAX {App.CurrentRun.CCD2MaxTemp}");
+
+            App.CurrentRun.CCDSAvgTemp = (double)App.hwsensors.GetMax(HWSensorName.CCDSTemp);
+            Trace.WriteLine($"CPU AVG CCDS {App.CurrentRun.CCDSAvgTemp}");
+
+            App.CurrentRun.CPUFSBAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUFSB);
+            App.CurrentRun.CPUFSBMax = (double)App.hwsensors.GetMax(HWSensorName.CPUFSB);
+            Trace.WriteLine($"CPU AVG FSB {App.CurrentRun.CPUFSBAvg} MAX {App.CurrentRun.CPUFSBMax}");
+
+            App.CurrentRun.CPUPPTMax = (double)App.hwsensors.GetMax(HWSensorName.CPUPPT);
+            App.CurrentRun.CPUPPTAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUPPT);
+            Trace.WriteLine($"CPU AVG PPT {App.CurrentRun.CPUPPTAvg} MAX {App.CurrentRun.CPUPPTMax}");
+
+            App.CurrentRun.CPUTDCMax = (double)App.hwsensors.GetMax(HWSensorName.CPUTDC);
+            App.CurrentRun.CPUTDCAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUTDC);
+            Trace.WriteLine($"CPU AVG TDC {App.CurrentRun.CPUTDCAvg} MAX {App.CurrentRun.CPUTDCMax}");
+
+            App.CurrentRun.CPUEDCMax = (double)App.hwsensors.GetMax(HWSensorName.CPUEDC);
+            App.CurrentRun.CPUEDCAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUEDC);
+            Trace.WriteLine($"CPU AVG EDC {App.CurrentRun.CPUEDCAvg} MAX {App.CurrentRun.CPUEDCMax}");
+
+            double _sensoravg = 0;
+            double _sensormax = 0;
+
+            for (int _core1 = 1; _core1 <= App.systemInfo.CPUCores; ++_core1)
+            {
+                bool _bold = false;
+                if (App.CurrentRun.RunCores.Contains(_core1)) _bold = true;
+
+                int _core = _core1 - 1;
+
+                if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresClocks))
+                {
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresClocks, _core);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresClocks, _core);
+                    if (_bold)
+                    {
+                        if (_coresmaxc < _sensormax && _sensormax > -99999) _coresmaxc = _sensormax;
+                        _coresavgc = _coresavgc == -99999 ? _sensoravg : (_coresavgc + _sensoravg) / 2;
+                    }
+                    App.CurrentRun.CPUCoresClocks.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                    Trace.WriteLine($"[Core {_core} Clock Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                }
+
+                if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresEffClocks))
+                {
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresEffClocks, _core);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresEffClocks, _core);
+                    if (_bold)
+                    {
+                        if (_coresmaxec < _sensormax && _sensormax > -99999) _coresmaxec = _sensormax;
+                        _coresavgec = _coresavgec == -99999 ? _sensoravg : (_coresavgec + _sensoravg) / 2;
+                    }
+                    App.CurrentRun.CPUCoresEffClocks.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                    Trace.WriteLine($"[Core {_core} Eff Clock Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresStretch, _core);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresStretch, _core);
+                    if (_bold)
+                    {
+                        if (_coresmaxst < _sensormax && _sensormax > -99999) _coresmaxst = _sensormax;
+                        if (_sensoravg > -99999) _coresavgst = _coresavgst == -99999 ? _sensoravg : (_coresavgst + _sensoravg) / 2;
+                    }
+                    App.CurrentRun.CPUCoresStretch.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                    Trace.WriteLine($"[Core {_core} Stretch Clock Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                }
+
+                if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresPower))
+                {
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresPower, _core);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresPower, _core);
+                    if (_bold)
+                    {
+                        if (_coresmaxp < _sensormax && _sensormax > -99999) _coresmaxp = _sensormax;
+                        _coresavgp = _coresavgp == -99999 ? _sensoravg : (_coresavgp + _sensoravg) / 2;
+                    }
+                    App.CurrentRun.CPUCoresPower.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 1), (float)Math.Round(_sensormax, 1), _bold, "0.0"));
+                    Trace.WriteLine($"[Core {_core} Power Avg: {Math.Round(_sensoravg, 1)} Max: {Math.Round(_sensormax, 1)} ]");
+                }
+
+                if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresVoltages))
+                {
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresVoltages, _core);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresVoltages, _core);
+                    if (_bold)
+                    {
+                        if (_coresmaxv < _sensormax && _sensormax > -99999) _coresmaxv = _sensormax;
+                        _coresavgv = _coresavgv == -99999 ? _coresavgv : (_coresavgv + _sensoravg) / 2;
+                    }
+                    App.CurrentRun.CPUCoresVoltages.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 3), (float)Math.Round(_sensormax, 3), _bold, "0.000"));
+                    Trace.WriteLine($"[Core {_core} VID Avg: {Math.Round(_sensoravg, 3)} Max: {Math.Round(_sensormax, 3)}]");
+                }
+
+                if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresC0))
+                {
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresC0, _core);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresC0, _core);
+                    App.CurrentRun.CPUCoresC0.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                    Trace.WriteLine($"[Core {_core} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                }
+
+                if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresTemps))
+                {
+                    _sensoravg = (double)(App.hwsensors.GetAvg(HWSensorName.CPUCoresTemps, _core) + App.hwsensors.GetOffset(HWSensorName.CPUCoresTemps));
+                    _sensormax = (double)(App.hwsensors.GetMax(HWSensorName.CPUCoresTemps, _core) + App.hwsensors.GetOffset(HWSensorName.CPUCoresTemps));
+                    if (_bold)
+                    {
+                        if (_coresmaxt < _sensormax && _sensormax > -99999) _coresmaxt = _sensormax;
+                        _coresavgt = _coresavgt == -99999 ? _coresavgt : (_coresavgt + _sensoravg) / 2;
+                    }
+                    App.CurrentRun.CPUCoresTemps.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0.0"));
+                    Trace.WriteLine($"[Core {_core} Temp Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                }
+            }
+
+            if (App.hwsensors.IsEnabled(HWSensorName.CPULogicalsLoad))
+            {
+                for (int _cpu = 1; _cpu <= App.systemInfo.CPULogicalProcessors; ++_cpu)
+                {
+                    bool _bold = false;
+                    if (App.CurrentRun.RunLogicals.Contains(_cpu)) _bold = true;
+                    int _core = ProcessorInfo.PhysicalCore(_cpu - 1);
+                    int _thread = ProcessorInfo.ThreadID(_cpu - 1);
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPULogicalsLoad, _cpu - 1);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPULogicalsLoad, _cpu - 1);
+                    if (_bold)
+                    {
+                        if (_coresmaxl < _sensormax && _sensormax > -99999) _coresmaxl = _sensormax;
+                        _coresavgl = _coresavgl == -99999 ? _sensoravg : (_coresavgl + _sensoravg) / 2;
+                    }
+                    if (App.systemInfo.HyperThreading)
+                    {
+                        App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                        Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                    }
+                    else
+                    {
+                        App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                        Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                    }
+                }
+            }
+
+            App.CurrentRun.CoresAvgTemp = Math.Round(_coresavgt, 1);
+            App.CurrentRun.CoresMaxTemp = Math.Round(_coresmaxt, 1);
+
+            App.CurrentRun.CoresAvgPower = Math.Round(_coresavgp, 1);
+            App.CurrentRun.CoresMaxPower = Math.Round(_coresmaxp, 1);
+
+            App.CurrentRun.CPUAvgClock = Math.Round(_coresavgc, 0);
+            App.CurrentRun.CPUMaxClock = Math.Round(_coresmaxc, 0);
+
+            App.CurrentRun.CPUAvgEffClock = Math.Round(_coresavgec, 0);
+            App.CurrentRun.CPUMaxEffClock = Math.Round(_coresmaxec, 0);
+
+            App.CurrentRun.CPUAvgStretch = Math.Round(_coresavgst, 0);
+            App.CurrentRun.CPUMaxStretch = Math.Round(_coresmaxst, 0);
+
+            App.CurrentRun.CPUAvgLoad = Math.Round(_coresavgl, 0);
+            App.CurrentRun.CPUMaxLoad = Math.Round(_coresmaxl, 0);
+
+            App.CurrentRun.CoresAvgVoltage = _coresavgv;
+            App.CurrentRun.CoresMaxVoltage = _coresmaxv;
+
+            if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp) && App.hwsensors.IsAny(HWSensorName.CCD2L3Temp))
+            {
+                App.CurrentRun.L3AvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp) + App.hwsensors.GetAvg(HWSensorName.CCD2L3Temp)) / 2;
+                App.CurrentRun.L3MaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CCD1L3Temp) + App.hwsensors.GetMax(HWSensorName.CCD2L3Temp)) / 2;
+            }
+            else if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp))
+            {
+                App.CurrentRun.L3AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp);
+                App.CurrentRun.L3MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD1L3Temp);
+            }
+
+            if (App.systemInfo.ZenPPT > 0)
+            {
+                App.CurrentRun.CPUPPTAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUPPTAvg) / App.systemInfo.ZenPPT);
+                App.CurrentRun.CPUPPTMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUPPTMax) / App.systemInfo.ZenPPT);
+            }
+
+            if (App.systemInfo.ZenTDC > 0)
+            {
+                App.CurrentRun.CPUTDCAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUTDCAvg) / App.systemInfo.ZenTDC);
+                App.CurrentRun.CPUTDCMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUTDCMax) / App.systemInfo.ZenTDC);
+            }
+
+            if (App.systemInfo.ZenEDC > 0)
+            {
+                App.CurrentRun.CPUEDCAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUEDCAvg) / App.systemInfo.ZenEDC);
+                App.CurrentRun.CPUEDCMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUEDCMax) / App.systemInfo.ZenEDC);
+            }
+
+            Trace.WriteLine($"MonitoringParsed");
+            MonitoringParsed = true;
+            MonitoringPause = false;
+            MonitoringPooling = MonitoringPoolingSlow;
+        }
         public static void OnHWM(object sender, ElapsedEventArgs args)
         {
             try
@@ -552,252 +927,15 @@ namespace BenchMaestro
 
                 if (MonitoringStopped && !MonitoringParsed)
                 {
-                    TimeSpan _deltarun = MonitoringStart - MonitoringEnd;
-
-                    Thread.Sleep(1000);
-
-                    double _coresmaxt = -99999;
-                    double _coresavgt = -99999;
-                    double _coresmaxc = -99999;
-                    double _coresavgc = -99999;
-                    double _coresmaxec = -99999;
-                    double _coresavgec = -99999;
-                    double _coresmaxst = -99999;
-                    double _coresavgst = -99999;
-                    double _coresmaxv = -99999;
-                    double _coresavgv = -99999;
-                    double _coresmaxp = -99999;
-                    double _coresavgp = -99999;
-                    double _coresmaxl = -99999;
-                    double _coresavgl = -99999;
-
-                    Trace.WriteLine($"GET STATS FOR {App.CurrentRun.RunCores.Count} CORES");
-
-                    App.CurrentRun.CPUMaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CPUTemp) + App.hwsensors.GetOffset(HWSensorName.CPUTemp));
-                    App.CurrentRun.CPUAvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CPUTemp) + App.hwsensors.GetOffset(HWSensorName.CPUTemp));
-                    Trace.WriteLine($"CPU AVG TEMP {App.CurrentRun.CPUAvgTemp} MAX {App.CurrentRun.CPUMaxTemp}");
-
-                    App.CurrentRun.CPUMaxPower = (double)App.hwsensors.GetMax(HWSensorName.CPUPower);
-                    App.CurrentRun.CPUAvgPower = (double)App.hwsensors.GetAvg(HWSensorName.CPUPower);
-                    Trace.WriteLine($"CPU AVG POWER {App.CurrentRun.CPUAvgPower} MAX {App.CurrentRun.CPUMaxPower}");
-
-                    App.CurrentRun.CPUMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUVoltage);
-                    App.CurrentRun.CPUAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUVoltage);
-                    Trace.WriteLine($"CPU AVG VOLTAGE {App.CurrentRun.CPUAvgVoltage} MAX {App.CurrentRun.CPUMaxVoltage}");
-
-                    App.CurrentRun.CPUIOMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUIOVoltage);
-                    App.CurrentRun.CPUIOAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUIOVoltage);
-                    Trace.WriteLine($"CPUIO AVG VOLTAGE {App.CurrentRun.CPUIOAvgVoltage} MAX {App.CurrentRun.CPUIOMaxVoltage}");
-
-                    App.CurrentRun.CPUSAMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.CPUSAVoltage);
-                    App.CurrentRun.CPUSAAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.CPUSAVoltage);
-                    Trace.WriteLine($"CPUSA AVG VOLTAGE {App.CurrentRun.CPUSAAvgVoltage} MAX {App.CurrentRun.CPUSAMaxVoltage}");
-
-                    App.CurrentRun.SOCMaxVoltage = (double)App.hwsensors.GetMax(HWSensorName.SOCVoltage);
-                    App.CurrentRun.SOCAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.SOCVoltage);
-                    Trace.WriteLine($"CPU AVG SOC {App.CurrentRun.SOCAvgVoltage} MAX {App.CurrentRun.SOCMaxVoltage}");
-
-                    App.CurrentRun.CCD1MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD1Temp);
-                    App.CurrentRun.CCD1AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1Temp);
-                    Trace.WriteLine($"CPU AVG CCD1 {App.CurrentRun.CCD1AvgTemp} MAX {App.CurrentRun.CCD1MaxTemp}");
-
-                    App.CurrentRun.CCD2MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD2Temp);
-                    App.CurrentRun.CCD2AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD2Temp);
-                    Trace.WriteLine($"CPU AVG CCD2 {App.CurrentRun.CCD2AvgTemp} MAX {App.CurrentRun.CCD2MaxTemp}");
-
-                    App.CurrentRun.CCDSAvgTemp = (double)App.hwsensors.GetMax(HWSensorName.CCDSTemp);
-                    Trace.WriteLine($"CPU AVG CCDS {App.CurrentRun.CCDSAvgTemp}");
-
-                    App.CurrentRun.CPUFSBAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUFSB);
-                    App.CurrentRun.CPUFSBMax = (double)App.hwsensors.GetMax(HWSensorName.CPUFSB);
-                    Trace.WriteLine($"CPU AVG FSB {App.CurrentRun.CPUFSBAvg} MAX {App.CurrentRun.CPUFSBMax}");
-
-                    App.CurrentRun.CPUPPTMax = (double)App.hwsensors.GetMax(HWSensorName.CPUPPT);
-                    App.CurrentRun.CPUPPTAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUPPT);
-                    Trace.WriteLine($"CPU AVG PPT {App.CurrentRun.CPUPPTAvg} MAX {App.CurrentRun.CPUPPTMax}");
-
-                    App.CurrentRun.CPUTDCMax = (double)App.hwsensors.GetMax(HWSensorName.CPUTDC);
-                    App.CurrentRun.CPUTDCAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUTDC);
-                    Trace.WriteLine($"CPU AVG TDC {App.CurrentRun.CPUTDCAvg} MAX {App.CurrentRun.CPUTDCMax}");
-
-                    App.CurrentRun.CPUEDCMax = (double)App.hwsensors.GetMax(HWSensorName.CPUEDC);
-                    App.CurrentRun.CPUEDCAvg = (double)App.hwsensors.GetAvg(HWSensorName.CPUEDC);
-                    Trace.WriteLine($"CPU AVG EDC {App.CurrentRun.CPUEDCAvg} MAX {App.CurrentRun.CPUEDCMax}");
-
-                    double _sensoravg = 0;
-                    double _sensormax = 0;
-
-                    for (int _core1 = 1; _core1 <= App.systemInfo.CPUCores; ++_core1)
+                    try
                     {
-                        bool _bold = false;
-                        if (App.CurrentRun.RunCores.Contains(_core1)) _bold = true;
-
-                        int _core = _core1 - 1;
-
-                        if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresClocks)) {
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresClocks, _core);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresClocks, _core);
-                            if (_bold)
-                            {
-                                if (_coresmaxc < _sensormax && _sensormax > -99999) _coresmaxc = _sensormax;
-                                _coresavgc = _coresavgc == -99999 ? _sensoravg : (_coresavgc + _sensoravg) / 2;
-                            }
-                            App.CurrentRun.CPUCoresClocks.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                            Trace.WriteLine($"[Core {_core} Clock Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                        }
-
-                        if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresEffClocks))
-                        {
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresEffClocks, _core);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresEffClocks, _core);
-                            if (_bold)
-                            {
-                                if (_coresmaxec < _sensormax && _sensormax > -99999) _coresmaxec = _sensormax;
-                                _coresavgec = _coresavgec == -99999 ? _sensoravg : (_coresavgec + _sensoravg) / 2;
-                            }
-                            App.CurrentRun.CPUCoresEffClocks.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                            Trace.WriteLine($"[Core {_core} Eff Clock Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresStretch, _core);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresStretch, _core);
-                            if (_bold)
-                            {
-                                if (_coresmaxst < _sensormax && _sensormax > -99999) _coresmaxst = _sensormax;
-                                if (_sensoravg > -99999) _coresavgst = _coresavgst == -99999 ? _sensoravg : (_coresavgst + _sensoravg) / 2;
-                            }
-                            App.CurrentRun.CPUCoresStretch.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                            Trace.WriteLine($"[Core {_core} Stretch Clock Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                        }
-
-                        if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresPower))
-                        {
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresPower, _core);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresPower, _core);
-                            if (_bold)
-                            {
-                                if (_coresmaxp < _sensormax && _sensormax > -99999) _coresmaxp = _sensormax;
-                                _coresavgp = _coresavgp == -99999 ? _sensoravg : (_coresavgp + _sensoravg) / 2;
-                            }
-                            App.CurrentRun.CPUCoresPower.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 1), (float)Math.Round(_sensormax, 1), _bold, "0.0"));
-                            Trace.WriteLine($"[Core {_core} Power Avg: {Math.Round(_sensoravg, 1)} Max: {Math.Round(_sensormax, 1)} ]");
-                        }
-
-                        if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresVoltages))
-                        {
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresVoltages, _core);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresVoltages, _core);
-                            if (_bold)
-                            {
-                                if (_coresmaxv < _sensormax && _sensormax > -99999) _coresmaxv = _sensormax;
-                                _coresavgv = _coresavgv == -99999 ? _coresavgv : (_coresavgv + _sensoravg) / 2;
-                            }
-                            App.CurrentRun.CPUCoresVoltages.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 3), (float)Math.Round(_sensormax, 3), _bold, "0.000"));
-                            Trace.WriteLine($"[Core {_core} VID Avg: {Math.Round(_sensoravg, 3)} Max: {Math.Round(_sensormax, 3)}]");
-                        }
-
-                        if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresC0))
-                        {
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPUCoresC0, _core);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPUCoresC0, _core);
-                            App.CurrentRun.CPUCoresC0.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                            Trace.WriteLine($"[Core {_core} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                        }
-
-                        if (App.hwsensors.IsEnabled(HWSensorName.CPUCoresTemps))
-                        {
-                            _sensoravg = (double)(App.hwsensors.GetAvg(HWSensorName.CPUCoresTemps, _core) + App.hwsensors.GetOffset(HWSensorName.CPUCoresTemps));
-                            _sensormax = (double)(App.hwsensors.GetMax(HWSensorName.CPUCoresTemps, _core) + App.hwsensors.GetOffset(HWSensorName.CPUCoresTemps));
-                            if (_bold)
-                            {
-                                if (_coresmaxt < _sensormax && _sensormax > -99999) _coresmaxt = _sensormax;
-                                _coresavgt = _coresavgt == -99999 ? _coresavgt : (_coresavgt + _sensoravg) / 2;
-                            }
-                            App.CurrentRun.CPUCoresTemps.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0.0"));
-                            Trace.WriteLine($"[Core {_core} Temp Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                        }
+                        ParseMonitoring();
                     }
-                    
-                    if (App.hwsensors.IsEnabled(HWSensorName.CPULogicalsLoad)) 
-                    { 
-                        for (int _cpu = 1; _cpu <= App.systemInfo.CPULogicalProcessors; ++_cpu)
-                        {
-                            bool _bold = false;
-                            if (App.CurrentRun.RunLogicals.Contains(_cpu)) _bold = true;
-                            int _core = ProcessorInfo.PhysicalCore(_cpu-1);
-                            int _thread = ProcessorInfo.ThreadID(_cpu - 1);
-                            _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPULogicalsLoad, _cpu - 1);
-                            _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPULogicalsLoad, _cpu - 1);
-                            if (_bold)
-                            {
-                                if (_coresmaxl < _sensormax && _sensormax > -99999) _coresmaxl = _sensormax;
-                                _coresavgl = _coresavgl == -99999 ? _sensoravg : (_coresavgl + _sensoravg) / 2;
-                            }
-                            if (App.systemInfo.HyperThreading)
-                            {
-                                App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                                Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                            }
-                            else
-                            {
-                                App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                                Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                            }
-                        }
-                    }
-
-                    App.CurrentRun.CoresAvgTemp = Math.Round(_coresavgt, 1);
-                    App.CurrentRun.CoresMaxTemp = Math.Round(_coresmaxt, 1);
-
-                    App.CurrentRun.CoresAvgPower = Math.Round(_coresavgp, 1);
-                    App.CurrentRun.CoresMaxPower = Math.Round(_coresmaxp, 1);
-
-                    App.CurrentRun.CPUAvgClock = Math.Round(_coresavgc, 0);
-                    App.CurrentRun.CPUMaxClock = Math.Round(_coresmaxc, 0);
-
-                    App.CurrentRun.CPUAvgEffClock = Math.Round(_coresavgec, 0);
-                    App.CurrentRun.CPUMaxEffClock = Math.Round(_coresmaxec, 0);
-
-                    App.CurrentRun.CPUAvgStretch = Math.Round(_coresavgst, 0);
-                    App.CurrentRun.CPUMaxStretch = Math.Round(_coresmaxst, 0);
-
-                    App.CurrentRun.CPUAvgLoad = Math.Round(_coresavgl, 0);
-                    App.CurrentRun.CPUMaxLoad = Math.Round(_coresmaxl, 0);
-
-                    App.CurrentRun.CoresAvgVoltage = _coresavgv;
-                    App.CurrentRun.CoresMaxVoltage = _coresmaxv;
-
-                    if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp) && App.hwsensors.IsAny(HWSensorName.CCD2L3Temp))
+                    catch (Exception ex)
                     {
-                        App.CurrentRun.L3AvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp) + App.hwsensors.GetAvg(HWSensorName.CCD2L3Temp)) / 2;
-                        App.CurrentRun.L3MaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CCD1L3Temp) + App.hwsensors.GetMax(HWSensorName.CCD2L3Temp)) / 2;
-                    }
-                    else if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp))
-                    {
-                        App.CurrentRun.L3AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp);
-                        App.CurrentRun.L3MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD1L3Temp);
+                        Trace.WriteLine($"HWM ParseMonitoring Exception: {ex}");
                     }
 
-                    if (App.systemInfo.ZenPPT > 0) {
-                        App.CurrentRun.CPUPPTAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUPPTAvg) / App.systemInfo.ZenPPT);
-                        App.CurrentRun.CPUPPTMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUPPTMax) / App.systemInfo.ZenPPT);
-                    }
-
-                    if (App.systemInfo.ZenTDC > 0)
-                    {
-                        App.CurrentRun.CPUTDCAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUTDCAvg) / App.systemInfo.ZenTDC);
-                        App.CurrentRun.CPUTDCMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUTDCMax) / App.systemInfo.ZenTDC);
-                    }
-
-                    if (App.systemInfo.ZenEDC > 0)
-                    {
-                        App.CurrentRun.CPUEDCAvgLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUEDCAvg) / App.systemInfo.ZenEDC);
-                        App.CurrentRun.CPUEDCMaxLimit = (int)Math.Round((double)(100 * App.CurrentRun.CPUEDCMax) / App.systemInfo.ZenEDC);
-                    }
-
-                    Trace.WriteLine($"MonitoringParsed");
-                    MonitoringParsed = true;
-                    MonitoringPause = false;
-                    MonitoringPooling = MonitoringPoolingSlow;                    
                 }
 
                 if (!MonitoringPause)
@@ -927,126 +1065,14 @@ namespace BenchMaestro
 
                 bool _debug = false;
 
-                if (_debug || _dumphwm && !MonitoringIdle)
+                try
                 {
-
-                    StringBuilder sb = new StringBuilder();
-                    string line = "";
-
-                    foreach (IHardware hardware in computer.Hardware)
-                    {
-                        line = $"Hardware: {hardware.Name} identifier: {hardware.Identifier}";
-                        Trace.WriteLine(line);
-                        if (_dumphwm) sb.AppendLine(line);
-
-                        foreach (IHardware subhardware in hardware.SubHardware)
-                        {
-                            line = $"\tSubhardware: {subhardware.Name} identifier: {subhardware.Identifier}";
-                            Trace.WriteLine(line);
-                            if (_dumphwm) sb.AppendLine(line);
-
-                            foreach (ISensor sensor in subhardware.Sensors)
-                            {
-                                line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
-                                Trace.WriteLine(line);
-                                if (_dumphwm) sb.AppendLine(line);
-
-                                foreach (IParameter parameter in sensor.Parameters)
-                                {
-                                    line = $"\t\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
-                                    Trace.WriteLine(line);
-                                    if (_dumphwm) sb.AppendLine(line);
-                                }
-                            }
-                        }
-
-                        foreach (ISensor sensor in hardware.Sensors)
-                        {
-                            line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
-                            Trace.WriteLine(line);
-                            if (_dumphwm) sb.AppendLine(line);
-
-                            foreach (IParameter parameter in sensor.Parameters)
-                            {
-                                line = $"\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
-                                Trace.WriteLine(line);
-                                if (_dumphwm) sb.AppendLine(line);
-                            }
-                        }
-                    }
-                    if (_dumphwm)
-                    {
-                        string path = @".\dumphwm.txt";
-                        if (!File.Exists(path)) File.Delete(path);
-
-                        using (StreamWriter sw = File.CreateText(path))
-                        {
-                            sw.WriteLine(sb.ToString());
-                        }
-                    }
-                    _dumphwm = false;
+                    DumpHWM(_debug);
                 }
-
-                if ((_debug || _dumphwmidle) && MonitoringIdle)
+                catch (Exception ex)
                 {
-
-                    StringBuilder sb = new StringBuilder();
-                    string line = "";
-
-                    foreach (IHardware hardware in computer.Hardware)
-                    {
-                        line = $"Hardware: {hardware.Name} identifier: {hardware.Identifier}";
-                        Trace.WriteLine(line);
-                        if (_dumphwmidle) sb.AppendLine(line);
-
-                        foreach (IHardware subhardware in hardware.SubHardware)
-                        {
-                            line = $"\tSubhardware: {subhardware.Name} identifier: {subhardware.Identifier}";
-                            Trace.WriteLine(line);
-                            if (_dumphwmidle) sb.AppendLine(line);
-
-                            foreach (ISensor sensor in subhardware.Sensors)
-                            {
-                                line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
-                                Trace.WriteLine(line);
-                                if (_dumphwmidle) sb.AppendLine(line);
-
-                                foreach (IParameter parameter in sensor.Parameters)
-                                {
-                                    line = $"\t\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
-                                    Trace.WriteLine(line);
-                                    if (_dumphwmidle) sb.AppendLine(line);
-                                }
-                            }
-                        }
-
-                        foreach (ISensor sensor in hardware.Sensors)
-                        {
-                            line = $"\tSensor: {sensor.Name}, value: {sensor.Value}, max: {sensor.Max}, min: {sensor.Min}, index: {sensor.Index}, control: {sensor.Control}, identifier: {sensor.Identifier}, type: {sensor.SensorType}";
-                            Trace.WriteLine(line);
-                            if (_dumphwmidle) sb.AppendLine(line);
-
-                            foreach (IParameter parameter in sensor.Parameters)
-                            {
-                                line = $"\t\tParameter: {parameter.Name}, value: {parameter.Value}, Sensor: {parameter.Sensor}, desc: {parameter.Description}";
-                                Trace.WriteLine(line);
-                                if (_dumphwmidle) sb.AppendLine(line);
-                            }
-                        }
-                    }
-                    if (_dumphwmidle)
-                    {
-                        string path = @".\dumphwmidle.txt";
-                        if (!File.Exists(path)) File.Delete(path);
-
-                        using (StreamWriter sw = File.CreateText(path))
-                        {
-                            sw.WriteLine(sb.ToString());
-                        }
-                    }
-                    _dumphwmidle = false;
+                    Trace.WriteLine($"HWM Monitoring DumpHWM Exception: {ex}");
                 }
-
 
             }
             catch (OperationCanceledException)

@@ -477,7 +477,8 @@ namespace BenchMaestro
 				ZenCOLabel = "";
 				ZenSMUVer = "N/A";
 				ZenPTVersion = 0;
-
+				ZenCoreMapLabel = "";
+				
 				CPUSensorsSource = "LibreHardwareMonitor";
 				HWMonitor.CPUSource = HWSensorSource.Libre;
 				HWMonitor.NewSensors();

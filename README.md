@@ -34,6 +34,11 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.12 Alpha
+    - Fix: Zen CO label not initialized causing crash at start with non AMD CPUs
+    - Fix: Missing BenchMaestro version in Window title
+    - Fix: Improved Bench Details Expanders handling
+    - Fix: Improved countdown in seconds for bench run
 - v1.0.11 Alpha
     - Add: CCD temperature monitoring for Zen via ZenCore
     - Add: Better clock stretching display

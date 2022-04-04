@@ -145,6 +145,7 @@ namespace BenchMaestro
                 Trace.WriteLine($"Saving Window Position {Properties.Settings.Default.Top} {Properties.Settings.Default.Left} {Properties.Settings.Default.Height} {Properties.Settings.Default.Width} {Properties.Settings.Default.Maximized}");
             }
         }
+
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj != null)
@@ -161,6 +162,22 @@ namespace BenchMaestro
                     {
                         yield return childOfChild;
                     }
+                }
+            }
+        }
+        public static IEnumerable<T> FindVisualParent<T>(DependencyObject depObj) where T : DependencyObject
+        {
+            if (depObj != null)
+            {
+                DependencyObject parent = VisualTreeHelper.GetParent(depObj);
+                if (parent != null && parent is T)
+                {
+                    yield return (T)parent;
+                }
+
+                foreach (T parentOfparent in FindVisualParent<T>(parent))
+                {
+                    yield return parentOfparent;
                 }
             }
         }

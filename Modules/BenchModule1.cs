@@ -1032,10 +1032,13 @@ namespace BenchMaestro
                 Expander _detailsexp = new Expander { Header = "Details", IsExpanded = false, FontSize = 14, Foreground = App.detailsbrush };
                 Grid.SetColumn(_detailsexp, _column);
                 Grid.SetRow(_detailsexp, _row);
+                _detailsexp.Collapsed += new RoutedEventHandler(ScoreExpanderHasCollapsed);
+                _detailsexp.Expanded += new RoutedEventHandler(ScoreExpanderHasExpanded);
                 _detailsexp.HorizontalAlignment = HorizontalAlignment.Stretch;
                 _detailsexp.VerticalAlignment = VerticalAlignment.Stretch;
                 _detailsexp.Margin = App.thickness;
                 _detailsexp.MinHeight = 30;
+                _detailsexp.SetBinding(FrameworkElement.HeightProperty, "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Window}}, Path=ActualHeight}");
 
                 StackPanel _detailspstack = new StackPanel { Margin = App.thickness, Background = App.boxbrush1 };
                 _detailspstack.HorizontalAlignment = HorizontalAlignment.Stretch;
@@ -1044,16 +1047,16 @@ namespace BenchMaestro
                 StackPanel _detailsstack = new StackPanel { Margin = App.thickness, Background = App.boxbrush1 };
                 _detailsstack.HorizontalAlignment = HorizontalAlignment.Center;
                 _detailsstack.Visibility = Visibility.Collapsed;
-                _detailsstack.SetBinding(FrameworkElement.HeightProperty, "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type ScrollViewer}}, Path=ActualHeight}");
+                _detailsstack.SetBinding(FrameworkElement.HeightProperty, "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type Expander}}, Path=ActualHeight}");
 
                 Grid _detailsgrid = new Grid { Margin = App.thickness };
                 _detailsgrid.HorizontalAlignment = HorizontalAlignment.Stretch;
                 _detailsgrid.VerticalAlignment = VerticalAlignment.Stretch;
                 _detailsgrid.Visibility = Visibility.Collapsed;
-                _detailsgrid.SetBinding(FrameworkElement.HeightProperty, "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type StackPanel}}, Path=ActualHeight}");
+                //_detailsgrid.SetBinding(FrameworkElement.HeightProperty, "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type StackPanel}}, Path=ActualHeight}");
                 _detailsgrid.ShowGridLines = false;
 
-                ScrollViewer _scroller = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Visible, HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden, MinHeight = 100 };
+                ScrollViewer _scroller = new ScrollViewer { VerticalScrollBarVisibility = ScrollBarVisibility.Auto, HorizontalScrollBarVisibility = ScrollBarVisibility.Hidden, MinHeight = 100 };
                 _scroller.Visibility = Visibility.Collapsed;
                 _scroller.Tag = "Details";
                 _scroller.SetBinding(FrameworkElement.HeightProperty, "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type StackPanel}}, Path=ActualHeight}");
@@ -1064,6 +1067,7 @@ namespace BenchMaestro
                 _details.TextWrapping = TextWrapping.Wrap;
                 _run.DetailsBox = _details;
 
+                _run.DetailsExpander = _detailsexp;
                 _run.DetailsPanel = _detailsstack;
                 _run.DetailsPPanel = _detailspstack;
                 _run.DetailsGrid = _detailsgrid;
@@ -1079,7 +1083,49 @@ namespace BenchMaestro
 
                 _column++;
             }
-
+        }
+        private static void ScoreExpanderHasCollapsed(object sender, RoutedEventArgs args)
+        {
+            Expander _sender = sender as Expander;
+            IEnumerable<Window> pwins = MainWindow.FindVisualParent<Window>(_sender);
+            Window pwin = pwins.FirstOrDefault();
+            IEnumerable<Expander> expanders = MainWindow.FindVisualChildren<Expander>(pwin);
+            foreach (Expander exp in expanders)
+            {
+                exp.IsExpanded = false;
+            }
+            pwin.SizeToContent = SizeToContent.Height;
+        }
+        private static void ScoreExpanderHasExpanded(object sender, RoutedEventArgs args)
+        {
+            Expander _sender = sender as Expander;
+            IEnumerable<Window> pwins = MainWindow.FindVisualParent<Window>(_sender);
+            Window pwin = pwins.FirstOrDefault();
+            IEnumerable<Expander> expanders = MainWindow.FindVisualChildren<Expander>(pwin);
+            foreach (Expander exp in expanders)
+            {
+                exp.IsExpanded = true;
+            }
+            IEnumerable<ScrollViewer> elements = MainWindow.FindVisualChildren<ScrollViewer>(_sender).Where(x => x.Tag != null && x.Tag.ToString().StartsWith("Details"));
+            if (elements.Any())
+            {
+                ScrollViewer sv = elements.FirstOrDefault();
+                double _scrollmh = pwin.MaxHeight - sv.TranslatePoint(new Point(0, 0), null).Y;
+                double _scrolldh = pwin.Height - sv.TranslatePoint(new Point(0, 0), null).Y;
+                double _scrollth = sv.TranslatePoint(new Point(0, 0), null).Y;
+                double _tsh = sv.ScrollableHeight + sv.ExtentHeight;
+                if (sv.Visibility == Visibility.Visible && _tsh < _scrollmh )
+                {
+                    sv.Height = _tsh - 8;
+                }
+                else
+                {
+                    sv.Height = _scrollmh - 8;
+                }
+                //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} dH={_scrolldh} tH={_scrollth}");
+                //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
+                //Trace.WriteLine($"ScVis {sv.ComputedVerticalScrollBarVisibility}");
+            }
         }
     }
 }
