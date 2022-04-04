@@ -14,6 +14,7 @@
                             ResizeMode="CanResize"
                             BorderBrush="{DynamicResource WindowBorderColor}"
                             SourceInitialized="Window_SourceInitialized"
+                            Loaded="MainWindow_Loaded"
                             SizeChanged="Window_SizeChanged"
                             Closing="Window_Closing" Visibility="Visible"
                             >

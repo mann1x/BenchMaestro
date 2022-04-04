@@ -24,15 +24,18 @@ using System.Reflection;
 using AutoUpdaterDotNET;
 using Newtonsoft.Json;
 
+
 namespace BenchMaestro
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
+    using WindowSettings = Properties.Settings;
     public partial class MainWindow
     {
         static string Benchname = "MainMenu";
         static bool InitUI = true;
+        static bool WinLoaded = false;
         
         XMRSTAKRXWindow XMRSTAKRXWin;
         CPUMINERSSE2Window CPUMINERSSE2Win;
@@ -54,8 +57,6 @@ namespace BenchMaestro
         public MainWindow()
         {
             InitializeComponent();
-            Loaded += MainWindow_Loaded;
-
         }
         private void TextBox_KeyEnterUpdate(object sender, KeyEventArgs e)
         {
@@ -70,7 +71,7 @@ namespace BenchMaestro
         }
         private void Window_SourceInitialized(object sender, EventArgs e)
         {
-            Trace.WriteLine($"SourceInit Window Initialized {Properties.Settings.Default.Initialized}");
+            Trace.WriteLine($"SourceInit Window Initialized {WindowSettings.Default.Initialized}");
             SizeToContent = SizeToContent.WidthAndHeight;
             SetValue(MinWidthProperty, Width);
             SetValue(MinHeightProperty, Height);
@@ -78,26 +79,21 @@ namespace BenchMaestro
             App.systemInfo.WinMaxSize = System.Windows.SystemParameters.WorkArea.Height;
 
 
-            if (Properties.Settings.Default.Initialized)
+            if (WindowSettings.Default.Initialized)
             {
-                Trace.WriteLine($"Restoring Window Position {Properties.Settings.Default.Top} {Properties.Settings.Default.Left} {Properties.Settings.Default.Height} {Properties.Settings.Default.Width} {Properties.Settings.Default.Maximized}");
+                Trace.WriteLine($"Restoring Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
 
                 WindowState = WindowState.Normal;
-                Top = Properties.Settings.Default.Top;
-                Left = Properties.Settings.Default.Left;
-                Height = Properties.Settings.Default.Height;
-                Width = Properties.Settings.Default.Width;
-                if (Properties.Settings.Default.Maximized)
+                Top = WindowSettings.Default.Top < SystemParameters.WorkArea.Top ? SystemParameters.WorkArea.Top : WindowSettings.Default.Top;
+                Left = WindowSettings.Default.Left < SystemParameters.WorkArea.Left ? SystemParameters.WorkArea.Left : WindowSettings.Default.Left;
+                Height = WindowSettings.Default.Height > SystemParameters.WorkArea.Height ? SystemParameters.WorkArea.Height : WindowSettings.Default.Height;
+                Width = WindowSettings.Default.Width > SystemParameters.WorkArea.Width ? SystemParameters.WorkArea.Width : WindowSettings.Default.Width;
+                if (WindowSettings.Default.Maximized)
                 {
                     WindowState = WindowState.Maximized;
                 }
-            } 
-        }
-
-        private void Window_SizeChanged(object sender, EventArgs e)
-        {
-            Trace.WriteLine($"SizeChanged Window Initialized {Properties.Settings.Default.Initialized}");
-            if (!Properties.Settings.Default.Initialized)
+            }
+            else
             {
                 SizeToContent = SizeToContent.WidthAndHeight;
                 double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
@@ -107,42 +103,50 @@ namespace BenchMaestro
                 this.Left = (screenWidth / 2) - (windowWidth / 2);
                 this.Top = (screenHeight / 2) - (windowHeight / 2);
                 WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                SaveWindowState();
+                SaveWinPos();
                 Trace.WriteLine($"SizeChanged Set Center and Save");
+                WindowSettings.Default.Initialized = true;
+                SaveWinPos();
             }
-
-            Properties.Settings.Default.Initialized = true;
-            Properties.Settings.Default.Save();
-            Trace.WriteLine($"Saving Initialized ");
+            WinLoaded = true;
         }
 
-        private void SaveWindowState()
+        private void Window_SizeChanged(object sender, EventArgs e)
         {
+            Trace.WriteLine($"SizeChanged Window Initialized {WindowSettings.Default.Initialized}");
+            if (WindowSettings.Default.Initialized && WinLoaded)
+            {
+                SaveWinPos();
+            }
+        }
+        private void SaveWinPos()
+        {
+
             if (WindowState == WindowState.Maximized)
             {
-                Properties.Settings.Default.Top = RestoreBounds.Top;
-                Properties.Settings.Default.Left = RestoreBounds.Left;
-                Properties.Settings.Default.Height = RestoreBounds.Height;
-                Properties.Settings.Default.Width = RestoreBounds.Width;
-                Properties.Settings.Default.Maximized = true;
+                WindowSettings.Default.Top = RestoreBounds.Top;
+                WindowSettings.Default.Left = RestoreBounds.Left;
+                WindowSettings.Default.Height = RestoreBounds.Height;
+                WindowSettings.Default.Width = RestoreBounds.Width;
+                WindowSettings.Default.Maximized = true;
             }
             else
             {
-                Properties.Settings.Default.Top = Top;
-                Properties.Settings.Default.Left = Left;
-                Properties.Settings.Default.Height = Height;
-                Properties.Settings.Default.Width = Width;
-                Properties.Settings.Default.Maximized = false;
+                WindowSettings.Default.Top = Top;
+                WindowSettings.Default.Left = Left;
+                WindowSettings.Default.Height = Height;
+                WindowSettings.Default.Width = Width;
+                WindowSettings.Default.Maximized = false;
             }
-            Properties.Settings.Default.Save();
+            WindowSettings.Default.Save();
+            Trace.WriteLine($"Saving Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
         }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if (IsActive && Properties.Settings.Default.Initialized)
+            if (IsActive && WindowSettings.Default.Initialized)
             {
-                SaveWindowState();
-                Trace.WriteLine($"Saving Window Position {Properties.Settings.Default.Top} {Properties.Settings.Default.Left} {Properties.Settings.Default.Height} {Properties.Settings.Default.Width} {Properties.Settings.Default.Maximized}");
+                SaveWinPos();
+                Trace.WriteLine($"Saving Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
             }
         }
 
@@ -223,7 +227,6 @@ namespace BenchMaestro
             AutoUpdater.Synchronous = false;
             AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
             AutoUpdater.Start("https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json");
-         
         }
         private void AutoUpdaterOnParseUpdateInfoEvent(ParseUpdateInfoEventArgs args)
         {
@@ -256,7 +259,7 @@ namespace BenchMaestro
                 if ((string)rb.Tag == "Custom")
                 {
                     App.systemInfo.STMT = false;
-                    Properties.Settings.Default.BtnSTMT = false;
+                    WindowSettings.Default.BtnSTMT = false;
                     if (App.GetThreads().Length < 1)
                     {
                         Trace.WriteLine($"RB BACK TO STMT");
@@ -266,10 +269,10 @@ namespace BenchMaestro
                 else
                 {
                     App.systemInfo.STMT = true;
-                    Properties.Settings.Default.BtnSTMT = true;
+                    WindowSettings.Default.BtnSTMT = true;
                 }
-                Properties.Settings.Default.Save();
-                Trace.WriteLine($"RB CHECKED {rb.Name} {rb.Tag} SETTINGS BtnSTMT {Properties.Settings.Default.BtnSTMT}");
+                WindowSettings.Default.Save();
+                Trace.WriteLine($"RB CHECKED {rb.Name} {rb.Tag} SETTINGS BtnSTMT {WindowSettings.Default.BtnSTMT}");
             }
 
         }
@@ -281,36 +284,36 @@ namespace BenchMaestro
 
             if (cb.IsChecked == true)
             {
-                if (!Properties.Settings.Default.Threads.Contains(Tag)) Properties.Settings.Default.Threads.Add(Tag);
+                if (!WindowSettings.Default.Threads.Contains(Tag)) WindowSettings.Default.Threads.Add(Tag);
                 Trace.WriteLine($"CB CHECKED {cb.Tag}");
                 if (!InitUI) { 
                     RadioCustom.IsChecked = true;
                     RadioSTMT.IsChecked = false;
                     App.systemInfo.STMT = false;
-                    Properties.Settings.Default.BtnSTMT = false;
+                    WindowSettings.Default.BtnSTMT = false;
                 }
             }
             else
             {
-                if (Properties.Settings.Default.Threads.Contains(Tag)) Properties.Settings.Default.Threads.Remove(Tag);
+                if (WindowSettings.Default.Threads.Contains(Tag)) WindowSettings.Default.Threads.Remove(Tag);
                 Trace.WriteLine($"CB UNCHECKED {cb.Tag}");
                 RadioCustom.IsChecked = true;
                 RadioSTMT.IsChecked = false;
                 App.systemInfo.STMT = false;
-                Properties.Settings.Default.BtnSTMT = false;
+                WindowSettings.Default.BtnSTMT = false;
             }
-            Properties.Settings.Default.Save();
+            WindowSettings.Default.Save();
 
         }
         private void CheckCustomCPPC(object sender, RoutedEventArgs e)
         {
             CheckBox cb = sender as CheckBox;
 
-            Trace.WriteLine($"CUSTOMCPPC {BenchMaestro.Properties.Settings.Default.CustomCPPC}");
+            Trace.WriteLine($"CUSTOMCPPC {WindowSettings.Default.CustomCPPC}");
 
             if (cb.IsChecked == true)
             {
-                Properties.Settings.Default.cbCustomCPPC = true;
+                WindowSettings.Default.cbCustomCPPC = true;
                 Trace.WriteLine($"CB CHECKED {cb.Tag}");
                 App.systemInfo.CPPCActiveOrder = App.systemInfo.CPPCCustomOrder;
                 App.systemInfo.CPPCActiveLabel = App.GetCustomLabel();
@@ -319,14 +322,14 @@ namespace BenchMaestro
             }
             else
             {
-                Properties.Settings.Default.cbCustomCPPC = false;
+                WindowSettings.Default.cbCustomCPPC = false;
                 Trace.WriteLine($"CB UNCHECKED {cb.Tag}");
                 App.systemInfo.CPPCActiveOrder = App.systemInfo.CPPCOrder;
                 App.systemInfo.CPPCActiveLabel = App.systemInfo.CPPCLabel;
                 CPPCActiveLabel.Text = App.systemInfo.CPPCLabel;
                 Trace.WriteLine($"LABEL {App.systemInfo.CPPCLabel} {App.systemInfo.CPPCActiveLabel}");
             }
-            Properties.Settings.Default.Save();
+            WindowSettings.Default.Save();
 
         }
         public static bool IsWindowOpen<T>(string name = "") where T : Window
@@ -357,8 +360,8 @@ namespace BenchMaestro
                 Trace.WriteLine($"1 = {_core.Tag}");
             }
 
-            BenchMaestro.Properties.Settings.Default.CustomCPPC = App.GetCustomLabel();
-            Properties.Settings.Default.Save();
+            WindowSettings.Default.CustomCPPC = App.GetCustomLabel();
+            WindowSettings.Default.Save();
 
             if (cbCustomCPPC.IsChecked == true)
             {
@@ -368,7 +371,7 @@ namespace BenchMaestro
                 Trace.WriteLine($"LABEL {App.GetCustomLabel()} {App.systemInfo.CPPCActiveLabel}");
             }
 
-            Trace.WriteLine($"CUSTOMCPPC {BenchMaestro.Properties.Settings.Default.CustomCPPC}");
+            Trace.WriteLine($"CUSTOMCPPC {WindowSettings.Default.CustomCPPC}");
             Trace.WriteLine($"CUSTOMLABEL {App.GetCustomLabel()}");
         }
         private void ButtonScreenshot_Click(object sender, RoutedEventArgs e)
@@ -387,7 +390,7 @@ namespace BenchMaestro
         }
         private void ButtonReset(object sender, RoutedEventArgs e)
         {
-            Properties.Settings.Default.Reset();
+            WindowSettings.Default.Reset();
             
             App.SettingsInit();
 
@@ -400,8 +403,8 @@ namespace BenchMaestro
 
             InitUI = true;
 
-            Trace.WriteLine($"STMT={Properties.Settings.Default.BtnSTMT}");
-            if (Properties.Settings.Default.BtnSTMT)
+            Trace.WriteLine($"STMT={WindowSettings.Default.BtnSTMT}");
+            if (WindowSettings.Default.BtnSTMT)
             {
                 RadioSTMT.IsChecked = true;
                 RadioCustom.IsChecked = false;
@@ -412,7 +415,7 @@ namespace BenchMaestro
                 RadioCustom.IsChecked = true;
             }
 
-            foreach (string thr in Properties.Settings.Default.Threads)
+            foreach (string thr in WindowSettings.Default.Threads)
             {
                 Trace.WriteLine($" RESTORING CB {thr}");
                 IEnumerable<CheckBox> elements = FindVisualChildren<CheckBox>(this).Where(x => x.Tag != null && x.Tag.ToString() == thr.ToString());
@@ -445,7 +448,7 @@ namespace BenchMaestro
             }
 
 
-            if (Properties.Settings.Default.cbCustomCPPC)
+            if (WindowSettings.Default.cbCustomCPPC)
             {
                 cbCustomCPPC.IsChecked = true;
                 App.systemInfo.CPPCActiveOrder = App.systemInfo.CPPCCustomOrder;
@@ -580,6 +583,12 @@ namespace BenchMaestro
             }
         }
 
+        public static void CenterWindowTopScreen(Window _this) { 
+            double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
+            double windowWidth = _this.Width;
+            _this.Left = (screenWidth / 2) - (windowWidth / 2);
+            _this.Top = SystemParameters.WorkArea.Top;
+        }
         private void btnRefreshInfo_Click(object sender, RoutedEventArgs e)
         {
             App.systemInfo.ZenRefreshStatic(true);

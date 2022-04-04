@@ -96,10 +96,10 @@ namespace BenchMaestro
                 Trace.WriteLine($"Restoring Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
 
                 WindowState = WindowState.Normal;
-                Top = WindowSettings.Default.Top;
-                Left = WindowSettings.Default.Left;
-                Height = WindowSettings.Default.Height;
-                Width = WindowSettings.Default.Width;
+                Top = WindowSettings.Default.Top < SystemParameters.WorkArea.Top ? SystemParameters.WorkArea.Top : WindowSettings.Default.Top;
+                Left = WindowSettings.Default.Left < SystemParameters.WorkArea.Left ? SystemParameters.WorkArea.Left : WindowSettings.Default.Left;
+                Height = WindowSettings.Default.Height > SystemParameters.WorkArea.Height ? SystemParameters.WorkArea.Height : WindowSettings.Default.Height;
+                Width = WindowSettings.Default.Width > SystemParameters.WorkArea.Width ? SystemParameters.WorkArea.Width : WindowSettings.Default.Width;
                 if (WindowSettings.Default.Maximized)
                 {
                     WindowState = WindowState.Maximized;
@@ -107,11 +107,11 @@ namespace BenchMaestro
             }
             else
             {
-                CenterWindowOnScreen();
+                MainWindow.CenterWindowTopScreen(this);
                 WindowSettings.Default.Initialized = true;
                 SaveWinPos();
-
             }
+
 
         }
         private void UpdateConfigTag(Object sender, DataTransferEventArgs args)
@@ -119,17 +119,10 @@ namespace BenchMaestro
             Trace.WriteLine($"UpdateConfigTag to {ConfigTag.Text.Trim()}");
             WinTitle = $"BenchMaestro-{App.version}-{Benchname}-{ConfigTag.Text.Trim()}";
         }
-
-
         private void Window_SizeChanged(object sender, EventArgs e)
         {
-
-            if (!WindowSettings.Default.Initialized) SizeToContent = SizeToContent.WidthAndHeight;
-            WindowSettings.Default.Initialized = true;
-            WindowSettings.Default.Save();
-            Trace.WriteLine($"Saving Initialized ");
+            if (WindowSettings.Default.Initialized) SaveWinPos();
         }
-
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
             if (WindowSettings.Default.Initialized)
@@ -170,6 +163,7 @@ namespace BenchMaestro
             source.AddHook(new HwndSourceHook(WndProc));
         }
 
+
         private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
         {
             if (msg == WM_SIZING)
@@ -187,28 +181,45 @@ namespace BenchMaestro
                     var _check = App.CurrentRun;
                     if (_check != null)
                     {
-                        IEnumerable<ScrollViewer> elements = MainWindow.FindVisualChildren<ScrollViewer>(this).Where(x => x.Tag != null && x.Tag.ToString().StartsWith("Details"));
-                        foreach (ScrollViewer sv in elements)
+                        foreach (BenchScore bscore in scoreRun)
                         {
-
+                            ScrollViewer sv = bscore.DetailsScroller;
+                            Expander exp = bscore.DetailsExpander;
+                            bool expanded = exp.IsExpanded;
                             double _scrollh = Height - sv.TranslatePoint(new Point(0, 0), null).Y;
+                            double _scrollmh = MaxHeight - sv.TranslatePoint(new Point(0, 0), null).Y;
                             double _scrollth = sv.TranslatePoint(new Point(0, 0), null).Y;
+                            double _tsh = sv.ScrollableHeight + sv.ExtentHeight;
                             //Trace.WriteLine($"_scroller tTP={App.CurrentRun.DetailsBox.TranslatePoint(new Point(0, this.Height), this)} TP={App.CurrentRun.DetailsScroller.TranslatePoint(new Point(0, 0), null)} H={App.CurrentRun.DetailsScroller.ActualHeight} WH={this.Height}");
-                            IEnumerable<Expander> expanders = MainWindow.FindVisualParent<Expander>(sv);
-                            bool expanded = false;
-                            Expander exp = expanders.FirstOrDefault();
-                            if (exp != null) expanded = exp.IsExpanded;
-                            if (_scrollh >= sv.ExtentHeight + 8) _scrollh = sv.ExtentHeight + 8;
-                            if (_scrollh > sv.MinHeight && _scrollh < _scrollth && expanded) sv.Height = _scrollh;
-                            Trace.WriteLine($"_scroller aH={sv.ActualHeight} rH={_scrollh} tH={_scrollth} isexpanded={expanded} expcount={expanders.Count()}");
+                            if (expanded)
+                            {
+                                if (_scrollh >= _tsh - 8)
+                                {
+                                    sv.Height = _tsh - 8;
+                                }
+                                else if (_scrollh >= _scrollmh - 8)
+                                {
+                                    sv.Height = _scrollmh - 8;
+                                }
+                                else
+                                {
+                                    //Trace.WriteLine($"exitszm_scroller_p aH={sv.ActualHeight} eH={sv.ExtentHeight} scH={sv.ViewportHeight}");
+                                    sv.Height = _scrollh - 8;
+                                }
+                            }
+                            //Trace.WriteLine($"exitszm_scroller aH={sv.ActualHeight} sH={_scrollh} tH={_scrollth} isexpanded={expanded}");
+                            //Trace.WriteLine($"exitszm_scroller tsh={_tsh} eH={sv.ExtentHeight} scH={sv.ViewportHeight} isexpanded={expanded}");
                         }
                     }
+
                     WindowWasResized = false;
                 }
             }
 
             return IntPtr.Zero;
         }
+
+
 
 
         private void ButtonScreenshot_Click(object sender, RoutedEventArgs e)

@@ -414,12 +414,15 @@ namespace BenchMaestro
 
 			HWMonitor.Close();
 
+			Trace.Flush();
+
 			hwmcts.Dispose();
 			benchcts.Dispose();
 			
 			SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
 
-			Trace.Flush();
+			App.systemInfo.Zen.Dispose();
+
 		}
 		private void InitColors()
 		{

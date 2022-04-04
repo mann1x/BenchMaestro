@@ -96,10 +96,10 @@ namespace BenchMaestro
                 Trace.WriteLine($"Restoring Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
 
                 WindowState = WindowState.Normal;
-                Top = WindowSettings.Default.Top;
-                Left = WindowSettings.Default.Left;
-                Height = WindowSettings.Default.Height;
-                Width = WindowSettings.Default.Width;
+                Top = WindowSettings.Default.Top < SystemParameters.WorkArea.Top ? SystemParameters.WorkArea.Top : WindowSettings.Default.Top;
+                Left = WindowSettings.Default.Left < SystemParameters.WorkArea.Left ? SystemParameters.WorkArea.Left : WindowSettings.Default.Left;
+                Height = WindowSettings.Default.Height > SystemParameters.WorkArea.Height ? SystemParameters.WorkArea.Height : WindowSettings.Default.Height;
+                Width = WindowSettings.Default.Width > SystemParameters.WorkArea.Width ? SystemParameters.WorkArea.Width : WindowSettings.Default.Width;
                 if (WindowSettings.Default.Maximized)
                 {
                     WindowState = WindowState.Maximized;
@@ -107,11 +107,11 @@ namespace BenchMaestro
             }
             else
             {
-                CenterWindowOnScreen();
+                MainWindow.CenterWindowTopScreen(this);
                 WindowSettings.Default.Initialized = true;
                 SaveWinPos();
-
             }
+
 
         }
         private void UpdateConfigTag(Object sender, DataTransferEventArgs args)
@@ -123,12 +123,9 @@ namespace BenchMaestro
 
         private void Window_SizeChanged(object sender, EventArgs e)
         {
-
-            if (!WindowSettings.Default.Initialized) SizeToContent = SizeToContent.WidthAndHeight;
-            WindowSettings.Default.Initialized = true;
-            WindowSettings.Default.Save();
-            Trace.WriteLine($"Saving Initialized ");
+            if (WindowSettings.Default.Initialized) SaveWinPos();
         }
+
 
         private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
