@@ -38,7 +38,7 @@ You can compile with Visual Studio 2019 and .NET Core 5.
     - Fix: Missing Bench Details Expanders handling
     - Fix: Initial Window position, now Bench are center top
     - Fix: Windows cannot be restored outside of Workarea, support for taskbar on top
-    - Fix: Main Window resore position, cannot be restored outside of Workarea
+    - Fix: Main Window restore position, cannot be restored outside of Workarea
     - Fix: Dispose of ZenStates-Core DLL
 - v1.0.12 Alpha
     - Fix: Zen CO label not initialized causing crash at start with non AMD CPUs
