@@ -61,6 +61,24 @@ namespace BenchMaestro
 			}
 			return 0;
 		}
+		/// <summary>
+		/// Get Thread ID from Logical
+		/// </summary>
+		public static int ThreadID(int logicalCore)
+		{
+			for (var i = 0; i < HardwareCores.Length; ++i)
+			{
+				if (HardwareCores[i].LogicalCores.Contains(logicalCore))
+				{
+					for (int t = 0; t < HardwareCores[i].LogicalCores.Length; ++t)
+                    {
+						if (HardwareCores[i].LogicalCores[t] == logicalCore) return t;
+
+					}
+				}
+			}
+			return 0;
+		}
 
 		/// <summary>
 		/// Current logical core ID

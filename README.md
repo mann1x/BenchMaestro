@@ -34,6 +34,13 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.11 Alpha
+    - Add: CCD temperature monitoring for Zen via ZenCore
+    - Add: Better clock stretching display
+    - Fix: Zen check for CO improved
+    - Fix: Fix for Zen1 temperature
+    - Fix: Fix for Zen1/2 coremap
+    - Fix: ThreadID for Logical cores load in details
 - v1.0.10 Alpha
     - New: Fixed version of cpuminer-opt binaries thx to JayDDee, all binaries now are using same algo
     - Fix: Zen restored missing SMU and PT version

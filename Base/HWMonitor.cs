@@ -185,22 +185,38 @@ namespace BenchMaestro
                         {
                             int _core = ProcessorInfo.PhysicalCore(i);
                             float? _c0 = App.hwsensors.GetValue(HWSensorName.CPUCoresC0, _core);
-                            Trace.WriteLine($"Test Stretch CPU={i} [{_core}] C0={_c0}");
+                            //Trace.WriteLine($"Test Stretch CPU={i} [{_core}] C0={_c0}");
                             if (App.hwsensors.IsAny(HWSensorName.CPUCoresClocks,_core) && App.hwsensors.IsAny(HWSensorName.CPUCoresEffClocks, _core) && _c0 >= 99)
                             {
                                 float? _stretch = App.hwsensors.GetValue(HWSensorName.CPUCoresClocks, _core) - App.hwsensors.GetValue(HWSensorName.CPUCoresEffClocks, _core);
-                                Trace.WriteLine($"Stretch {_stretch} MHz");
-                                if (_stretch >= 1)
+                                //Trace.WriteLine($"Stretch {_stretch} MHz");
+                                if (_stretch > 0)
                                 {
                                     App.hwsensors.UpdateZenSensor(HWSensorName.CPUCoresStretch, _stretch, _core);
-                                    Trace.WriteLine($"Add Stretch [{_core}] {_stretch} MHz");
+                                    //Trace.WriteLine($"Add Stretch [{_core}] {_stretch} MHz");
                                 }
                             }
                         }
                     }
                 }
 
-                App.hwsensors.Where(sensorItem => sensorItem.Name == HWSensorName.CPULoad).First().Values.Add(cpuLoad.GetTotalLoad());
+                App.hwsensors.UpdateZenSensor(HWSensorName.CPULoad, cpuLoad.GetTotalLoad());
+
+                if (App.systemInfo.ZenPerCCDTemp)
+                {
+                    {
+                        float ccd1temp = App.systemInfo.Zen.GetSingleCcdTemperature(0);
+                        //Trace.WriteLine($"CCD1T={ccd1temp}");
+                        App.hwsensors.UpdateZenSensor(HWSensorName.CCD1Temp, ccd1temp);
+                        if (App.systemInfo.ZenCCDTotal > 1)
+                        {
+                            float ccd2temp = App.systemInfo.Zen.GetSingleCcdTemperature(1);
+                            //Trace.WriteLine($"CCD2T={ccd2temp}");
+                            App.hwsensors.UpdateZenSensor(HWSensorName.CCD2Temp, ccd1temp);
+                            App.hwsensors.UpdateZenSensor(HWSensorName.CCDSTemp, (ccd1temp + ccd2temp) / 2);
+                        }
+                    }
+                }
 
             }
             catch (Exception ex)
@@ -332,7 +348,7 @@ namespace BenchMaestro
                     Trace.WriteLine($"Libre CPU MB Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
-                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && (sensor.Name.StartsWith("Core (Tctl") || sensor.Name.Contains("CPU Package")) && CPUSource == HWSensorSource.Libre)
+                if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Temperature && (sensor.Name.StartsWith("Core (Tctl/Tdie)") || sensor.Name.Contains("CPU Package")) && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUTemp, sensor.Identifier.ToString(), sensor.Name);
                     Trace.WriteLine($"Libre CPU Temp Sensor added {sensor.Identifier} HW={hardware.Identifier}");
@@ -707,8 +723,8 @@ namespace BenchMaestro
                         {
                             bool _bold = false;
                             if (App.CurrentRun.RunLogicals.Contains(_cpu)) _bold = true;
-                            int _core = (int)(_cpu - 1) / 2;
-                            int _thread = _cpu % 2 == 0 ? 1 : 0;
+                            int _core = ProcessorInfo.PhysicalCore(_cpu-1);
+                            int _thread = ProcessorInfo.ThreadID(_cpu - 1);
                             _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPULogicalsLoad, _cpu - 1);
                             _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPULogicalsLoad, _cpu - 1);
                             if (_bold)
@@ -716,8 +732,16 @@ namespace BenchMaestro
                                 if (_coresmaxl < _sensormax && _sensormax > -99999) _coresmaxl = _sensormax;
                                 _coresavgl = _coresavgl == -99999 ? _sensoravg : (_coresavgl + _sensoravg) / 2;
                             }
-                            App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                            Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                            if (App.systemInfo.HyperThreading)
+                            {
+                                App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                                Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                            }
+                            else
+                            {
+                                App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                                Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
+                            }
                         }
                     }
 

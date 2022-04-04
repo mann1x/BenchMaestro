@@ -216,7 +216,8 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { });
                     _row++;
 
-                    _value = App.CurrentRun.CPUAvgStretch > -99999 ? App.CurrentRun.CPUAvgStretch.ToString() : "None";
+                    _value = App.CurrentRun.CPUAvgStretch > -99999 ? App.CurrentRun.CPUAvgStretch.ToString() : "N/D";
+                    _value = (App.CurrentRun.CPUAvgStretch > 1)? App.CurrentRun.CPUAvgStretch.ToString() : "None";
 
                     TextBlock _tb3a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                     _tb3a.Inlines.Add(new Run { Text = $"{avgchar} Stretch: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
@@ -227,7 +228,8 @@ namespace BenchMaestro
                     _tb3a.TextAlignment = TextAlignment.Right;
                     _gridblock.Children.Add(_tb3a);
 
-                    _value = App.CurrentRun.CPUMaxStretch > -99999 ? App.CurrentRun.CPUMaxStretch.ToString() : "None";
+                    _value = App.CurrentRun.CPUMaxStretch > -99999 ? App.CurrentRun.CPUMaxStretch.ToString() : "N/D";
+                    _value = (App.CurrentRun.CPUMaxStretch > 1) ? App.CurrentRun.CPUMaxStretch.ToString() : "None";
 
                     TextBlock _tb3b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                     _tb3b.Inlines.Add(new Run { Text = $" {maxchar} Stretch: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
@@ -726,70 +728,69 @@ namespace BenchMaestro
                         _row++;
 
                         int _colspan = 1;
-                        if (_thislist.Count == 1) _colspan = 2;
                         int _index = 1;
                         int _col = 0;
+                        _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                        int _fcount = _thislist.Where(x => x.Val1 > -99999 || x.Val2 > -99999).Count();
 
-                        foreach (DetailsGrid _item in _thislist)
+                        if (_fcount == 1) _colspan = 2;
+
+                        foreach (DetailsGrid _item in _thislist.Where(x => x.Val1 > -99999 || x.Val2 > -99999))
                         {
-                            if (_item.Val1 > -99999 || _item.Val2 > -99999)
+                            Trace.WriteLine($"{_header} {_item.Label} {_item.Val1} {_item.Val2}");
+
+                            string Label = _item.Label.ToString();
+                            string Val1 = String.Format("{0:" + _item.Format + "}", _item.Val1.ToString());
+                            string Val2 = String.Format("{0:" + _item.Format + "}", _item.Val2.ToString());
+                            if (Val1 == "-99999") Val1 = "N/A";
+                            if (Val2 == "-99999") Val2 = "N/A";
+                            FontWeight _weight = FontWeights.Normal;
+                            if (_item.Bold) _weight = FontWeights.Bold;
+                            Trace.WriteLine($"{Label} {Val1} {Val2}");
+
+                            TextBlock _tb1a = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                            _tb1a.Inlines.Add(new Run { Text = Label, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                            Grid.SetColumn(_tb1a, _col);
+                            Grid.SetRow(_tb1a, _row);
+                            Grid.SetColumnSpan(_tb1a, _colspan);
+                            _tb1a.TextAlignment = TextAlignment.Left;
+                            _gridblock.Children.Add(_tb1a);
+
+                            _col++;
+                            if (_fcount == 1) _col++;
+
+                            TextBlock _tb1b = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                            _tb1b.Inlines.Add(new Run { Text = Val1, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                            Grid.SetColumn(_tb1b, _col);
+                            Grid.SetRow(_tb1b, _row);
+                            Grid.SetColumnSpan(_tb1b, _colspan);
+                            _tb1b.TextAlignment = TextAlignment.Right;
+                            _gridblock.Children.Add(_tb1b);
+
+                            _col++;
+                            if (_fcount == 1) _col++;
+
+                            TextBlock _tb1c = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                            _tb1c.Inlines.Add(new Run { Text = Val2, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                            Grid.SetColumn(_tb1c, _col);
+                            Grid.SetRow(_tb1c, _row);
+                            Grid.SetColumnSpan(_tb1c, _colspan);
+                            _tb1c.TextAlignment = TextAlignment.Right;
+                            _gridblock.Children.Add(_tb1c);
+
+                            _col++;
+                            ++_index;
+
+                            if (_index % 2 == 1 || _fcount == 1)
                             {
-                                string Label = _item.Label.ToString();
-                                string Val1 = _item.Val1.ToString();
-                                string Val2 = _item.Val2.ToString();
-                                String.Format("{0:" + _item.Format + "}", Val1);
-                                String.Format("{0:" + _item.Format + "}", Val2);
-                                if (Val1 == "-99999") Val1 = "N/A";
-                                if (Val2 == "-99999") Val2 = "N/A";
-                                FontWeight _weight = FontWeights.Normal;
-                                if (_item.Bold) _weight = FontWeights.Bold;
-
-                                TextBlock _tb1a = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
-                                _tb1a.Inlines.Add(new Run { Text = Label, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
-                                Grid.SetColumn(_tb1a, _col);
-                                Grid.SetRow(_tb1a, _row);
-                                Grid.SetColumnSpan(_tb1a, _colspan);
-                                _tb1a.TextAlignment = TextAlignment.Left;
-                                _gridblock.Children.Add(_tb1a);
-
-                                _col++;
-                                if (_thislist.Count == 1) _col++;
-
-                                TextBlock _tb1b = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
-                                _tb1b.Inlines.Add(new Run { Text = Val1, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
-                                Grid.SetColumn(_tb1b, _col);
-                                Grid.SetRow(_tb1b, _row);
-                                Grid.SetColumnSpan(_tb1b, _colspan);
-                                _tb1b.TextAlignment = TextAlignment.Right;
-                                _gridblock.Children.Add(_tb1b);
-
-                                _col++;
-                                if (_thislist.Count == 1) _col++;
-
-                                TextBlock _tb1c = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
-                                _tb1c.Inlines.Add(new Run { Text = Val2, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
-                                Grid.SetColumn(_tb1c, _col);
-                                Grid.SetRow(_tb1c, _row);
-                                Grid.SetColumnSpan(_tb1c, _colspan);
-                                _tb1c.TextAlignment = TextAlignment.Right;
-                                _gridblock.Children.Add(_tb1c);
-
-                                _col++;
-                                _index++;
-
-                                if (_index % 2 == 1 || _thislist.Count == 1)
-                                {
-                                    _col = 0;
-                                    _row++;
-                                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
-                                    Trace.WriteLine($"Add Row {_item.Label}");
-                                }
-                                Trace.WriteLine($"Finish {_header}");
-
+                                _col = 0;
+                                _row++;
+                                _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                                Trace.WriteLine($"Add Row {_item.Label}");
                             }
-
+                            Trace.WriteLine($"Finish {_header}");
                         }
-                        if (_index == 1) _tbh.Visibility = Visibility.Collapsed;
+                        if (_index == 0) _tbh.Visibility = Visibility.Collapsed;
                     }
 
                 }
