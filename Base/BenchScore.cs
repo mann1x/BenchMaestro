@@ -13,6 +13,7 @@ namespace BenchMaestro
         public int Threads { get; set; }
         public string Benchname { get; set; }
         public string ProgressBar { get; set; }
+        public string FinishString { get; set; }
         public Window RunWindow { get; set; }
         public TextBlock ScoreBox { get; set; }
         public float? Score { get; set; }
@@ -91,6 +92,7 @@ namespace BenchMaestro
         public List<DetailsGrid> CPUCoresTemps { get; set; }
         public List<DetailsGrid> CPUCoresC0 { get; set; }
         public List<DetailsGrid> CPULogicalsLoad { get; set; }
+        public List<DetailsGrid> CPULogicalsScores { get; set; }
         public TextBlock StartedBox { get; set; }
         public DateTime Started { get; set; }
         public int StartedTemp { get; set; }
@@ -181,6 +183,7 @@ namespace BenchMaestro
             SWFeatures = "";
             AlgoFeatures = "";
             Algo = "";
+            FinishString = "";
             CPUCoresVoltages = new List<DetailsGrid>();
             CPUCoresClocks = new List<DetailsGrid>();
             CPUCoresEffClocks = new List<DetailsGrid>();
@@ -190,6 +193,7 @@ namespace BenchMaestro
             CPUCoresTemps = new List<DetailsGrid>();
             CPUCoresC0 = new List<DetailsGrid>();
             CPULogicalsLoad = new List<DetailsGrid>();
+            CPULogicalsScores = new List<DetailsGrid>();
             ExitStatus = "";
             OutputLog = "";
             RunLog = "";

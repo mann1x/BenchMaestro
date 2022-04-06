@@ -7,7 +7,6 @@ using System.Text;
 using System.Threading;
 using System.Diagnostics.Eventing.Reader;
 using System.IO;
-using System.Text.RegularExpressions;
 using ZenStates.Core;
 using Octokit;
 using System.Xml.Linq;
@@ -133,6 +132,49 @@ namespace BenchMaestro
 		{
 			try
 			{
+
+				CPUBits = "N/A";
+				CPUDescription = "N/A";
+				CPUName = "N/A";
+				CPUCores = 1;
+				CPUEnabledCores = 1;
+				CPUThreads = 1;
+				CPUSocket = "N/A";
+				CPULogicalProcessors = 1;
+				CPUFamily = 0;
+				BoardBIOS = "N/A";
+				BoardManufacturer = "N/A";
+				BoardModel = "N/A";
+
+				CPPCTags = new int[CPUCores];
+				CPPCOrder = new int[CPUCores];
+				CPPCOrder1 = new int[CPUCores];
+
+				CPPCTagsLabel = "";
+
+				ZenStates = false;
+				ZenPerCCDTemp = false;
+				ZenBoost = 0;
+				ZenScalar = 0;
+				ZenPPT = 0;
+				ZenTDC = 0;
+				ZenEDC = 0;
+				ZenTHM = 0;
+				ZenFCLK = 0;
+				ZenUCLK = 0;
+				ZenMCLK = 0;
+				ZenVDDP = 0;
+				ZenVDDG = 0;
+				ZenVCCD = 0;
+				ZenVIOD = 0;
+				ZenCO = new int[CPUCores];
+				ZenCoreMap = new int[CPUCores];
+				ZenCOb = false;
+				ZenCOLabel = "";
+				ZenSMUVer = "N/A";
+				ZenPTVersion = 0;
+				ZenCoreMapLabel = "";
+
 				WinMaxSize = 600;
 
 				STMT = true;
@@ -144,8 +186,6 @@ namespace BenchMaestro
 				ManagementObjectCollection SIManagemenobjCol = SIManagementClass.GetInstances();
 				//Get the properties in the class
 				PropertyDataCollection SIproperties = SIManagementClass.Properties;
-
-				BoardBIOS = "N/A";
 
 				foreach (ManagementObject obj in SIManagemenobjCol)
 				{
@@ -166,15 +206,11 @@ namespace BenchMaestro
 					}
 				}
 
-
 				ClassName = "Win32_BaseBoard";
 
 				SIManagementClass = new ManagementClass(ClassName);
 				SIManagemenobjCol = SIManagementClass.GetInstances();
 				SIproperties = SIManagementClass.Properties;
-
-				BoardManufacturer = "N/A";
-				BoardModel = "N/A";
 
 				foreach (ManagementObject obj in SIManagemenobjCol)
 				{
@@ -205,16 +241,6 @@ namespace BenchMaestro
 				SIManagementClass = new ManagementClass(ClassName);
 				SIManagemenobjCol = SIManagementClass.GetInstances();
 				SIproperties = SIManagementClass.Properties;
-
-				CPUBits = "N/A";
-				CPUDescription = "N/A";
-				CPUName = "N/A";
-				CPUCores = 1;
-				CPUEnabledCores = 1;
-				CPUThreads = 1;
-				CPUSocket = "N/A";
-				CPULogicalProcessors = 1;
-				CPUFamily = 0;
 
 				foreach (ManagementObject obj in SIManagemenobjCol)
 				{
@@ -559,7 +585,7 @@ namespace BenchMaestro
 
 							uint cores_t = ZenCore_Layout;
 
-							ZenCCDTotal = (int)ZenCCDS_Total;
+							ZenCCDTotal = (int)ZenCCDS_Total - (int)ZenCCD_Disabled;
 
 							Trace.WriteLine($"ZenCCD_Total {ZenCCD_Total:X2}");
 							Trace.WriteLine($"ZenCCD_Total2 {ZenCCD_Total2:X2}");
@@ -620,9 +646,8 @@ namespace BenchMaestro
 								if (ZenSMUVer == "25.86.0")
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] Zen1");
-
 									int _maxcores = 8;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen1");
 
 									CPUSensorsSource = "Zen PowerTable";
 									HWMonitor.CPUSource = HWSensorSource.Zen;
@@ -644,11 +669,10 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CPUPPTLimit, -1, 1, false);
 									App.hwsensors.InitZen(HWSensorName.CPUTDCLimit, -1, 1, false);
 									App.hwsensors.InitZen(HWSensorName.CPUPower, 22);
-									int _vsoc = (int)Zen.powerTable.Table[45] == 0 ? 44 : 45;
-									App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
+									App.hwsensors.InitZen(HWSensorName.SOCVoltage, 26);
 									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 158);
 									App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 159);
-									App.hwsensors.InitZen(HWSensorName.CPUFSB, 66);
+									App.hwsensors.InitZen(HWSensorName.CPUFSB, 31);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
 									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
@@ -669,13 +693,19 @@ namespace BenchMaestro
 									App.hwsensors.SetValueOffset(HWSensorName.CPUTemp, -20);
 									App.hwsensors.SetValueOffset(HWSensorName.CPUCoresTemps, -20);
 
+									for (int _cpu = 1; _cpu <= CPULogicalProcessors; ++_cpu)
+									{
+										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
+									}
+
+									Trace.WriteLine($"Configuring Zen Source done");
 								}
 								else if (ZenPTVersion == 0x380804)
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}]");
-
 									int _maxcores = 16;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen3");
+
 									ZenPerCCDTemp = true;
 
 									CPUSensorsSource = "Zen PowerTable";
@@ -732,14 +762,15 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+									Trace.WriteLine($"Configuring Zen Source done");
 
 								}
 								else if (ZenPTVersion == 0x380904)
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}]");
-
 									int _maxcores = 8;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen3");
+
 									ZenPerCCDTemp = true;
 
 									CPUSensorsSource = "Zen PowerTable";
@@ -794,14 +825,15 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+									Trace.WriteLine($"Configuring Zen Source done");
 
 								}
 								else if (ZenPTVersion == 0x380805)
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}]");
-
 									int _maxcores = 16;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen3");
+
 									ZenPerCCDTemp = true;
 
 									CPUSensorsSource = "Zen PowerTable";
@@ -858,14 +890,15 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+									Trace.WriteLine($"Configuring Zen Source done");
 
 								}
 								else if (ZenPTVersion == 0x380905)
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}]");
-
 									int _maxcores = 8;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen3");
+
 									ZenPerCCDTemp = true;
 
 									CPUSensorsSource = "Zen PowerTable";
@@ -920,14 +953,15 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+									Trace.WriteLine($"Configuring Zen Source done");
 
 								}
 								else if (ZenPTVersion == 0x400005)
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}]");
-
 									int _maxcores = 8;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen3 APU");
+
 									ZenPerCCDTemp = true;
 
 									CPUSensorsSource = "Zen PowerTable";
@@ -982,14 +1016,15 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+									Trace.WriteLine($"Configuring Zen Source done");
 
 								}
 								else if (ZenPTVersion == 0x240903)
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}]");
-
 									int _maxcores = 8;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen2");
+
 									ZenPerCCDTemp = true;
 
 									CPUSensorsSource = "Zen PowerTable";
@@ -1044,14 +1079,15 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+									Trace.WriteLine($"Configuring Zen Source done");
 
 								}
 								else if (ZenPTVersion == 0x240803)
 								{
 									ZenPTKnown = true;
-									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}]");
-
 									int _maxcores = 16;
+									Trace.WriteLine($"Configuring Zen Source for PT [0x{ZenPTVersion:X}] [{_maxcores}] Zen2");
+
 									ZenPerCCDTemp = true;
 
 									CPUSensorsSource = "Zen PowerTable";
@@ -1106,6 +1142,7 @@ namespace BenchMaestro
 									{
 										App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 									}
+									Trace.WriteLine($"Configuring Zen Source done");
 								}
 
 								for (int it = 0; it < Zen.powerTable.Table.Length; ++it)
@@ -1399,7 +1436,7 @@ namespace BenchMaestro
 					for (int r = 0; r < 80; ++r)
 					{
 						Thread.Sleep(25);
-						status = Zen.RefreshPowerTable();
+						status = ZenRefreshPowerTable2();
 						if (status == SMU.Status.OK) r = 80;
 					}
 				}
@@ -1413,7 +1450,34 @@ namespace BenchMaestro
 				return false;
 			}
 
-		}		
+		}
+		public SMU.Status ZenRefreshPowerTable2()
+		{
+			try
+			{
+				SMU.Status status = Zen.RefreshPowerTable();
+
+				if (status != SMU.Status.OK)
+				{
+					for (int r = 0; r < 80; ++r)
+					{
+						Thread.Sleep(25);
+						status = Zen.RefreshPowerTable();
+						Trace.WriteLine($"ZenRefreshPowerTable SMU Error: {status}");
+						if (status == SMU.Status.OK) r = 80;
+					}
+				}
+
+				return status;
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"ZenRefreshPowerTable Exception: {ex}");
+				return SMU.Status.FAILED;
+			}
+
+		}
+
 		public void ZenRefreshCO()
 		{
 			try
@@ -1484,7 +1548,7 @@ namespace BenchMaestro
 
 				if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
 
-				if (ZenCoreMapLabel.Length > 0) ProcessorsLabel += $"\nZen CoreMap: {ZenCoreMapLabel} ";
+				if (ZenCoreMapLabel.Length > 0) ProcessorsLabel += $"\nCoreMap: {ZenCoreMapLabel} ";
 
 			}
 			OnChange("CPULabel");

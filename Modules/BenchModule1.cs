@@ -8,6 +8,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Threading;
 
@@ -18,7 +19,7 @@ namespace BenchMaestro
     //CPUMINER
     static class BenchModule1
     {
-        public static void UpdateMonitoring2(Grid ScoreList)
+        public static void UpdateMonitoring2(Grid ScoreList, Window thiswin)
         {
             try
             {
@@ -696,6 +697,8 @@ namespace BenchMaestro
                 _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
                 _gridblock.ColumnDefinitions.Add(new ColumnDefinition { Width = gridLength2 });
 
+                _gridblock.ShowGridLines = false;
+
                 _row = 0;
 
                 void AddDetails(List<DetailsGrid> _thislist, string _header)
@@ -728,20 +731,39 @@ namespace BenchMaestro
                         _row++;
 
                         int _colspan = 1;
+                        int _colspan1 = 1;
+                        int _colspan2 = 1;
+                        int _colspan3 = 1;
                         int _index = 1;
                         int _col = 0;
                         _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
                         int _fcount = _thislist.Where(x => x.Val1 > -99999 || x.Val2 > -99999).Count();
 
-                        if (_fcount == 1) _colspan = 2;
+                        if (_fcount == 1)
+                        {
+                            _col = 1;
+                            _colspan = 1;
+                            _colspan2 = 2;
+                            _colspan3 = 1;
+                        }
 
                         foreach (DetailsGrid _item in _thislist.Where(x => x.Val1 > -99999 || x.Val2 > -99999))
                         {
-                            Trace.WriteLine($"{_header} {_item.Label} {_item.Val1} {_item.Val2}");
+                            Trace.WriteLine($"{_header} {_item.Label} {_item.Val1} {_item.Val2} {_item.Unit}");
+
+                            if (_item.Val2 == -99998 && _fcount == 1)
+                            {
+                                _colspan2 = 1;
+                            }
+                            else if (_item.Val2 == -99998)
+                            {
+                                _colspan2 = 2;
+                            }
 
                             string Label = _item.Label.ToString();
                             string Val1 = String.Format("{0:" + _item.Format + "}", _item.Val1.ToString());
                             string Val2 = String.Format("{0:" + _item.Format + "}", _item.Val2.ToString());
+                            string Unit = _item.Unit.ToString();
                             if (Val1 == "-99999") Val1 = "N/A";
                             if (Val2 == "-99999") Val2 = "N/A";
                             FontWeight _weight = FontWeights.Normal;
@@ -752,31 +774,38 @@ namespace BenchMaestro
                             _tb1a.Inlines.Add(new Run { Text = Label, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
                             Grid.SetColumn(_tb1a, _col);
                             Grid.SetRow(_tb1a, _row);
-                            Grid.SetColumnSpan(_tb1a, _colspan);
+                            Grid.SetColumnSpan(_tb1a, _colspan1);
                             _tb1a.TextAlignment = TextAlignment.Left;
                             _gridblock.Children.Add(_tb1a);
 
                             _col++;
-                            if (_fcount == 1) _col++;
+                            if (_fcount == 1 && _item.Val2 == -99998) _col++;
 
                             TextBlock _tb1b = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
                             _tb1b.Inlines.Add(new Run { Text = Val1, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                            if (Unit.Length > 0)
+                            {
+                                _tb1b.Inlines.Add(new Run { Text = $" {Unit}", FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                            }
                             Grid.SetColumn(_tb1b, _col);
                             Grid.SetRow(_tb1b, _row);
-                            Grid.SetColumnSpan(_tb1b, _colspan);
+                            Grid.SetColumnSpan(_tb1b, _colspan2);
                             _tb1b.TextAlignment = TextAlignment.Right;
                             _gridblock.Children.Add(_tb1b);
 
                             _col++;
                             if (_fcount == 1) _col++;
 
-                            TextBlock _tb1c = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
-                            _tb1c.Inlines.Add(new Run { Text = Val2, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
-                            Grid.SetColumn(_tb1c, _col);
-                            Grid.SetRow(_tb1c, _row);
-                            Grid.SetColumnSpan(_tb1c, _colspan);
-                            _tb1c.TextAlignment = TextAlignment.Right;
-                            _gridblock.Children.Add(_tb1c);
+                            if (_item.Val2 != -99998)
+                            {
+                                TextBlock _tb1c = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                                _tb1c.Inlines.Add(new Run { Text = Val2, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                                Grid.SetColumn(_tb1c, _col);
+                                Grid.SetRow(_tb1c, _row);
+                                Grid.SetColumnSpan(_tb1c, _colspan3);
+                                _tb1c.TextAlignment = TextAlignment.Right;
+                                _gridblock.Children.Add(_tb1c);
+                            }
 
                             _col++;
                             ++_index;
@@ -850,6 +879,10 @@ namespace BenchMaestro
                 if (App.CurrentRun.CPULogicalsLoad.Any()) AddDetails(App.CurrentRun.CPULogicalsLoad, $"CPU Load % [ Thread - Average - Max ]");
                 if (App.CurrentRun.CPUCoresC0.Any()) AddDetails(App.CurrentRun.CPUCoresC0, $"CPU C0 Time % [ Core - Average - Max ]");
                 if (App.CurrentRun.CPUCoresScores.Any()) AddDetails(App.CurrentRun.CPUCoresScores, $"Cores Scores [ Core - Average - Max ]");
+                if (App.CurrentRun.CPULogicalsScores.Any()) AddDetails(App.CurrentRun.CPULogicalsScores, $"Threads Scores [ Thread - Score ]");
+
+                thiswin.SizeToContent = SizeToContent.WidthAndHeight;
+                thiswin.UpdateLayout();
 
             }
             catch (Exception e)
@@ -870,6 +903,8 @@ namespace BenchMaestro
 
             int _column = 0;
 
+            Thickness dpadding = new Thickness(8, 0, 8, 0);
+
             foreach (int _threads in threads)
             {
                 BenchScore _run = GetRunForThreads(scoreRun, _threads, Benchname);
@@ -879,7 +914,7 @@ namespace BenchMaestro
                 scoreRun.Add(_run);
                 int _row = 0;
 
-                TextBlock _header = new TextBlock { FontSize = 16, Background = App.thrbgbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                TextBlock _header = new TextBlock { FontSize = 16, Background = App.thrbgbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_header, _column);
                 Grid.SetRow(_header, _row);
                 _header.TextAlignment = TextAlignment.Center;
@@ -889,7 +924,9 @@ namespace BenchMaestro
                 ScoreList.Children.Add(_header);
                 _row++;
 
-                TextBlock _score = new TextBlock { FontSize = 20, Background = App.whitebrush, Foreground = App.scorebrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                // SCORE
+
+                TextBlock _score = new TextBlock { FontSize = 20, Background = App.whitebrush, Foreground = App.scorebrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_score, _column);
                 Grid.SetRow(_score, _row);
                 _score.TextAlignment = TextAlignment.Center;
@@ -914,7 +951,7 @@ namespace BenchMaestro
                 Grid.SetColumn(_cputempgrid, _column);
                 Grid.SetRow(_cputempgrid, _row);
 
-                TextBlock _cputemp = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                TextBlock _cputemp = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_cputemp, _column);
                 Grid.SetRow(_cputemp, _row);
                 _cputemp.TextAlignment = TextAlignment.Center;
@@ -940,7 +977,7 @@ namespace BenchMaestro
                 Grid.SetColumn(_cpuclockgrid, _column);
                 Grid.SetRow(_cpuclockgrid, _row);
 
-                TextBlock _cpuclock = new TextBlock { FontSize = 14, Background = App.boxbrush2, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                TextBlock _cpuclock = new TextBlock { FontSize = 14, Background = App.boxbrush2, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_cpuclock, _column);
                 Grid.SetRow(_cpuclock, _row);
                 _cpuclock.TextAlignment = TextAlignment.Center;
@@ -966,7 +1003,7 @@ namespace BenchMaestro
                 Grid.SetColumn(_cpupowergrid, _column);
                 Grid.SetRow(_cpupowergrid, _row);
 
-                TextBlock _cpupowerblock = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                TextBlock _cpupowerblock = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_cpupowerblock, _column);
                 Grid.SetRow(_cpupowerblock, _row);
                 _cpupowerblock.TextAlignment = TextAlignment.Center;
@@ -992,7 +1029,7 @@ namespace BenchMaestro
                 Grid.SetColumn(_additionalgrid, _column);
                 Grid.SetRow(_additionalgrid, _row);
 
-                TextBlock _additional = new TextBlock { FontSize = 14, Background = App.boxbrush2, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                TextBlock _additional = new TextBlock { FontSize = 14, Background = App.boxbrush2, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_additional, _column);
                 Grid.SetRow(_additional, _row);
                 _additional.TextAlignment = TextAlignment.Center;
@@ -1005,7 +1042,7 @@ namespace BenchMaestro
 
                 /// STARTED
 
-                TextBlock _started = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                TextBlock _started = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_started, _column);
                 Grid.SetRow(_started, _row);
                 _started.TextAlignment = TextAlignment.Center;
@@ -1017,7 +1054,7 @@ namespace BenchMaestro
 
                 /// FINISHED
 
-                TextBlock _finished = new TextBlock { FontSize = 14, Background = App.boxbrush2, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                TextBlock _finished = new TextBlock { FontSize = 14, Background = App.boxbrush2, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
                 Grid.SetColumn(_finished, _column);
                 Grid.SetRow(_finished, _row);
                 _finished.TextAlignment = TextAlignment.Center;
@@ -1029,7 +1066,7 @@ namespace BenchMaestro
 
                 /// DETAILS
 
-                Expander _detailsexp = new Expander { Header = "Details", IsExpanded = false, FontSize = 14, Foreground = App.detailsbrush };
+                Expander _detailsexp = new Expander { Header = "Details", IsExpanded = false, FontSize = 14, Foreground = App.detailsbrush, Padding = dpadding };
                 Grid.SetColumn(_detailsexp, _column);
                 Grid.SetRow(_detailsexp, _row);
                 _detailsexp.Collapsed += new RoutedEventHandler(ScoreExpanderHasCollapsed);
@@ -1060,8 +1097,13 @@ namespace BenchMaestro
                 _scroller.Visibility = Visibility.Collapsed;
                 _scroller.Tag = "Details";
                 _scroller.SetBinding(FrameworkElement.HeightProperty, "{Binding RelativeSource={RelativeSource FindAncestor, AncestorType={x:Type StackPanel}}, Path=ActualHeight}");
-
-                TextBlock _details = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch };
+                /*
+                Binding bindW = new Binding("MinWidth");
+                bindW.Mode = BindingMode.OneWay;
+                bindW.Source = App.scoreMinWidth;
+                BindingOperations.SetBinding(_score, TextBlock.MinWidthProperty, bindW);
+                */
+                TextBlock _details = new TextBlock { FontSize = 14, Background = App.boxbrush1, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, Padding = dpadding };
                 _details.TextAlignment = TextAlignment.Center;
                 _details.Text = "N/A";
                 _details.TextWrapping = TextWrapping.Wrap;
@@ -1093,8 +1135,16 @@ namespace BenchMaestro
             foreach (Expander exp in expanders)
             {
                 exp.IsExpanded = false;
+                /*
+                IEnumerable<ScrollViewer> svs = MainWindow.FindVisualChildren<ScrollViewer>(exp);
+                foreach (ScrollViewer sv in svs)
+                {
+                    sv.Visibility = Visibility.Collapsed;
+                }
+                */
             }
             pwin.SizeToContent = SizeToContent.Height;
+            pwin.UpdateLayout();
         }
         private static void ScoreExpanderHasExpanded(object sender, RoutedEventArgs args)
         {
@@ -1105,23 +1155,33 @@ namespace BenchMaestro
             foreach (Expander exp in expanders)
             {
                 exp.IsExpanded = true;
+                /*
+                IEnumerable<ScrollViewer> svs = MainWindow.FindVisualChildren<ScrollViewer>(exp);
+                foreach (ScrollViewer sv in svs)
+                {
+                    sv.Visibility = Visibility.Visible;
+                }
+                */
             }
             IEnumerable<ScrollViewer> elements = MainWindow.FindVisualChildren<ScrollViewer>(_sender).Where(x => x.Tag != null && x.Tag.ToString().StartsWith("Details"));
             if (elements.Any())
             {
                 ScrollViewer sv = elements.FirstOrDefault();
                 double _scrollmh = pwin.MaxHeight - sv.TranslatePoint(new Point(0, 0), null).Y;
-                double _scrolldh = pwin.Height - sv.TranslatePoint(new Point(0, 0), null).Y;
-                double _scrollth = sv.TranslatePoint(new Point(0, 0), null).Y;
+                //double _scrolldh = pwin.Height - sv.TranslatePoint(new Point(0, 0), null).Y;
+                //double _scrollth = sv.TranslatePoint(new Point(0, 0), null).Y;
                 double _tsh = sv.ScrollableHeight + sv.ExtentHeight;
+                double svHeight = 0;
                 if (sv.Visibility == Visibility.Visible && _tsh < _scrollmh )
                 {
-                    sv.Height = _tsh - 8;
+                    svHeight = _tsh - 8;
                 }
                 else
                 {
-                    sv.Height = _scrollmh - 8;
+                    svHeight = _scrollmh - 8;
                 }
+                sv.Height = svHeight > 0 ? svHeight : 0;
+                pwin.UpdateLayout();
                 //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} dH={_scrolldh} tH={_scrollth}");
                 //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
                 //Trace.WriteLine($"ScVis {sv.ComputedVerticalScrollBarVisibility}");

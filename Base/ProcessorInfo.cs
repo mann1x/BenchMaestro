@@ -209,7 +209,7 @@ namespace BenchMaestro
 			return null;
 		}
 
-		[DllImport(@"kernel32.dll", SetLastError = true)]
+		[DllImport(@"kernel32.dll")]
 		private static extern int GetCurrentProcessorNumber();
 
 		#endregion

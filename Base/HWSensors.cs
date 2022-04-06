@@ -645,14 +645,17 @@ namespace BenchMaestro
         public float? Val2 { get; set; }
         public bool Bold { get; set; }
         public string Format { get; set; }
-        public DetailsGrid(string _label, float? _val1, float? _val2, bool _bold, string _format)
+        public string Unit { get; set; }
+        public DetailsGrid(string _label, float? _val1, float? _val2, bool _bold, string _format, string _unit = "")
         {
             Label = _label;
             Val1 = _val1;
             Val2 = _val2;
             Bold = _bold;
             Format = _format;
+            Unit = _unit;
         }
     }
+
 
 }

@@ -71,6 +71,7 @@ namespace BenchMaestro
 		public static DateTime TSRunStart = DateTime.Now;
 		public static bool benchrunning = false;
 		public static bool benchclosed = true;
+		public static double scoreMinWidth = 0;
 
 		public static int BenchIterations = 1;
 		public static int IterationPretime = 20;
@@ -421,7 +422,17 @@ namespace BenchMaestro
 			
 			SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
 
-			App.systemInfo.Zen.Dispose();
+			systemInfo.Zen.Dispose();
+
+			if (systemInfo.Zen != null)
+			{
+				systemInfo.Zen = null;
+			}
+
+			if (HWMonitor.computer != null)
+            {
+				HWMonitor.computer = null;
+			}
 
 		}
 		private void InitColors()

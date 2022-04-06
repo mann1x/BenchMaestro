@@ -94,5 +94,21 @@ namespace BenchMaestro.Properties {
                 this["Initialized"] = value;
             }
         }
+
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("0")]
+        public double scoreMinWidth
+        {
+            get
+            {
+                return ((double)(this["scoreMinWidth"]));
+            }
+            set
+            {
+                this["scoreMinWidth"] = value;
+            }
+        }
+
     }
 }

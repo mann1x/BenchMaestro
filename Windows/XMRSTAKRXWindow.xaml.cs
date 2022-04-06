@@ -49,7 +49,8 @@ namespace BenchMaestro
         const int WM_SIZING = 0x214;
         const int WM_EXITSIZEMOVE = 0x232;
         private static bool WindowWasResized = false;
-
+        private static bool WindowIsInit = false;
+        
         // Using a DependencyProperty as the backing store for MyTitle.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty WinTitleProperty =
             DependencyProperty.Register("WinTitle", typeof(string), typeof(XMRSTAKRXWindow), new UIPropertyMetadata($"BenchMaestro-{App.version}-{Benchname}"));
@@ -57,6 +58,8 @@ namespace BenchMaestro
         {
             InitializeComponent();
             Loaded += Window_Loaded;
+            WindowSettings.Default.scoreMinWidth = 0;
+            WindowSettings.Default.Save();
 
             DataContext = new
             {
@@ -108,6 +111,7 @@ namespace BenchMaestro
             if (WindowSettings.Default.Initialized)
             {
                 Trace.WriteLine($"Restoring Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
+                Trace.WriteLine($"Restoring Window WorkArea {SystemParameters.WorkArea.Top} {SystemParameters.WorkArea.Left} {SystemParameters.WorkArea.Height} {SystemParameters.WorkArea.Width}");
 
                 WindowState = WindowState.Normal;
                 Top = WindowSettings.Default.Top < SystemParameters.WorkArea.Top ? SystemParameters.WorkArea.Top : WindowSettings.Default.Top;
@@ -125,7 +129,7 @@ namespace BenchMaestro
                 WindowSettings.Default.Initialized = true;
                 SaveWinPos();
             }
-
+            WindowIsInit = true;
 
         }
         private void UpdateConfigTag(Object sender, DataTransferEventArgs args)
@@ -136,7 +140,8 @@ namespace BenchMaestro
 
         private void Window_SizeChanged(object sender, EventArgs e)
         {
-            if (WindowSettings.Default.Initialized) SaveWinPos();
+            Trace.WriteLine($"Size changed Window");
+            if (WindowSettings.Default.Initialized && WindowIsInit) SaveWinPos();
         }
 
 
@@ -144,7 +149,6 @@ namespace BenchMaestro
         {
             if (WindowSettings.Default.Initialized)
             {
-
                 SaveWinPos();
             }
             e.Cancel = true;
@@ -210,19 +214,21 @@ namespace BenchMaestro
                             //Trace.WriteLine($"_scroller tTP={App.CurrentRun.DetailsBox.TranslatePoint(new Point(0, this.Height), this)} TP={App.CurrentRun.DetailsScroller.TranslatePoint(new Point(0, 0), null)} H={App.CurrentRun.DetailsScroller.ActualHeight} WH={this.Height}");
                             if (expanded)
                             {
+                                double svHeight = 0;
                                 if (_scrollh >= _tsh - 8)
                                 {
-                                    sv.Height = _tsh - 8;
+                                    svHeight = _tsh - 8;
                                 }
                                 else if (_scrollh >= _scrollmh - 8)
                                 {
-                                    sv.Height = _scrollmh - 8;
+                                    svHeight = _scrollmh - 8;
                                 }
                                 else
                                 {
                                     //Trace.WriteLine($"exitszm_scroller_p aH={sv.ActualHeight} eH={sv.ExtentHeight} scH={sv.ViewportHeight}");
-                                    sv.Height = _scrollh - 8;
+                                    svHeight = _scrollh - 8;
                                 }
+                                sv.Height = svHeight > 0 ? svHeight : 0;
                             }
                             //Trace.WriteLine($"exitszm_scroller aH={sv.ActualHeight} sH={_scrollh} tH={_scrollth} isexpanded={expanded}");
                             //Trace.WriteLine($"exitszm_scroller tsh={_tsh} eH={sv.ExtentHeight} scH={sv.ViewportHeight} isexpanded={expanded}");
@@ -235,8 +241,6 @@ namespace BenchMaestro
 
             return IntPtr.Zero;
         }
-
-
 
         private void ButtonScreenshot_Click(object sender, RoutedEventArgs e)
         {
@@ -275,7 +279,7 @@ namespace BenchMaestro
                 TextBlock _textblock = App.CurrentRun.StartedBox;
                 _textblock.FontSize = 12;
                 _textblock.Text = $"Started: {App.CurrentRun.Started}";
-                if (App.CurrentRun.StartedTemp > -999) _textblock.Text += $" @ {App.CurrentRun.StartedTemp} °C";
+                if (App.CurrentRun.StartedTemp > -999) _textblock.Text += $" @ {App.CurrentRun.StartedTemp}°C";
             }));
         }
         public void STCWin()
@@ -309,7 +313,7 @@ namespace BenchMaestro
             {
                 TextBlock _textblock = App.CurrentRun.ScoreBox;
                 _textblock.Text = "";
-                if (_score.Length == 0)
+                if (App.CurrentRun.ScoreUnit.Length > 0)
                 {
                     _score = $"{Math.Round((decimal)App.CurrentRun.Score, 2)}";
                     _textblock.Inlines.Add(new Run { Text = $"{_score}", FontSize = 20, FontWeight = FontWeights.Bold, Foreground = Brushes.Green });
@@ -463,16 +467,17 @@ namespace BenchMaestro
 
                     Module1.ScoresLayout(ScoreList, scoreRun, threads, Benchname, ConfigTag.Text.Trim());
 
+                    Double minh = 100;
+                    SetValue(MinWidthProperty, minh);
+                    SetValue(MinHeightProperty, minh);
+                    SizeToContent = SizeToContent.WidthAndHeight;
+                    UpdateLayout();
+                    SetValue(MinWidthProperty, ActualWidth);
+                    SetValue(MinHeightProperty, ActualHeight);
+
                     App.thrBench = new Thread(StartBench);
                     App.thridBench = App.thrBench.ManagedThreadId;
                     App.thrBench.Start();
-
-
-                    SizeToContent = SizeToContent.WidthAndHeight;
-                    SetValue(MinWidthProperty, Width);
-                    SetValue(MinHeightProperty, Height);
-                    SizeToContent = SizeToContent.WidthAndHeight;
-
                 }
             }
 
@@ -489,7 +494,7 @@ namespace BenchMaestro
             {
                 Dispatcher.Invoke((Action)(() =>
                 {
-                    Module1.UpdateMonitoring2(ScoreList);
+                    Module1.UpdateMonitoring2(ScoreList, this);
                 }));
             }
             catch (Exception e)

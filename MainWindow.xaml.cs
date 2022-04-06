@@ -82,6 +82,7 @@ namespace BenchMaestro
             if (WindowSettings.Default.Initialized)
             {
                 Trace.WriteLine($"Restoring Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
+                Trace.WriteLine($"Restoring Window WorkArea {SystemParameters.WorkArea.Top} {SystemParameters.WorkArea.Left} {SystemParameters.WorkArea.Height} {SystemParameters.WorkArea.Width}");
 
                 WindowState = WindowState.Normal;
                 Top = WindowSettings.Default.Top < SystemParameters.WorkArea.Top ? SystemParameters.WorkArea.Top : WindowSettings.Default.Top;
@@ -103,7 +104,6 @@ namespace BenchMaestro
                 this.Left = (screenWidth / 2) - (windowWidth / 2);
                 this.Top = (screenHeight / 2) - (windowHeight / 2);
                 WindowStartupLocation = WindowStartupLocation.CenterScreen;
-                SaveWinPos();
                 Trace.WriteLine($"SizeChanged Set Center and Save");
                 WindowSettings.Default.Initialized = true;
                 SaveWinPos();
@@ -146,7 +146,7 @@ namespace BenchMaestro
             if (IsActive && WindowSettings.Default.Initialized)
             {
                 SaveWinPos();
-                Trace.WriteLine($"Saving Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
+                Trace.WriteLine($"Saved Window Position Closing {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
             }
         }
 

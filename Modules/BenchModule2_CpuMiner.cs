@@ -164,6 +164,8 @@ namespace BenchMaestro
                     {
                         UpdateMainStatus($"Benchmark execution error, exitcode: {App.BenchProc.ExitCode}");
                         UpdateScore("Error");
+                        App.CurrentRun.FinishString = $"[{App.BenchProc.ExitCode}] System unstable?";
+                        UpdateFinished(App.CurrentRun.FinishString);
                         App.benchrunning = false;
                         HWMonitor.MonitoringParsed = true;
                     }
@@ -291,9 +293,10 @@ namespace BenchMaestro
                             Arguments = _args,
                             UseShellExecute = false,
                             RedirectStandardOutput = true,
+                            RedirectStandardError = true,
                             CreateNoWindow = true,
-                            StandardOutputEncoding = Encoding.GetEncoding(850)
-                            //StandardErrorEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage)
+                            StandardOutputEncoding = Encoding.GetEncoding(850),
+                            StandardErrorEncoding = Encoding.GetEncoding(850)
                         }
                     };
 
@@ -329,7 +332,8 @@ namespace BenchMaestro
                             _scoreRun.ExitStatus = "Aborted by user";
                             UpdateScore("N/A");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                            UpdateFinished("Aborted by user");
+                            App.CurrentRun.FinishString = "Aborted by user";
+                            UpdateFinished(App.CurrentRun.FinishString);
                             Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                             return;
                         }
@@ -349,7 +353,8 @@ namespace BenchMaestro
                                     _scoreRun.ExitStatus = "Aborted by user";
                                     UpdateScore("N/A");
                                     UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                                    UpdateFinished("Aborted by user");
+                                    App.CurrentRun.FinishString = "Aborted by user";
+                                    UpdateFinished(App.CurrentRun.FinishString);
                                     Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                                     throw new OperationCanceledException();
                                 }
@@ -431,7 +436,8 @@ namespace BenchMaestro
                     {
                         UpdateScore("N/A");
                         UpdateMainStatus($"Benchmark has been deleted, check your AntiVirus!");
-                        UpdateFinished("Bench binary not found");
+                        App.CurrentRun.FinishString = "Bench binary not found";
+                        UpdateFinished(App.CurrentRun.FinishString);
                         Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                         return;
                     }
@@ -531,6 +537,16 @@ namespace BenchMaestro
                         }
                     };
 
+                    App.BenchProc.ErrorDataReceived += (s, e) =>
+                    {
+                        if (e.Data != null)
+                        {
+                            string _line = e.Data.ToString();
+                            App.CurrentRun.RunLog += _line;
+                            Trace.WriteLine($"BENCH ERROR LINE=={_line}");
+                        }
+                    };
+
                     App.BenchProc.BeginOutputReadLine();
 
                     while (App.benchrunning)
@@ -542,7 +558,6 @@ namespace BenchMaestro
                             //hwmcts.Cancel();
                             UpdateScore("N/A");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                            UpdateFinished("Aborted by user");
                             Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                             return;
                         }
@@ -557,7 +572,7 @@ namespace BenchMaestro
 
                     DateTime _finished = DateTime.Now;
                     _scoreRun.Finished = _finished;
-                    UpdateFinished("");
+                    UpdateFinished(App.CurrentRun.FinishString);
                     Trace.WriteLine($"Finish: {_finished}");
 
                     while (!HWMonitor.MonitoringParsed && !benchtoken.IsCancellationRequested)
@@ -576,7 +591,8 @@ namespace BenchMaestro
                     {
                         UpdateScore("N/A");
                         UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                        UpdateFinished("Aborted by user");
+                        App.CurrentRun.FinishString = "Aborted by user";
+                        UpdateFinished(App.CurrentRun.FinishString);
                         Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                         return;
                     }
@@ -605,7 +621,16 @@ namespace BenchMaestro
                 Trace.WriteLine($"{Benchname} Finally {App.RunningProcess}");
                 if (App.RunningProcess != -1) BenchRun.KillProcID(App.RunningProcess);
                 App.TaskRunning = false;
-                if (BenchArchived) File.Delete(BenchBinary);
+                if (BenchArchived)
+                {
+                    try
+                    {
+                        File.Delete(BenchBinary);
+                    }
+                    catch
+                    {
+                    }
+                }
                 SetStart();
                 SetEnabled();
                 UpdateRunStop();

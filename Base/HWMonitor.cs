@@ -141,16 +141,13 @@ namespace BenchMaestro
         {
             try
             {
-                SMU.Status status = App.systemInfo.Zen.RefreshPowerTable();
+                bool _refreshpt = App.systemInfo.ZenRefreshPowerTable();
 
-                if (status != SMU.Status.OK)
+
+                if (!_refreshpt)
                 {
-                    for (int r = 0; r < 5; ++r)
-                    {
-                        Thread.Sleep(25);
-                        status = App.systemInfo.Zen.RefreshPowerTable();
-                        if (status == SMU.Status.OK) r = 5;
-                    }
+                    Trace.WriteLine($"ZenRefreshPowerTable Error, skip to next cycle");
+                    return;
                 }
 
                 foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Source == HWSensorSource.Zen && sensorItem.Enabled && sensorItem.ZenPTOffset >= 0))
@@ -177,10 +174,10 @@ namespace BenchMaestro
                 {
                     for (int i = 0; i < App.systemInfo.CPULogicalProcessors; i++)
                     {
+                        //Trace.Write($"_GetCpuLoad [{cpuLoad.GetCpuCount()}] read #{i} ");
                         float _value = cpuLoad.GetCpuLoad(i);
-                        //Trace.Write($"_GetCpuLoad [{cpuLoad.GetCpuCount()}] read #{i}");
-                        _sensor.MultiValues[i].Values.Add(_value);
                         //Trace.WriteLine($" {_value}%");
+                        _sensor.MultiValues[i].Values.Add(_value);
                         if (_value > 98)
                         {
                             int _core = ProcessorInfo.PhysicalCore(i);
@@ -816,16 +813,8 @@ namespace BenchMaestro
                         if (_coresmaxl < _sensormax && _sensormax > -99999) _coresmaxl = _sensormax;
                         _coresavgl = _coresavgl == -99999 ? _sensoravg : (_coresavgl + _sensoravg) / 2;
                     }
-                    if (App.systemInfo.HyperThreading)
-                    {
-                        App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                        Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                    }
-                    else
-                    {
-                        App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
-                        Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
-                    }
+                    App.CurrentRun.CPULogicalsLoad.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0"));
+                    Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
                 }
             }
 

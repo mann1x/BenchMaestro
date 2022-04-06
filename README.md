@@ -34,6 +34,13 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.14 Alpha
+    - Add: Threads scores for XMR-Stak-RX miner 
+    - Fix: Bench Windows not saving correct last position
+    - Fix: Improved Zen Refresh PowerTable
+    - Fix: Bug for Zen initialization
+    - Fix: Zen sensors
+    - Fix: Scores layout improvements
 - v1.0.13 Alpha
     - Fix: Missing Bench Details Expanders handling
     - Fix: Initial Window position, now Bench are center top

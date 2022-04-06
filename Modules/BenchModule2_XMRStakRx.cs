@@ -59,6 +59,7 @@ namespace BenchMaestro
                 return (false, "CONFIG", 0, "", "");
             }
             string start_pattern = @"^\[.*\] : Start a (?<seconds>.*) second benchmark...";
+            string tscore_pattern = @"^\[.*\] : Benchmark Thread (?<thread>\d+) cpu: (?<score>.*) (?<scoreunit>.*)";
             string end_pattern = @"^\[.*\] : Benchmark Total: (?<score>.*) (?<scoreunit>.*)";
 
             Regex start_rgx = new Regex(start_pattern, RegexOptions.Multiline);
@@ -66,6 +67,45 @@ namespace BenchMaestro
             if (start_m.Success)
             {
                 return (true, "START", 0, start_m.Groups[1].Value, "");
+            }
+            Regex tscore_rgx = new Regex(tscore_pattern, RegexOptions.Multiline);
+            Match tscore_m = tscore_rgx.Match(_line);
+            if (tscore_m.Success)
+            {
+                string[] results = tscore_rgx.GetGroupNames();
+                string thread = "";
+                string score = "";
+                string scoreunit = "";
+
+                foreach (var name in results)
+                {
+                    Group grp = tscore_m.Groups[name];
+                    if (name == "thread" && grp.Value.Length > 0)
+                    {
+                        thread = grp.Value.TrimEnd('\r', '\n').Trim();
+                    }
+                    if (name == "score" && grp.Value.Length > 0)
+                    {
+                        score = grp.Value.TrimEnd('\r', '\n').Trim();
+                    }
+                    if (name == "scoreunit" && grp.Value.Length > 0)
+                    {
+                        scoreunit = grp.Value.TrimEnd('\r', '\n').Trim();
+                    }
+                }
+
+                int int_test = 0;
+                if (score.Length > 0 && scoreunit.Length > 0 && thread.Length > 0 && Int32.TryParse(thread.ToCharArray(), out int_test))
+                {
+                    float? fscore = float.Parse(score, CultureInfo.InvariantCulture.NumberFormat);
+                    Trace.WriteLine($"LogLine Thread Result: {thread} {score} {scoreunit} fscore: {fscore} int_test: {int_test}");
+                    return (true, "THREAD", fscore, scoreunit, thread);
+                }
+                else
+                {
+                    Trace.WriteLine($"LogLine End Result error: {score} {scoreunit}");
+                    return (false, "END", 0, "", "");
+                }
             }
             Regex end_rgx = new Regex(end_pattern, RegexOptions.Multiline);
             Match end_m = end_rgx.Match(_line);
@@ -130,6 +170,8 @@ namespace BenchMaestro
                     {
                         UpdateMainStatus($"Benchmark execution error, exitcode: {App.BenchProc.ExitCode}");
                         UpdateScore("Error");
+                        App.CurrentRun.FinishString = $"[{App.BenchProc.ExitCode}] System unstable?";
+                        UpdateFinished(App.CurrentRun.FinishString);
                         App.benchrunning = false;
                         HWMonitor.MonitoringParsed = true;
                     }
@@ -145,6 +187,7 @@ namespace BenchMaestro
                 string parseString2 = "";
 
                 App.TaskRunning = true;
+                App.scoreMinWidth = 0;
 
                 CancellationToken benchtoken = new CancellationToken();
                 benchtoken = (CancellationToken)App.benchcts.Token;
@@ -262,9 +305,10 @@ namespace BenchMaestro
                             Arguments = _args,
                             UseShellExecute = false,
                             RedirectStandardOutput = true,
+                            RedirectStandardError = true,
                             CreateNoWindow = true,
-                            StandardOutputEncoding = Encoding.GetEncoding(850)
-                            //StandardErrorEncoding = Encoding.GetEncoding(CultureInfo.CurrentCulture.TextInfo.OEMCodePage)
+                            StandardOutputEncoding = Encoding.GetEncoding(850),
+                            StandardErrorEncoding = Encoding.GetEncoding(850)
                         }
                     };
 
@@ -300,7 +344,8 @@ namespace BenchMaestro
                             _scoreRun.ExitStatus = "Aborted by user";
                             UpdateScore("N/A");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                            UpdateFinished("Aborted by user");
+                            App.CurrentRun.FinishString = "Aborted by user";
+                            UpdateFinished(App.CurrentRun.FinishString);
                             Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                             return;
                         }
@@ -320,7 +365,8 @@ namespace BenchMaestro
                                     _scoreRun.ExitStatus = "Aborted by user";
                                     UpdateScore("N/A");
                                     UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                                    UpdateFinished("Aborted by user");
+                                    App.CurrentRun.FinishString = "Aborted by user";
+                                    UpdateFinished(App.CurrentRun.FinishString);
                                     Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                                     throw new OperationCanceledException();
                                 }
@@ -391,7 +437,7 @@ namespace BenchMaestro
                     UpdateStarted();
 
                     string _startstr = $"Benchmark {_thrds}T started at {_started}";
-                    if (_scoreRun.StartedTemp > -999) _startstr += $" with CPU temperature at {_scoreRun.StartedTemp} °C";
+                    if (_scoreRun.StartedTemp > -999) _startstr += $" with CPU temperature at {_scoreRun.StartedTemp}°C";
                     Trace.WriteLine(_startstr);
                     UpdateMainStatus(_startstr);
 
@@ -402,7 +448,8 @@ namespace BenchMaestro
                     {
                         UpdateScore("N/A");
                         UpdateMainStatus($"Benchmark has been deleted, check your AntiVirus!");
-                        UpdateFinished("Bench binary not found");
+                        App.CurrentRun.FinishString = "Bench binary not found";
+                        UpdateFinished(App.CurrentRun.FinishString);
                         Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                         return;
                     }
@@ -423,6 +470,19 @@ namespace BenchMaestro
                     parseString2 = "";
                     App.benchrunning = true;
                     App.benchclosed = false;
+
+                    App.BenchProc.ErrorDataReceived += (s, e) =>
+                    {
+                        if (e.Data != null)
+                        {
+                            string _line = e.Data.ToString();
+                            App.CurrentRun.RunLog += _line;
+                            Trace.WriteLine($"BENCH ERROR LINE=={_line}");
+                        }
+                    };
+
+                    List<DetailsGrid> _tscores = new();
+                    List<int[]> _logicalsscores = new();
 
                     App.BenchProc.OutputDataReceived += (s, e) =>
                     {
@@ -457,6 +517,15 @@ namespace BenchMaestro
                                     Trace.WriteLine("Benchmark START");
                                     parseMsg = "";
                                 }
+                                if (parseMsg == "THREAD")
+                                {
+                                    int _cpu = _scoreRun.RunLogicals[Int32.Parse(parseString2)] - 1;
+                                    int _core = ProcessorInfo.PhysicalCore(_cpu);
+                                    int _thread = ProcessorInfo.ThreadID(_cpu);
+                                    _logicalsscores.Add(new int[] { _scoreRun.RunLogicals[Int32.Parse(parseString2)] - 1, Int32.Parse(parseString2) });
+                                    _tscores.Add(new DetailsGrid($"#{_core}T{_thread}", parseFloat, -99998, true, "0.00", parseString1));
+                                    parseMsg = "";
+                                }
                                 if (parseMsg == "END")
                                 {
                                     TimeSpan _runtimespan = DateTime.Now - App.IterationRuntimeTS;
@@ -487,7 +556,8 @@ namespace BenchMaestro
                             //hwmcts.Cancel();
                             UpdateScore("N/A");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                            UpdateFinished("Aborted by user");
+                            App.CurrentRun.FinishString = "Aborted by user";
+                            UpdateFinished(App.CurrentRun.FinishString);
                             Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                             return;
                         }
@@ -502,13 +572,27 @@ namespace BenchMaestro
 
                     DateTime _finished = DateTime.Now;
                     _scoreRun.Finished = _finished;
-                    UpdateFinished("");
+                    UpdateFinished(App.CurrentRun.FinishString);
                     Trace.WriteLine($"Finish: {_finished}");
 
                     while (!HWMonitor.MonitoringParsed && !benchtoken.IsCancellationRequested)
                     {
                         Thread.Sleep(100);
                     }
+
+                    List<int> _sortrunlogicals = _scoreRun.RunLogicals;
+                    _sortrunlogicals.Sort();
+                    for (int i = 0; i < _sortrunlogicals.Count; ++i)
+                    {
+                        foreach (int[] _cpu in _logicalsscores)
+                        {
+                            int _runcpu = _sortrunlogicals[i] - 1;
+                            DetailsGrid _item = _tscores[_cpu[1]];
+                            Trace.WriteLine($"Check tscores _runcpu={_runcpu} _cpu0=[{_cpu[0]}]: {_item}");
+                            if (_cpu[0] == _runcpu) _scoreRun.CPULogicalsScores.Add(_item);
+                        }
+                    }
+                    _sortrunlogicals = null;
 
                     UpdateMonitoring();
 
@@ -521,7 +605,8 @@ namespace BenchMaestro
                     {
                         UpdateScore("N/A");
                         UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                        UpdateFinished("Aborted by user");
+                        App.CurrentRun.FinishString = "Aborted by user";
+                        UpdateFinished(App.CurrentRun.FinishString);
                         Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                         return;
                     }
@@ -550,7 +635,16 @@ namespace BenchMaestro
                 Trace.WriteLine($"{Benchname} Finally {App.RunningProcess}");
                 if (App.RunningProcess != -1) BenchRun.KillProcID(App.RunningProcess);
                 App.TaskRunning = false;
-                if (BenchArchived) File.Delete(BenchBinary);
+                if (BenchArchived)
+                {
+                    try
+                    {
+                        File.Delete(BenchBinary);
+                    }
+                    catch
+                    {
+                    }
+                }
                 SetStart();
                 SetEnabled();
                 UpdateRunStop();
