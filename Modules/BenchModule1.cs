@@ -593,7 +593,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUPPTMax, 0)}W", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUPPTMax, 0)}W", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     if (App.CurrentRun.CPUPPTMaxLimit > 0)
                     {
                         _tb1b.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUPPTMaxLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
@@ -628,7 +628,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUTDCMax, 0)}A", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUTDCMax, 0)}A", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     if (App.CurrentRun.CPUTDCMaxLimit > 0)
                     {
                         _tb1b.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUTDCMaxLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
@@ -663,7 +663,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUEDCMax, 0)}A", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $" {maxchar} {Math.Round(App.CurrentRun.CPUEDCMax, 0)}A", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     if (App.CurrentRun.CPUEDCMaxLimit > 0)
                     {
                         _tb1b.Inlines.Add(new Run { Text = $" ({App.CurrentRun.CPUEDCMaxLimit}%)", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });

@@ -202,16 +202,13 @@ namespace BenchMaestro
                 if (App.systemInfo.ZenPerCCDTemp)
                 {
                     {
-                        float ccd1temp = App.systemInfo.Zen.GetSingleCcdTemperature(0);
+                        float? ccd1temp = App.systemInfo.Zen.GetSingleCcdTemperature(0);
                         //Trace.WriteLine($"CCD1T={ccd1temp}");
-                        App.hwsensors.UpdateZenSensor(HWSensorName.CCD1Temp, ccd1temp);
-                        if (App.systemInfo.ZenCCDTotal > 1)
-                        {
-                            float ccd2temp = App.systemInfo.Zen.GetSingleCcdTemperature(1);
-                            //Trace.WriteLine($"CCD2T={ccd2temp}");
-                            App.hwsensors.UpdateZenSensor(HWSensorName.CCD2Temp, ccd1temp);
-                            App.hwsensors.UpdateZenSensor(HWSensorName.CCDSTemp, (ccd1temp + ccd2temp) / 2);
-                        }
+                        if (ccd1temp != null) App.hwsensors.UpdateZenSensor(HWSensorName.CCD1Temp, ccd1temp);
+                        float? ccd2temp = App.systemInfo.Zen.GetSingleCcdTemperature(1);
+                        //Trace.WriteLine($"CCD2T={ccd2temp}");
+                        if (ccd2temp != null) App.hwsensors.UpdateZenSensor(HWSensorName.CCD2Temp, ccd2temp);
+                        if (ccd1temp != null && ccd2temp != null) App.hwsensors.UpdateZenSensor(HWSensorName.CCDSTemp, (ccd1temp + ccd2temp) / 2);
                     }
                 }
 
