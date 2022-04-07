@@ -219,8 +219,8 @@ namespace BenchMaestro
                 float? parseFloat = 0;
                 string parseString1 = "";
                 string parseString2 = "";
-
                 string _unit = App.BenchScoreUnit;
+
                 App.hwsensors.SetEnabled(HWSensorName.CPULogicalsScores, true);
                 App.hwsensors.InitSensorLogicalsScore(HWSensorName.CPULogicalsScores, _unit, true);
 
@@ -269,6 +269,7 @@ namespace BenchMaestro
 
                     _scoreRun.ClearRun();
                     _scoreRun.Runtime = _runtime;
+                    _scoreRun.BenchScoreUnit = _unit;
 
                     UpdateProgress(-1);
 

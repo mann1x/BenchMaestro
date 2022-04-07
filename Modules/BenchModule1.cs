@@ -6,11 +6,12 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
+using System.Windows.Media;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Threading;
+using System.Windows;
 
 namespace BenchMaestro
 {
@@ -1181,9 +1182,7 @@ namespace BenchMaestro
             if (elements.Any())
             {
                 ScrollViewer sv = elements.FirstOrDefault();
-                double _scrollmh = pwin.MaxHeight - sv.TranslatePoint(new Point(0, 0), null).Y;
-                //double _scrolldh = pwin.Height - sv.TranslatePoint(new Point(0, 0), null).Y;
-                //double _scrollth = sv.TranslatePoint(new Point(0, 0), null).Y;
+                double _scrollmh = pwin.MaxHeight - sv.TranslatePoint(new System.Windows.Point(0, 0), null).Y;
                 double _tsh = sv.ScrollableHeight + sv.ExtentHeight;
                 double svHeight = 0;
                 if (sv.Visibility == Visibility.Visible && _tsh < _scrollmh )
@@ -1196,9 +1195,71 @@ namespace BenchMaestro
                 }
                 sv.Height = svHeight > 0 ? svHeight : 0;
                 pwin.UpdateLayout();
-                //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} dH={_scrolldh} tH={_scrollth}");
                 //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
                 //Trace.WriteLine($"ScVis {sv.ComputedVerticalScrollBarVisibility}");
+            }
+        }
+        public static void UpdateScore2(string _score)
+        {
+            try
+            {
+                if (App.CurrentRun.ScoreBox != null)
+                {
+                    TextBlock _textblock = App.CurrentRun.ScoreBox;
+                    _textblock.Text = "";
+                    if (App.CurrentRun.ScoreUnit.Length > 0)
+                    {
+                        _score = $"{Math.Round((decimal)App.CurrentRun.Score, 2)}";
+                        _textblock.Inlines.Add(new Run { Text = $"{_score}", FontSize = 20, FontWeight = FontWeights.Bold, Foreground = App.scorebrush });
+                        _textblock.Inlines.Add(new Run { Text = $"  {App.CurrentRun.ScoreUnit}", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                    }
+                    else
+                    {
+                        _textblock.Inlines.Add(new Run { Text = $"{_score}", FontSize = 20, FontWeight = FontWeights.Bold, Foreground = App.scorebrush });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"UpdateScore2 Exception: {ex}");
+            }
+        }
+        public static void UpdateFinished2(string _exitstatus)
+        {
+            try
+            {
+                if (App.CurrentRun.FinishedBox != null)
+                {
+                    TextBlock _textblock = App.CurrentRun.FinishedBox;
+                    _textblock.FontSize = 12;
+                    _textblock.Text = $"Finish: {App.CurrentRun.Finished}";
+                    if (_exitstatus.Length > 0)
+                    {
+                        _textblock.Inlines.Add(new LineBreak { });
+                        _textblock.Inlines.Add(new Run { Text = _exitstatus, FontSize = 15, FontWeight = FontWeights.Bold, Foreground = App.maxbrush });
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"UpdateFinished2 Exception: {ex}");
+            }
+        }
+        public static void UpdateStarted2()
+        {
+            try
+            {
+                if (App.CurrentRun.StartedBox != null)
+                {
+                    TextBlock _textblock = App.CurrentRun.StartedBox;
+                    _textblock.FontSize = 12;
+                    _textblock.Text = $"Started: {App.CurrentRun.Started}";
+                    if (App.CurrentRun.StartedTemp > -999) _textblock.Text += $" @ {App.CurrentRun.StartedTemp}°C";
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"UpdateFinished2 Exception: {ex}");
             }
         }
     }

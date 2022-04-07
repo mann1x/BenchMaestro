@@ -260,10 +260,7 @@ namespace BenchMaestro
         {
             Dispatcher.Invoke((Action)(() =>
             {
-                TextBlock _textblock = App.CurrentRun.StartedBox;
-                _textblock.FontSize = 12;
-                _textblock.Text = $"Started: {App.CurrentRun.Started}";
-                if (App.CurrentRun.StartedTemp > -999) _textblock.Text += $" @ {App.CurrentRun.StartedTemp}°C";
+                Module1.UpdateStarted2();
             }));
         }
         public void STCWin()
@@ -281,32 +278,14 @@ namespace BenchMaestro
         {
             Dispatcher.Invoke((Action)(() =>
             {
-                TextBlock _textblock = App.CurrentRun.FinishedBox;
-                _textblock.FontSize = 12;
-                _textblock.Text = $"Finish: {App.CurrentRun.Finished}";
-                if (_exitstatus.Length > 0)
-                {
-                    _textblock.Inlines.Add(new LineBreak { });
-                    _textblock.Inlines.Add(new Run { Text = _exitstatus, FontSize = 15, FontWeight = FontWeights.Bold, Foreground = Brushes.Red });
-                }
+                Module1.UpdateFinished2(_exitstatus);
             }));
         }
         public void UpdateScore(string _score = "")
         {
             Dispatcher.Invoke((Action)(() =>
             {
-                TextBlock _textblock = App.CurrentRun.ScoreBox;
-                _textblock.Text = "";
-                if (App.CurrentRun.ScoreUnit.Length > 0)
-                {
-                    _score = $"{Math.Round((decimal)App.CurrentRun.Score, 2)}";
-                    _textblock.Inlines.Add(new Run { Text = $"{_score}", FontSize = 20, FontWeight = FontWeights.Bold, Foreground = Brushes.Green });
-                    _textblock.Inlines.Add(new Run { Text = $"  {App.CurrentRun.ScoreUnit}", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = Brushes.Black });
-                }
-                else
-                {
-                    _textblock.Inlines.Add(new Run { Text = $"{_score}", FontSize = 20, FontWeight = FontWeights.Bold, Foreground = Brushes.Green });
-                }
+                Module1.UpdateScore2(_score);
             }));
         }
         public void UpdateRunStop()

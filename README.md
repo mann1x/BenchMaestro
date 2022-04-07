@@ -34,6 +34,8 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.17 Alpha
+    - Fix: Bug with Score unit at bench start
 - v1.0.16 Alpha
     - Add: Zen direct SMU read CPU temperature
     - Add: Threads scores for CPUminer
