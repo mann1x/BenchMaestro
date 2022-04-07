@@ -41,6 +41,7 @@ namespace BenchMaestro
         string BenchArchive = @".\Benchmarks\xmr-stak-rx-win64-1.0.5\xmr-stak-rx.7z";
         string BenchPath = @".\Benchmarks\xmr-stak-rx-win64-1.0.5\";
         string BenchArgs = $" --noTest --benchmark 255 --benchwait 0 --benchwork ###runtime### -c xmrstakrx_config.txt --currency randomx -o pool.usxmrpool.com:3333 -u benchmark -p \"\" -r BenchMaestro --cpu xmrstakrx_cpu.txt";
+        string BenchScoreUnit = "H/S";
         bool BenchArchived = true;
         bool EndCheckLowLoad = true;
 
@@ -465,7 +466,7 @@ namespace BenchMaestro
                         ScoreList.ColumnDefinitions.Add(new ColumnDefinition { });
                     }
 
-                    Module1.ScoresLayout(ScoreList, scoreRun, threads, Benchname, ConfigTag.Text.Trim());
+                    Module1.ScoresLayout(ScoreList, scoreRun, threads, Benchname, ConfigTag.Text.Trim(), BenchScoreUnit);
 
                     Double minh = 100;
                     SetValue(MinWidthProperty, minh);

@@ -517,8 +517,18 @@ namespace BenchMaestro
 						try
 						{
 							Zen = new Cpu();
+							Trace.WriteLine($"Zen Name: {Zen.info.cpuName}");
+							Trace.WriteLine($"Zen CodeName: {Zen.info.codeName}");
+							Trace.WriteLine($"Zen Family: {Zen.info.family}");
+							Trace.WriteLine($"Zen Model: {Zen.info.model}");
+							Trace.WriteLine($"Zen BaseModel: {Zen.info.baseModel}");
+							Trace.WriteLine($"Zen ExtModel: {Zen.info.extModel}");
+							Trace.WriteLine($"Zen Socket: {Zen.info.packageType}");
+							Trace.WriteLine($"Zen CpuID: {Zen.info.cpuid:X8}");
+							Trace.WriteLine($"Zen SVI2: {Zen.info.svi2.coreAddress:X8}:{Zen.info.svi2.socAddress:X8}");
 							smucheck = Zen.smu.Version != 0U;
-							Trace.WriteLine($"Test SMU for Zen: {smucheck}");
+							Trace.WriteLine($"Zen Test SMU: {smucheck}");
+							Trace.WriteLine($"Zen SMU Type: {Zen.smu.SMU_TYPE}");
 						}
 						catch
 						{
@@ -674,7 +684,7 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 159);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 31);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPULoad, -1);
@@ -690,8 +700,6 @@ namespace BenchMaestro
 										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 										App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 97 + _coreoffset, _core);
 									}
-									App.hwsensors.SetValueOffset(HWSensorName.CPUTemp, -20);
-									App.hwsensors.SetValueOffset(HWSensorName.CPUCoresTemps, -20);
 
 									for (int _cpu = 1; _cpu <= CPULogicalProcessors; ++_cpu)
 									{
@@ -738,7 +746,7 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 526);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
@@ -801,7 +809,7 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 347);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
@@ -866,7 +874,7 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 545);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
@@ -929,7 +937,7 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 358);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
@@ -992,8 +1000,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 386);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 78);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 99);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 17);
-
+									//App.hwsensors.InitZen(HWSensorName.CPUTemp, 17);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CCD1Temp, -1, 1);
@@ -1055,7 +1063,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 303);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 66);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									//App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);
@@ -1118,7 +1127,7 @@ namespace BenchMaestro
 									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 459);
 									App.hwsensors.InitZen(HWSensorName.CPUFSB, 66);
 									App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
-									App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
+									App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
 									App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
 									App.hwsensors.InitZen(HWSensorName.CPUEffClock, -1);

@@ -26,7 +26,8 @@ namespace BenchMaestro
         string BenchBinary = @".\Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx2.exe";
         string BenchArchive = @".\Benchmarks\cpuminer-opt-3.19.7\cpuminer-avx2.7z";
         string BenchPath = @".\Benchmarks\cpuminer-opt-3.19.7\";
-        string BenchArgs = $" --benchmark --no-color --time-limit=###runtime### --threads=###threads### --cpu-affinity ###affinity### --algo=scrypt:512 --no-redirect --no-extranonce --no-stratum --no-gbt --no-getwork --no-longpoll --stratum-keepalive";
+        string BenchArgs = $" --benchmark --hash-meter --no-color --time-limit=###runtime### --threads=###threads### --cpu-affinity ###affinity### --algo=scrypt:512 --no-redirect --no-extranonce --no-stratum --no-gbt --no-getwork --no-longpoll --stratum-keepalive";
+        string BenchScoreUnit = "H/s";
         bool BenchArchived = true;
         bool EndCheckLowLoad = false;
 
@@ -458,7 +459,7 @@ namespace BenchMaestro
                     SetValue(MinWidthProperty, ActualWidth);
                     SetValue(MinHeightProperty, ActualHeight);
 
-                    Module1.ScoresLayout(ScoreList, scoreRun, threads, Benchname, ConfigTag.Text.Trim());
+                    Module1.ScoresLayout(ScoreList, scoreRun, threads, Benchname, ConfigTag.Text.Trim(), BenchScoreUnit);
 
                     App.thrBench = new Thread(StartBench);
                     App.thridBench = App.thrBench.ManagedThreadId;

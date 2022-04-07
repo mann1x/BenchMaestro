@@ -34,6 +34,12 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.16 Alpha
+    - Add: Zen direct SMU read CPU temperature
+    - Add: Threads scores for CPUminer
+    - Add: Zen debug info in tracelog 
+    - Fix: Bug with Alder Lake with set affinity on last thread
+    - Fix: Bug with tracelog writeline
 - v1.0.15 Alpha
     - Fix: Layout colors for additional info (CCD, L3, etc)
     - Fix: Missing CCD temp and CCDs average

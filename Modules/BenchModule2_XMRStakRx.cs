@@ -186,6 +186,10 @@ namespace BenchMaestro
                 string parseString1 = "";
                 string parseString2 = "";
 
+                string _unit = App.CurrentRun.BenchScoreUnit;
+                App.hwsensors.SetEnabled(HWSensorName.CPULogicalsScores, false);
+                App.hwsensors.SetUnit(HWSensorName.CPULogicalsScores, _unit);
+
                 App.TaskRunning = true;
                 App.scoreMinWidth = 0;
 
@@ -584,12 +588,12 @@ namespace BenchMaestro
                     _sortrunlogicals.Sort();
                     for (int i = 0; i < _sortrunlogicals.Count; ++i)
                     {
-                        foreach (int[] _cpu in _logicalsscores)
+                        foreach (int[] _cpuscore in _logicalsscores)
                         {
                             int _runcpu = _sortrunlogicals[i] - 1;
-                            DetailsGrid _item = _tscores[_cpu[1]];
-                            Trace.WriteLine($"Check tscores _runcpu={_runcpu} _cpu0=[{_cpu[0]}]: {_item}");
-                            if (_cpu[0] == _runcpu) _scoreRun.CPULogicalsScores.Add(_item);
+                            DetailsGrid _item = _tscores[_cpuscore[1]];
+                            //Trace.WriteLine($"Check tscores _runcpu={_runcpu} _cpu0=[{_cpuscore[0]}]: {_item}");
+                            if (_cpuscore[0] == _runcpu) _scoreRun.CPULogicalsScores.Add(_item);
                         }
                     }
                     _sortrunlogicals = null;

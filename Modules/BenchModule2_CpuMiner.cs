@@ -70,6 +70,7 @@ namespace BenchMaestro
             string swfeat_pattern = @"^SW features: (?<swfeatures>.*)";
             string feat_pattern = @"^Starting miner with (?<features>.*)...";
             string start_pattern = @"^\[.*\] \d+ of \d+ miner threads started using '(?<algo>.*)' algorithm";
+            string tscore_pattern = @"^\[.*\] CPU #(?<thread>\d+): (?<score>.*) (?<scoreunit>.*)";
             string end_pattern = @"^\[.*\] Benchmark: (?<score>.*) (?<scoreunit>.*)";
             Regex start_rgx = new Regex(start_pattern, RegexOptions.Multiline);
             Match start_m = start_rgx.Match(_line);
@@ -100,6 +101,45 @@ namespace BenchMaestro
             if (algofeat_m.Success)
             {
                 return (true, "ALGOFEATURES", 0, algofeat_m.Groups[1].Value, "");
+            }
+            Regex tscore_rgx = new Regex(tscore_pattern, RegexOptions.Multiline);
+            Match tscore_m = tscore_rgx.Match(_line);
+            if (tscore_m.Success)
+            {
+                string[] results = tscore_rgx.GetGroupNames();
+                string thread = "";
+                string score = "";
+                string scoreunit = "";
+
+                foreach (var name in results)
+                {
+                    Group grp = tscore_m.Groups[name];
+                    if (name == "thread" && grp.Value.Length > 0)
+                    {
+                        thread = grp.Value.TrimEnd('\r', '\n').Trim();
+                    }
+                    if (name == "score" && grp.Value.Length > 0)
+                    {
+                        score = grp.Value.TrimEnd('\r', '\n').Trim();
+                    }
+                    if (name == "scoreunit" && grp.Value.Length > 0)
+                    {
+                        scoreunit = grp.Value.TrimEnd('\r', '\n').Trim();
+                    }
+                }
+
+                int int_test = 0;
+                if (score.Length > 0 && scoreunit.Length > 0 && thread.Length > 0 && Int32.TryParse(thread.ToCharArray(), out int_test))
+                {
+                    float? fscore = float.Parse(score, CultureInfo.InvariantCulture.NumberFormat);
+                    Trace.WriteLine($"LogLine Thread Result: {thread} {score} {scoreunit} fscore: {fscore} int_test: {int_test}");
+                    return (true, "THREAD", fscore, scoreunit, thread);
+                }
+                else
+                {
+                    Trace.WriteLine($"LogLine End Result error: {score} {scoreunit}");
+                    return (false, "END", 0, "", "");
+                }
             }
             Regex end_rgx = new Regex(end_pattern, RegexOptions.Multiline);
             Match end_m = end_rgx.Match(_line);
@@ -179,6 +219,10 @@ namespace BenchMaestro
                 float? parseFloat = 0;
                 string parseString1 = "";
                 string parseString2 = "";
+
+                string _unit = App.BenchScoreUnit;
+                App.hwsensors.SetEnabled(HWSensorName.CPULogicalsScores, true);
+                App.hwsensors.InitSensorLogicalsScore(HWSensorName.CPULogicalsScores, _unit, true);
 
                 App.TaskRunning = true;
 
@@ -516,6 +560,18 @@ namespace BenchMaestro
                                 {
                                     Trace.WriteLine($"ALGO Features: {parseString1}");
                                     App.CurrentRun.AlgoFeatures = parseString1.Trim();
+                                    parseMsg = "";
+                                }
+                                if (parseMsg == "THREAD")
+                                {
+                                    float? _valscore = parseFloat;
+                                    string _prefix = parseString1[0..^_unit.Length];
+                                    if (_prefix.Length > 0)
+                                    {
+                                        _valscore = (float?)HWMonitor.SetScaleValueFromPrefix((double)parseFloat, _prefix);
+                                    }
+                                    //Trace.WriteLine($"TSCORE [{Int32.Parse(parseString2)}] [{parseFloat}] [{_valscore}] [{_prefix}]");
+                                    App.hwsensors.UpdateSensorLogicalsScore(HWSensorName.CPULogicalsScores, Int32.Parse(parseString2), _valscore, _prefix);
                                     parseMsg = "";
                                 }
                                 if (parseMsg == "END")

@@ -74,6 +74,7 @@ namespace BenchMaestro
 		public static double scoreMinWidth = 0;
 
 		public static int BenchIterations = 1;
+		public static string BenchScoreUnit;
 		public static int IterationPretime = 20;
 		public static int IterationRuntime = 100;
 		public static int IterationPostime = 5;
@@ -169,15 +170,8 @@ namespace BenchMaestro
 		}
 		public static int GetLastThread(int _base = 1)
 		{
-			int _thr = systemInfo.CPUCores;
-			if (App.systemInfo.HyperThreading)
-			{
-				_thr = _thr * 2;
-			}
-			if (_base == 0)
-			{
-				_thr = _thr - 1;
-			}
+			int _thr = ProcessorInfo.LastThreadID();
+			if (_base == 0) _thr--;
 			return _thr;
 		}
 		public static void SetCPUSource(HWSensorSource _source)
@@ -379,9 +373,7 @@ namespace BenchMaestro
 			systemInfo.STMT = BenchMaestro.Properties.Settings.Default.BtnSTMT;
 			systemInfo.CPPCCustomEnabled = BenchMaestro.Properties.Settings.Default.BtnSTMT;
 
-			Process thisprocess = Process.GetCurrentProcess();
-
-			thisprocess.ProcessorAffinity = (IntPtr)(1L << App.GetLastThread(0));
+			SetLastThreadAffinity();
 
 		}
 		private static void Monitor_ElapsedEventHandler(object sender, ElapsedEventArgs e)
@@ -415,8 +407,6 @@ namespace BenchMaestro
 
 			HWMonitor.Close();
 
-			Trace.Flush();
-
 			hwmcts.Dispose();
 			benchcts.Dispose();
 			
@@ -433,6 +423,9 @@ namespace BenchMaestro
             {
 				HWMonitor.computer = null;
 			}
+			Trace.WriteLine("BenchMaestro closed");
+			Trace.Flush();
+			Trace.Close();
 
 		}
 		private void InitColors()
@@ -521,6 +514,19 @@ namespace BenchMaestro
 			{
 				Trace.WriteLine($"ExtractBench exception: {ex}");
 				return false;
+			}
+		}
+
+		public static void SetLastThreadAffinity()
+        {
+			try
+            {
+				Process thisprocess = Process.GetCurrentProcess();
+				thisprocess.ProcessorAffinity = (IntPtr)(1L << App.GetLastThread(0));
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"SetLastThreadAffinity exception: {ex}");
 			}
 		}
 

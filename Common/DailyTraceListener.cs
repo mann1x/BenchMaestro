@@ -38,12 +38,8 @@ namespace BenchMaestro
             StringBuilder sb = new StringBuilder();
             sb.Append(DateTime.Now);
             sb.Append("##");
-            sb.Append(Process.GetCurrentProcess().Id);
-            sb.Append("##");
-            sb.Append(String.Format("Background: {0}\n", thread.IsBackground) +
-            String.Format("Thread Pool: {0}\n", thread.IsThreadPoolThread) +
-            String.Format("Thread ID: {0}\n", thread.ManagedThreadId)); 
-            sb.Append("##");
+            sb.Append($"{Process.GetCurrentProcess().Id}:{thread.ManagedThreadId}");
+            sb.Append("## ");
             sb.Append(message);
             _TraceWriter.WriteLine(sb.ToString());
         }
@@ -54,14 +50,10 @@ namespace BenchMaestro
             StringBuilder sb = new StringBuilder();
             sb.Append(DateTime.Now);
             sb.Append("##");
-            sb.Append(Process.GetCurrentProcess().Id);
-            sb.Append("##");
-            sb.Append(String.Format("Background: {0}\n", thread.IsBackground) +
-            String.Format("Thread Pool: {0}\n", thread.IsThreadPoolThread) +
-            String.Format("Thread ID: {0}\n", thread.ManagedThreadId));
+            sb.Append($"{Process.GetCurrentProcess().Id}:{thread.ManagedThreadId}");
             sb.Append("##");
             sb.Append(category);
-            sb.Append("##");
+            sb.Append("## ");
             sb.Append(message);
             _TraceWriter.WriteLine(sb.ToString());
         }

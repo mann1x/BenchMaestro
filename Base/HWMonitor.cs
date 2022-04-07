@@ -70,6 +70,7 @@ namespace BenchMaestro
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresPower, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Power));
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresTemps, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Temperature));
             App.hwsensors.Add(new HWSensorItem(HWSensorName.CPULogicalsLoad, HWSensorValues.MultiLogical, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Load));
+            App.hwsensors.Add(new HWSensorItem(HWSensorName.CPULogicalsScores, HWSensorValues.MultiLogical, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Load));
         }
         public static void AddMonDevice(HWSensorDevice _device)
         {
@@ -198,6 +199,8 @@ namespace BenchMaestro
                 }
 
                 App.hwsensors.UpdateZenSensor(HWSensorName.CPULoad, cpuLoad.GetTotalLoad());
+                App.hwsensors.UpdateZenSensor(HWSensorName.CPUTemp, App.systemInfo.Zen.GetCpuTemperature());
+                //Trace.WriteLine($"Zen CPU Temp {App.systemInfo.Zen.GetCpuTemperature()}");
 
                 if (App.systemInfo.ZenPerCCDTemp)
                 {
@@ -647,6 +650,8 @@ namespace BenchMaestro
             double _coresavgp = -99999;
             double _coresmaxl = -99999;
             double _coresavgl = -99999;
+            double _coresmaxsc = -99999;
+            double _coresavgsc = -99999;
 
             Trace.WriteLine($"GET STATS FOR {App.CurrentRun.RunCores.Count} CORES");
 
@@ -814,6 +819,37 @@ namespace BenchMaestro
                     Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Load Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
                 }
             }
+
+            if (App.hwsensors.IsEnabled(HWSensorName.CPULogicalsScores))
+            {
+                string _unit = App.hwsensors.GetUnit(HWSensorName.CPULogicalsScores);
+                for (int _cpu = 1; _cpu <= App.systemInfo.CPULogicalProcessors; ++_cpu)
+                {
+                    _coresavgsc = -99999;
+                    _coresmaxsc = -99999;
+                    bool _bold = true;
+                    int _core = ProcessorInfo.PhysicalCore(_cpu - 1);
+                    int _thread = ProcessorInfo.ThreadID(_cpu - 1);
+                    _sensoravg = (double)App.hwsensors.GetAvg(HWSensorName.CPULogicalsScores, _cpu - 1);
+                    _sensormax = (double)App.hwsensors.GetMax(HWSensorName.CPULogicalsScores, _cpu - 1);
+                    if (_bold)
+                    {
+                        if (_coresmaxsc < _sensormax && _sensormax > -99999) _coresmaxsc = _sensormax;
+                        _coresavgsc = _coresavgsc == -99999 ? _sensoravg : (_coresavgsc + _sensoravg) / 2;
+                    }
+                    double _scoreavg;
+                    string _scoreavgscale;
+                    double _scoremax;
+                    string _scoremaxscale;
+
+                    (_scoreavg, _scoreavgscale) = GetScaleValueAndPrefix(_coresavgsc);
+                    (_scoremax, _scoremaxscale) = GetScaleValueAndPrefix(_coresmaxsc);
+
+                    App.CurrentRun.CPULogicalsScores.Add(new DetailsGrid($"#{_core}T{_thread}", (float)Math.Round(_scoreavg, 2), (float)Math.Round(_scoremax, 2), _bold, "2", _unit, _scoreavgscale, _scoremaxscale));
+                    Trace.WriteLine($"[CPU {_cpu} #{_core}T{_thread} Score Avg: {Math.Round(_scoreavg, 2)} {_scoreavgscale}{_unit} Max: {Math.Round(_scoremax, 2)} {_scoremaxscale}{_unit}]");
+                }
+            }
+
 
             App.CurrentRun.CoresAvgTemp = Math.Round(_coresavgt, 1);
             App.CurrentRun.CoresMaxTemp = Math.Round(_coresmaxt, 1);
@@ -1077,6 +1113,34 @@ namespace BenchMaestro
             }
         }
 
+        public static (double, string) GetScaleValueAndPrefix(double value)
+        {
+            string prefix;
+            if (value < 1e4) prefix = "";
+            else if (value < 1e7) { prefix = "k"; value /= 1e3; }
+            else if (value < 1e10) { prefix = "M"; value /= 1e6; }
+            else if (value < 1e13) { prefix = "G"; value /= 1e9; }
+            else if (value < 1e16) { prefix = "T"; value /= 1e12; }
+            else if (value < 1e19) { prefix = "P"; value /= 1e15; }
+            else if (value < 1e22) { prefix = "E"; value /= 1e18; }
+            else if (value < 1e25) { prefix = "Z"; value /= 1e21; }
+            else { prefix = "Y"; value /= 1e24; }
+            return (value, prefix);
+        }
+        public static double SetScaleValueFromPrefix(double value, string _prefix)
+        {
+            string prefix = _prefix.Trim();
+            if (prefix == "") return value;
+            if (prefix == "Y" || prefix == "y") { value *= 1e24; }
+            else if (prefix == "Z" || prefix == "z") { value *= 1e21; }
+            else if (prefix == "E" || prefix == "e") { value *= 1e18; }
+            else if (prefix == "P" || prefix == "p") { value *= 1e15; }
+            else if (prefix == "T" || prefix == "t") { value *= 1e12; }
+            else if (prefix == "G" || prefix == "g") { value *= 1e9; }
+            else if (prefix == "M" || prefix == "m") { value *= 1e6; }
+            else if (prefix == "K" || prefix == "k") { value *= 1e3; }
+            return value;
+        }
         public class UpdateVisitor : IVisitor
         {
             public void VisitComputer(IComputer computer)

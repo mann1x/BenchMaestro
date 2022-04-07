@@ -221,6 +221,25 @@ namespace BenchMaestro
                 return false;
             }
         }
+        public static bool SetEnabled(this List<HWSensorItem> _sensors, HWSensorName _name, bool _enabled)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        _sensor.Enabled = _enabled;
+                    }
+                }
+                return false;
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor SetEnabled Exception: {ex}");
+                return false;
+            }
+        }
         public static bool IsAny(this List<HWSensorItem> _sensors, HWSensorName _name, int _cpu = -1)
         {
             int _count = 0;
@@ -416,7 +435,6 @@ namespace BenchMaestro
                 return 0;
             }
         }
-
         public static void UpdateSensor(this List<HWSensorItem> _sensors, string _Identifier, float? _value)
         {
             try
@@ -448,6 +466,91 @@ namespace BenchMaestro
                 Trace.WriteLine($"HWSensor UpdateSensor Exception: {ex}");
             }
         }
+
+        public static void UpdateSensorLogicalsScore(this List<HWSensorItem> _sensors, HWSensorName _name, int _cpu, float? _value, string _unit = "")
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name && _sensor.Enabled)
+                    {
+                        _sensor.MultiValues[_cpu].Values.Add(_value);
+                        _sensor.MultiValues[_cpu].Unit = _unit;
+                        //Trace.WriteLine($"UpdateSensorLogicalsScore Added {_name} CPU {_cpu} Unit {_unit} Value {_value}");
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor UpdateSensorLogicalsScore Exception: {ex}");
+            }
+        }
+        public static void InitSensorLogicalsScore(this List<HWSensorItem> _sensors, HWSensorName _name, string _unit = "", bool _enabled = true)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        _sensor.Unit = _unit;
+                        _sensor.Source = HWSensorSource.Bench;
+                        _sensor.Enabled = _enabled;
+                        _sensor.SensorValues = HWSensorValues.MultiLogical;
+                        for (int i = 0; i < App.systemInfo.CPULogicalProcessors; ++i)
+                        {
+                            _sensor.MultiValues.Add(new HWSensorMultiValues());
+                            Trace.WriteLine($"InitSensorLogicalsScore Added {_name} Index {i} Unit {_unit}");
+                        }
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor InitSensorLogicalsScore Exception: {ex}");
+            }
+        }
+        public static void SetUnit(this List<HWSensorItem> _sensors, HWSensorName _name, string _unit)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        _sensor.Unit = _unit;
+                    }
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor SetUnit Exception: {ex}");
+            }
+        }
+        public static string GetUnit(this List<HWSensorItem> _sensors, HWSensorName _name)
+        {
+            try
+            {
+                foreach (var _sensor in _sensors)
+                {
+                    if (_sensor.Name == _name)
+                    {
+                        return _sensor.Unit;
+                    }
+                }
+                return "";
+                }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"HWSensor GetUnit Exception: {ex}");
+                return "";
+            }
+        }
+
         public static void UpdateZenSensor(this List<HWSensorItem> _sensors, HWSensorName _name, float? _value, int _core = -1)
         {
             try
@@ -502,6 +605,7 @@ namespace BenchMaestro
         public List<float?> Values { get; set; }
         public string LibreLabel { get; set; }
         public string LibreIdentifier { get; set; }
+        public string Unit { get; set; }
         public int ZenPTOffset { get; set; }
         public void Reset()
         {
@@ -528,6 +632,7 @@ namespace BenchMaestro
         public string LibreIdentifier { get; set; }
         public string ManualLibreLabel { get; set; }
         public string ManialLibreIdentifier { get; set; }
+        public string Unit { get; set; }
 
         public float? ValueOffset { get; set; }
         public int ZenPTOffset { get; set; }
@@ -550,6 +655,7 @@ namespace BenchMaestro
             Enabled = false;
             LibreLabel = "";
             LibreIdentifier = "";
+            Unit = "";
             ZenPTOffset = 0;
             ZenMulti = 1;
             ValueOffset = 0;
@@ -567,6 +673,7 @@ namespace BenchMaestro
 
     public enum HWSensorSource
     {
+        Bench,
         Libre,
         Zen
 
@@ -593,11 +700,12 @@ namespace BenchMaestro
         Amperage,
         Load,
         Temperature,
-        Percentage
-
+        Percentage,
+        Score
     }
     public enum HWSensorDevice
     {
+        Bench,
         CPU,
         MainBoard,
         GPU
@@ -627,6 +735,7 @@ namespace BenchMaestro
         CPUCoresTemps,
         CPUCoresC0,
         CPULogicalsLoad,
+        CPULogicalsScores,
         CPUPPT,
         CPUTDC,
         CPUEDC,
@@ -643,14 +752,18 @@ namespace BenchMaestro
         public string Label { get; set; }
         public float? Val1 { get; set; }
         public float? Val2 { get; set; }
+        public string Val1Scale { get; set; }
+        public string Val2Scale { get; set; }
         public bool Bold { get; set; }
         public string Format { get; set; }
         public string Unit { get; set; }
-        public DetailsGrid(string _label, float? _val1, float? _val2, bool _bold, string _format, string _unit = "")
+        public DetailsGrid(string _label, float? _val1, float? _val2, bool _bold, string _format, string _unit = "", string _val1scale = "", string _val2scale = "")
         {
             Label = _label;
             Val1 = _val1;
             Val2 = _val2;
+            Val1Scale = _val1scale;
+            Val2Scale = _val2scale;
             Bold = _bold;
             Format = _format;
             Unit = _unit;

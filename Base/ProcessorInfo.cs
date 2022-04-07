@@ -81,6 +81,14 @@ namespace BenchMaestro
 		}
 
 		/// <summary>
+		/// Get Last Thread ID for Processor
+		/// </summary>
+		public static int LastThreadID()
+		{
+			return HardwareCores[HardwareCores.Length - 1].LogicalCores.Last();
+		}
+
+		/// <summary>
 		/// Current logical core ID
 		/// </summary>
 		public static int CurrentLogicalCore

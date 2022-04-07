@@ -571,7 +571,7 @@ namespace BenchMaestro
                     _row++;
                 }
 
-                if (App.CurrentRun.CPUPPTAvg > -999)
+                if (App.CurrentRun.CPUPPTAvg > 0)
                 {
                     if (_gridblock.ColumnDefinitions.Count == 0)
                     {
@@ -606,7 +606,7 @@ namespace BenchMaestro
                     _row++;
                 }
 
-                if (App.CurrentRun.CPUTDCAvg > -999)
+                if (App.CurrentRun.CPUTDCAvg > 0)
                 {
                     if (_gridblock.ColumnDefinitions.Count == 0)
                     {
@@ -641,7 +641,7 @@ namespace BenchMaestro
                     _row++;
                 }
 
-                if (App.CurrentRun.CPUEDCAvg > -999)
+                if (App.CurrentRun.CPUEDCAvg > 0)
                 {
                     if (_gridblock.ColumnDefinitions.Count == 0)
                     {
@@ -749,25 +749,30 @@ namespace BenchMaestro
 
                         foreach (DetailsGrid _item in _thislist.Where(x => x.Val1 > -99999 || x.Val2 > -99999))
                         {
-                            Trace.WriteLine($"{_header} {_item.Label} {_item.Val1} {_item.Val2} {_item.Unit}");
+                            string Label = _item.Label.ToString();
+                            string Unit = _item.Unit.ToString();
+
+                            Trace.WriteLine($"{_header} {Label} v1={_item.Val1} v2={_item.Val2} v1s={_item.Val1Scale} v2s={_item.Val2Scale} iu={Unit}");
 
                             if (_item.Val2 == -99998 && _fcount == 1)
-                            {
                                 _colspan2 = 1;
-                            }
                             else if (_item.Val2 == -99998)
-                            {
                                 _colspan2 = 2;
+                            else if(_item.Val2 > -99998 && _item.Unit.Length > 0 && _item.Val2 > 0)
+                            {
+                            }
+                            if (_item.Val1 > -99998)
+                            {
                             }
 
-                            string Label = _item.Label.ToString();
                             string Val1 = String.Format("{0:" + _item.Format + "}", _item.Val1.ToString());
                             string Val2 = String.Format("{0:" + _item.Format + "}", _item.Val2.ToString());
-                            string Unit = _item.Unit.ToString();
+
                             if (Val1 == "-99999") Val1 = "N/A";
                             if (Val2 == "-99999") Val2 = "N/A";
                             FontWeight _weight = FontWeights.Normal;
                             if (_item.Bold) _weight = FontWeights.Bold;
+                            FontWeight _wnormal = FontWeights.Normal;
                             Trace.WriteLine($"{Label} {Val1} {Val2}");
 
                             TextBlock _tb1a = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
@@ -782,11 +787,9 @@ namespace BenchMaestro
                             if (_fcount == 1 && _item.Val2 == -99998) _col++;
 
                             TextBlock _tb1b = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
-                            _tb1b.Inlines.Add(new Run { Text = Val1, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
-                            if (Unit.Length > 0)
-                            {
-                                _tb1b.Inlines.Add(new Run { Text = $" {Unit}", FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
-                            }
+                            _tb1b.Inlines.Add(new Run { Text = $"{Val1}", FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                            if (_item.Val1Scale.Length > 0 || Unit.Length > 0)
+                                _tb1b.Inlines.Add(new Run { Text = $" {_item.Val1Scale}{Unit}", FontSize = 9, FontWeight = _wnormal, Foreground = App.blackbrush });
                             Grid.SetColumn(_tb1b, _col);
                             Grid.SetRow(_tb1b, _row);
                             Grid.SetColumnSpan(_tb1b, _colspan2);
@@ -799,7 +802,9 @@ namespace BenchMaestro
                             if (_item.Val2 != -99998)
                             {
                                 TextBlock _tb1c = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
-                                _tb1c.Inlines.Add(new Run { Text = Val2, FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                                _tb1c.Inlines.Add(new Run { Text = $"{Val2}", FontSize = 9, FontWeight = _weight, Foreground = App.blackbrush });
+                                if (_item.Val2Scale.Length > 0 || Unit.Length > 0)
+                                    _tb1c.Inlines.Add(new Run { Text = $" {_item.Val1Scale}{Unit}", FontSize = 9, FontWeight = _wnormal, Foreground = App.blackbrush });
                                 Grid.SetColumn(_tb1c, _col);
                                 Grid.SetRow(_tb1c, _row);
                                 Grid.SetColumnSpan(_tb1c, _colspan3);
@@ -879,7 +884,13 @@ namespace BenchMaestro
                 if (App.CurrentRun.CPULogicalsLoad.Any()) AddDetails(App.CurrentRun.CPULogicalsLoad, $"CPU Load % [ Thread - Average - Max ]");
                 if (App.CurrentRun.CPUCoresC0.Any()) AddDetails(App.CurrentRun.CPUCoresC0, $"CPU C0 Time % [ Core - Average - Max ]");
                 if (App.CurrentRun.CPUCoresScores.Any()) AddDetails(App.CurrentRun.CPUCoresScores, $"Cores Scores [ Core - Average - Max ]");
-                if (App.CurrentRun.CPULogicalsScores.Any()) AddDetails(App.CurrentRun.CPULogicalsScores, $"Threads Scores [ Thread - Score ]");
+                if (App.CurrentRun.CPULogicalsScores.Any())
+                {
+                    string _header = $"Threads Scores [ Thread - Score ]";
+                    if (App.CurrentRun.CPULogicalsScores.First().Val2 > -99998)
+                        _header = $"Threads Scores [ Thread - Avg - Max ]";
+                    AddDetails(App.CurrentRun.CPULogicalsScores, _header);
+                }
 
                 thiswin.SizeToContent = SizeToContent.WidthAndHeight;
                 thiswin.UpdateLayout();
@@ -899,15 +910,18 @@ namespace BenchMaestro
             return new BenchScore(_thrds, _Benchname);
         }
 
-        public static void ScoresLayout(Grid ScoreList, List<BenchScore> scoreRun, int[] threads, string Benchname, string ConfigTag) {
-
+        public static void ScoresLayout(Grid ScoreList, List<BenchScore> scoreRun, int[] threads, string Benchname, string ConfigTag, string BenchScoreUnit) 
+        {
             int _column = 0;
 
             Thickness dpadding = new Thickness(8, 0, 8, 0);
 
+            App.BenchScoreUnit = BenchScoreUnit;
+
             foreach (int _threads in threads)
             {
                 BenchScore _run = GetRunForThreads(scoreRun, _threads, Benchname);
+                _run.BenchScoreUnit = BenchScoreUnit;
                 _run.Threads = _threads;
                 _run.Benchname = Benchname;
                 _run.ConfigTag = ConfigTag;

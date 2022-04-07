@@ -18,6 +18,7 @@ namespace BenchMaestro
         public TextBlock ScoreBox { get; set; }
         public float? Score { get; set; }
         public float? ScoreMax { get; set; }
+        public string BenchScoreUnit { get; set; }
         public float?[] Scores { get; set; }
         public string ScoreUnit { get; set; }
         public Grid CPUClockGrid { get; set; }
@@ -194,6 +195,7 @@ namespace BenchMaestro
             CPUCoresC0 = new List<DetailsGrid>();
             CPULogicalsLoad = new List<DetailsGrid>();
             CPULogicalsScores = new List<DetailsGrid>();
+            BenchScoreUnit = "";
             ExitStatus = "";
             OutputLog = "";
             RunLog = "";
