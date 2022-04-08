@@ -10,6 +10,7 @@ using System.Diagnostics;
 using System.IO;
 using ZenStates.Core;
 using System.Text.RegularExpressions;
+using System.ComponentModel;
 
 namespace BenchMaestro
 {
@@ -42,7 +43,7 @@ namespace BenchMaestro
         public static CpuLoad cpuLoad;
 
         public static bool _dumphwm = true;
-        public static bool _dumphwmidle = true;     
+        public static bool _dumphwmidle = true;
 
         public static void NewSensors()
         {
@@ -198,8 +199,10 @@ namespace BenchMaestro
                     }
                 }
 
-                App.hwsensors.UpdateZenSensor(HWSensorName.CPULoad, cpuLoad.GetTotalLoad());
-                App.hwsensors.UpdateZenSensor(HWSensorName.CPUTemp, App.systemInfo.Zen.GetCpuTemperature());
+                float? _cputemp = App.systemInfo.Zen.GetCpuTemperature();
+                float? _cpuload = cpuLoad.GetTotalLoad();
+                App.hwsensors.UpdateZenSensor(HWSensorName.CPULoad, _cpuload);
+                App.hwsensors.UpdateZenSensor(HWSensorName.CPUTemp, _cputemp);
                 //Trace.WriteLine($"Zen CPU Temp {App.systemInfo.Zen.GetCpuTemperature()}");
 
                 if (App.systemInfo.ZenPerCCDTemp)
@@ -214,6 +217,11 @@ namespace BenchMaestro
                         if (ccd1temp != null && ccd2temp != null) App.hwsensors.UpdateZenSensor(HWSensorName.CCDSTemp, (ccd1temp + ccd2temp) / 2);
                     }
                 }
+
+                float? _cpupower = App.hwsensors.GetValue(HWSensorName.CPUPower);
+                App.systemInfo.UpdateLiveCPUClock($"{Math.Round((double)_cpuload, 0)}% CPU Load");
+                App.systemInfo.UpdateLiveCPUTemp($"{Math.Round((double)_cputemp, 1)}°C");
+                App.systemInfo.UpdateLiveCPUPower($"{Math.Round((double)_cpupower, 0)}W");
 
             }
             catch (Exception ex)
@@ -327,6 +335,21 @@ namespace BenchMaestro
                 }
             }
 
+            if (CPUSource == HWSensorSource.Libre)
+            {
+                float? _cputemp = App.hwsensors.GetValue(HWSensorName.CPUTemp);
+                float? _cpupower = App.hwsensors.GetValue(HWSensorName.CPUPower);
+                float? _cpuclock = App.hwsensors.GetValue(HWSensorName.CPUClock);
+                float? _cpuload = App.hwsensors.GetValue(HWSensorName.CPULoad);
+                if (_cputemp > 0) App.systemInfo.UpdateLiveCPUTemp($"{Math.Round((double)_cputemp, 1)}°C");
+                string _strclock = "";
+                if (_cpuclock > 0) _strclock += $"{Math.Round((double)_cpuclock, 0)} MHz";
+                if (_cpuclock > 0 && _cpuload > 0) _strclock += " @ ";
+                if (_cpuload > 0) _strclock += $"{Math.Round((double)_cpuload, 0)}% CPU Load";
+                if (_strclock.Length < 1) _strclock = "N/A";
+                App.systemInfo.UpdateLiveCPUClock(_strclock);
+                if (_cpupower > 0) App.systemInfo.UpdateLiveCPUPower($"{Math.Round((double)_cpupower, 0)}W");
+            }
         }
         public static void CheckSensor(IHardware hardware, ISensor sensor)
         {

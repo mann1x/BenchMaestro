@@ -1262,5 +1262,44 @@ namespace BenchMaestro
                 Trace.WriteLine($"UpdateFinished2 Exception: {ex}");
             }
         }
+        public static void SetLiveBindings2(BenchScore _scoreRun, bool enabled)
+        {
+            try
+            {
+                if (enabled)
+                {
+                    //CPU TEMP
+                    Binding bindLive = new Binding("LiveCPUTemp");
+                    bindLive.Mode = BindingMode.OneWay;
+                    bindLive.Source = App.systemInfo;
+                    BindingOperations.SetBinding(_scoreRun.CPUTempBox, TextBlock.TextProperty, bindLive);
+                    //CPU CLOCK
+                    bindLive = new Binding("LiveCPUClock");
+                    bindLive.Mode = BindingMode.OneWay;
+                    bindLive.Source = App.systemInfo;
+                    BindingOperations.SetBinding(_scoreRun.CPUClockBox, TextBlock.TextProperty, bindLive);
+                    //CPU vCORE Power
+                    bindLive = new Binding("LiveCPUPower");
+                    bindLive.Mode = BindingMode.OneWay;
+                    bindLive.Source = App.systemInfo;
+                    BindingOperations.SetBinding(_scoreRun.CPUPowerBox, TextBlock.TextProperty, bindLive);
+                }
+                else
+                {
+                    Trace.WriteLine("CLEAR BINDINGS");
+                    BindingOperations.ClearBinding(_scoreRun.CPUTempBox, TextBlock.TextProperty);
+                    BindingOperations.ClearBinding(_scoreRun.CPUClockBox, TextBlock.TextProperty);
+                    BindingOperations.ClearBinding(_scoreRun.CPUPowerBox, TextBlock.TextProperty);
+                    _scoreRun.CPUTempBox.Text = "N/A";
+                    _scoreRun.CPUClockBox.Text = "N/A";
+                    _scoreRun.CPUPowerBox.Text = "N/A";
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"SetLiveBindings[{enabled}] Exception: {ex}");
+            }
+        }
+
     }
 }

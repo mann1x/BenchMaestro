@@ -412,10 +412,9 @@ namespace BenchMaestro
 			
 			SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
 
-			systemInfo.Zen.Dispose();
-
 			if (systemInfo.Zen != null)
 			{
+				systemInfo.Zen.Dispose();
 				systemInfo.Zen = null;
 			}
 

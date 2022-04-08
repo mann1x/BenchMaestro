@@ -257,7 +257,13 @@ namespace BenchMaestro
                 BtnStartLabel.IsEnabled = true;
             }));
         }
-
+        public void SetLiveBindings(BenchScore _scoreRun, bool enabled)
+        {
+            Dispatcher.Invoke((Action)(() =>
+            {
+                Module1.SetLiveBindings2(_scoreRun, enabled);
+            }));
+        }
         public void UpdateStarted()
         {
             Dispatcher.Invoke((Action)(() =>
@@ -357,6 +363,7 @@ namespace BenchMaestro
                     }
 
                     UpdateMainStatus("User aborted");
+                    App.CurrentRun.FinishString = "User aborted";
 
                     App.benchcts = new CancellationTokenSource();
 
@@ -499,7 +506,8 @@ namespace BenchMaestro
                     UpdateMonitoring,
                     UpdateRunSettings,
                     UpdateStarted,
-                    UpdateRunStart
+                    UpdateRunStart,
+                    SetLiveBindings
                     );
                 App.InterlockBench = 0;
             }

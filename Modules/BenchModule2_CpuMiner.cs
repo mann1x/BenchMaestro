@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Data;
 using System.Windows.Documents;
 
 namespace BenchMaestro
@@ -188,7 +189,8 @@ namespace BenchMaestro
                 Action UpdateMonitoring,
                 Action UpdateRunSettings,
                 Action UpdateStarted,
-                Action UpdateRunStart
+                Action UpdateRunStart,
+                Action<BenchScore, bool> SetLiveBindings
             )
         {
             try
@@ -200,7 +202,7 @@ namespace BenchMaestro
                         $"Exit code    : {App.BenchProc.ExitCode}\n" +
                         $"Elapsed time : {Math.Round((App.BenchProc.ExitTime - App.BenchProc.StartTime).TotalMilliseconds)}");
                     App.RunningProcess = -1;
-                    if (App.BenchProc.ExitCode != 0 && App.benchrunning)
+                    if (App.BenchProc.ExitCode != 0 && App.CurrentRun.FinishString.Length < 1)
                     {
                         UpdateMainStatus($"Benchmark execution error, exitcode: {App.BenchProc.ExitCode}");
                         UpdateScore("Error");
@@ -375,7 +377,7 @@ namespace BenchMaestro
                         {
                             _scoreRun.Finished = DateTime.Now;
                             _scoreRun.ExitStatus = "Aborted by user";
-                            UpdateScore("N/A");
+                            UpdateScore("Error");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
                             App.CurrentRun.FinishString = "Aborted by user";
                             UpdateFinished(App.CurrentRun.FinishString);
@@ -396,7 +398,7 @@ namespace BenchMaestro
                                 {
                                     _scoreRun.Finished = DateTime.Now;
                                     _scoreRun.ExitStatus = "Aborted by user";
-                                    UpdateScore("N/A");
+                                    UpdateScore("Error");
                                     UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
                                     App.CurrentRun.FinishString = "Aborted by user";
                                     UpdateFinished(App.CurrentRun.FinishString);
@@ -479,7 +481,7 @@ namespace BenchMaestro
 
                     if (!File.Exists(BenchBinary))
                     {
-                        UpdateScore("N/A");
+                        UpdateScore("Error");
                         UpdateMainStatus($"Benchmark has been deleted, check your AntiVirus!");
                         App.CurrentRun.FinishString = "Bench binary not found";
                         UpdateFinished(App.CurrentRun.FinishString);
@@ -606,14 +608,17 @@ namespace BenchMaestro
 
                     App.BenchProc.BeginOutputReadLine();
 
+                    SetLiveBindings(_scoreRun, true);
+
                     while (App.benchrunning)
                     {
                         if (benchtoken.IsCancellationRequested)
                         {
+                            SetLiveBindings(_scoreRun, false);
                             _scoreRun.Finished = DateTime.Now;
                             _scoreRun.ExitStatus = "Aborted by user";
                             //hwmcts.Cancel();
-                            UpdateScore("N/A");
+                            UpdateScore("Error");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
                             Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                             return;
@@ -637,6 +642,8 @@ namespace BenchMaestro
                         Thread.Sleep(100);
                     }
 
+                    SetLiveBindings(_scoreRun, false);
+
                     UpdateMonitoring();
 
                     TimeSpan _postimespan = DateTime.Now - App.IterationPostimeTS;
@@ -646,7 +653,8 @@ namespace BenchMaestro
 
                     if (benchtoken.IsCancellationRequested)
                     {
-                        UpdateScore("N/A");
+                        SetLiveBindings(App.CurrentRun, false);
+                        UpdateScore("Error");
                         UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
                         App.CurrentRun.FinishString = "Aborted by user";
                         UpdateFinished(App.CurrentRun.FinishString);
@@ -669,6 +677,7 @@ namespace BenchMaestro
             }
             finally
             {
+                SetLiveBindings(App.CurrentRun, false);
                 HWMonitor.MonitoringPause = false;
                 HWMonitor.MonitoringIdle = false;
                 HWMonitor.MonitoringParsed = false;

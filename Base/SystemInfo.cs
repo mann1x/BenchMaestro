@@ -11,6 +11,8 @@ using ZenStates.Core;
 using Octokit;
 using System.Xml.Linq;
 using System.ComponentModel;
+using System.Text.RegularExpressions;
+using System.Windows.Data;
 
 namespace BenchMaestro
 {
@@ -72,7 +74,13 @@ namespace BenchMaestro
 		public double WinMaxSize { get; set; }
 		public string ZenCOLabel { get; set; }
 		public string CPUSensorsSource { get; set; }
-		
+		public bool Zen1X { get; set; }
+		public bool ZenPlus { get; set; }
+
+		public string LiveCPUTemp { get; set; }
+		public string LiveCPUClock { get; set; }
+		public string LiveCPUPower { get; set; }
+
 		public event PropertyChangedEventHandler PropertyChanged;
 
 		private int EmptyTags()
@@ -174,6 +182,11 @@ namespace BenchMaestro
 				ZenSMUVer = "N/A";
 				ZenPTVersion = 0;
 				ZenCoreMapLabel = "";
+				Zen1X = false;
+				ZenPlus = false;
+				LiveCPUTemp = "N/A";
+				LiveCPUClock = "N/A";
+				LiveCPUPower = "N/A";
 
 				WinMaxSize = 600;
 
@@ -662,11 +675,38 @@ namespace BenchMaestro
 									CPUSensorsSource = "Zen PowerTable";
 									HWMonitor.CPUSource = HWSensorSource.Zen;
 
+									string model_pattern = @"^AMD Ryzen (?<series>\d+) (?<generation>\d)(?<model>\d*)(?<ex>.?) .*";
+									Regex model_rgx = new Regex(model_pattern, RegexOptions.Multiline);
+									Match model_m = model_rgx.Match(Zen.info.cpuName);
+
+									if (model_m.Success)
+									{
+										string[] results = model_rgx.GetGroupNames();
+										string generation = "";
+										string ex = "";
+
+										foreach (var name in results)
+										{
+											Group grp = model_m.Groups[name];
+											if (name == "ex" && grp.Value.Length > 0)
+											{
+												ex = grp.Value.TrimEnd('\r', '\n').Trim();
+											}
+											if (name == "score" && grp.Value.Length > 0)
+											{
+												generation = grp.Value.TrimEnd('\r', '\n').Trim();
+											}
+										}
+										if (ex == "X") Zen1X = true;
+										if (ex == "2") ZenPlus = true;
+									}
+
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresC0, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Load, HWSensorSource.Zen));
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresEffClocks, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Clock, HWSensorSource.Zen));
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUCoresStretch, HWSensorValues.MultiCore, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Clock, HWSensorSource.Zen));
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUPPT, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Power, HWSensorSource.Zen));
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUTDC, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Amperage, HWSensorSource.Zen));
+									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUEDC, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Amperage, HWSensorSource.Zen));
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUPPTLimit, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Percentage, HWSensorSource.Zen));
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CPUTDCLimit, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Percentage, HWSensorSource.Zen));
 									App.hwsensors.Add(new HWSensorItem(HWSensorName.CCD1L3Temp, HWSensorValues.Single, HWSensorConfig.Auto, HWSensorDevice.CPU, HWSensorType.Temperature, HWSensorSource.Zen));
@@ -674,10 +714,18 @@ namespace BenchMaestro
 
 									ZenRefreshStatic(false);
 
-									App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
-									App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
-									App.hwsensors.InitZen(HWSensorName.CPUPPTLimit, -1, 1, false);
-									App.hwsensors.InitZen(HWSensorName.CPUTDCLimit, -1, 1, false);
+									if (Zen1X || ZenPlus)
+                                    {
+										App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
+										App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
+										App.hwsensors.InitZen(HWSensorName.CPUPPTLimit, -1, 1, false);
+										App.hwsensors.InitZen(HWSensorName.CPUTDCLimit, -1, 1, false);
+									}
+									if (ZenPlus)
+									{
+										App.hwsensors.InitZen(HWSensorName.CPUEDC, 9);
+										App.hwsensors.InitZen(HWSensorName.CPUEDCLimit, -1, 1, false);
+									}
 									App.hwsensors.InitZen(HWSensorName.CPUPower, 22);
 									App.hwsensors.InitZen(HWSensorName.SOCVoltage, 26);
 									App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 158);
@@ -1424,8 +1472,15 @@ namespace BenchMaestro
 			}
 			else if (ZenSMUVer == "25.86.0")
 			{
-				ZenPPT = (int)Zen.powerTable.Table[0];
-				ZenTDC = (int)Zen.powerTable.Table[2];
+				if (Zen1X || ZenPlus)
+				{
+					ZenPPT = (int)Zen.powerTable.Table[0];
+					ZenTDC = (int)Zen.powerTable.Table[2];
+				}
+				if (ZenPlus)
+				{
+					ZenEDC = (int)Zen.powerTable.Table[8];
+				}
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenFCLK = (int)Zen.powerTable.Table[33];
 				ZenUCLK = (int)Zen.powerTable.Table[33];
@@ -1564,6 +1619,24 @@ namespace BenchMaestro
 			OnChange("BoardLabel");
 			OnChange("ProcessorsLabel");
 			Trace.WriteLine($"RefreshLabels done");
+		}
+		public void UpdateLiveCPUTemp(string _value)
+        {
+			LiveCPUTemp = _value.Length > 0 ? _value : "N/A";
+			//Trace.WriteLine($"{_value}");
+			OnChange("LiveCPUTemp");			
+		}
+		public void UpdateLiveCPUPower(string _value)
+		{
+			LiveCPUPower = _value.Length > 0 ? _value : "N/A";
+			//Trace.WriteLine($"{_value}");
+			OnChange("LiveCPUPower");
+		}
+		public void UpdateLiveCPUClock(string _value)
+		{
+			LiveCPUClock = _value.Length > 0 ? _value : "N/A";
+			//Trace.WriteLine($"{_value}");
+			OnChange("LiveCPUClock");
 		}
 		protected void OnChange(string info)
 		{
