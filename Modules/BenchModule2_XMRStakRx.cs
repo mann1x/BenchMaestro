@@ -318,6 +318,16 @@ namespace BenchMaestro
                         }
                     };
 
+                    if (!File.Exists(BenchBinary))
+                    {
+                        UpdateScore("Error");
+                        UpdateMainStatus($"Benchmark has been deleted, check your AntiVirus!");
+                        App.CurrentRun.FinishString = "Bench binary not found";
+                        UpdateFinished(App.CurrentRun.FinishString);
+                        Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
+                        return;
+                    }
+
                     HWMonitor.MonitoringPause = true;
                     HWMonitor.MonitoringIdle = true;
 
@@ -449,16 +459,6 @@ namespace BenchMaestro
 
                     App.BenchProc.EnableRaisingEvents = true;
                     App.BenchProc.Exited += new EventHandler(RunningProcessClear);
-
-                    if (!File.Exists(BenchBinary))
-                    {
-                        UpdateScore("Error");
-                        UpdateMainStatus($"Benchmark has been deleted, check your AntiVirus!");
-                        App.CurrentRun.FinishString = "Bench binary not found";
-                        UpdateFinished(App.CurrentRun.FinishString);
-                        Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
-                        return;
-                    }
 
                     App.BenchProc.Start();
 

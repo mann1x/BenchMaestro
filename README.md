@@ -34,6 +34,11 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.19 Alpha
+    - Fix: Moved the extracted bench binary check before idle check (thx hahagu)
+    - Fix: Opening links from About (thx The_King)
+    - Fix: License text block max width
+    - Fix: Reduced timeout for Zen Refresh PowerTable (Riot Vanguard block)
 - v1.0.18 Alpha
     - Add: Real time display of few CPU stats while bench running
     - Fix: Tentative fix for Zen/Zen+ PBO limits

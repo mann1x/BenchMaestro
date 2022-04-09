@@ -227,6 +227,8 @@ namespace BenchMaestro
             AutoUpdater.Synchronous = false;
             AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
             AutoUpdater.Start("https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json");
+
+            UpdateLayout();
         }
         private void AutoUpdaterOnParseUpdateInfoEvent(ParseUpdateInfoEventArgs args)
         {
@@ -347,7 +349,18 @@ namespace BenchMaestro
 
         private void Hyperlink_RequestNavigate(object sender, RequestNavigateEventArgs e)
         {
-            System.Diagnostics.Process.Start(e.Uri.ToString());
+            try
+            {
+                System.Diagnostics.Process.Start(new ProcessStartInfo
+                {
+                    FileName = e.Uri.ToString(),
+                    UseShellExecute = true
+                });
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"Hyperlink_RequestNavigate Exception ({e.Uri.ToString()}): {ex}");
+            }
         }
         private void CustomCPPC_Save(object sender, RoutedEventArgs e)
         {

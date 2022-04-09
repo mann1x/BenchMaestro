@@ -714,15 +714,12 @@ namespace BenchMaestro
 
 									ZenRefreshStatic(false);
 
-									if (Zen1X || ZenPlus)
+									if (ZenPlus)
                                     {
 										App.hwsensors.InitZen(HWSensorName.CPUPPT, 1);
 										App.hwsensors.InitZen(HWSensorName.CPUTDC, 3);
 										App.hwsensors.InitZen(HWSensorName.CPUPPTLimit, -1, 1, false);
 										App.hwsensors.InitZen(HWSensorName.CPUTDCLimit, -1, 1, false);
-									}
-									if (ZenPlus)
-									{
 										App.hwsensors.InitZen(HWSensorName.CPUEDC, 9);
 										App.hwsensors.InitZen(HWSensorName.CPUEDCLimit, -1, 1, false);
 									}
@@ -1497,11 +1494,11 @@ namespace BenchMaestro
 
 				if (status != SMU.Status.OK)
 				{
-					for (int r = 0; r < 80; ++r)
+					for (int r = 0; r < 10; ++r)
 					{
 						Thread.Sleep(25);
 						status = ZenRefreshPowerTable2();
-						if (status == SMU.Status.OK) r = 80;
+						if (status == SMU.Status.OK) r = 99;
 					}
 				}
 
@@ -1523,12 +1520,11 @@ namespace BenchMaestro
 
 				if (status != SMU.Status.OK)
 				{
-					for (int r = 0; r < 80; ++r)
+					for (int r = 0; r < 10; ++r)
 					{
-						Thread.Sleep(25);
 						status = Zen.RefreshPowerTable();
 						Trace.WriteLine($"ZenRefreshPowerTable SMU Error: {status}");
-						if (status == SMU.Status.OK) r = 80;
+						if (status == SMU.Status.OK) r = 99;
 					}
 				}
 

@@ -438,7 +438,7 @@
                             <LineBreak/>
                             License:
                             <LineBreak/>
-                            <TextBox x:Name="boxLicense" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Height="Auto" MaxHeight="200"/>
+                            <TextBox x:Name="boxLicense" IsReadOnly="True" VerticalScrollBarVisibility="Auto" Height="Auto" MaxHeight="200" MaxWidth="750"/>
                             <LineBreak/>
                             </TextBlock>
                         </TabItem>
