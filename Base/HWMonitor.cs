@@ -479,7 +479,7 @@ namespace BenchMaestro
                     }
                 }
 
-                if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core #") && CPUSource == HWSensorSource.Libre)
+                if (sensor.SensorType == SensorType.Temperature && sensor.Name.Contains("Core #") && !sensor.Name.Contains("Distance to TjMax") && CPUSource == HWSensorSource.Libre)
                 {
                     Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
                     if (match.Success)
@@ -494,29 +494,27 @@ namespace BenchMaestro
 
                 if (sensor.SensorType == SensorType.Load && sensor.Name.Contains("Core #") && CPUSource == HWSensorSource.Libre)
                 {
-                    Match matcht = Regex.Match(sensor.Name, @".*Core #(?<cpu>\d+) Thread #(?<cpu>\d+).*$", RegexOptions.IgnoreCase);
-                    if (matcht.Success)
+                    Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
+                    Match matcht = Regex.Match(sensor.Name, @".*Core #(?<cpu>\d+) Thread #(?<thread>\d+).*$", RegexOptions.IgnoreCase);
+                    if (matcht.Success || match.Success)
                     {
                         Match matchid = Regex.Match(sensor.Identifier.ToString(), @".*cpu/\d+/load/(?<cpu>\d+)$", RegexOptions.IgnoreCase);
                         if (matchid.Success)
                         {
                             string _cpu = matchid.Groups[1].Value;
-                            Trace.WriteLine($"Libre CPU Cores w/Thread Load #{_cpu}");
+                            string _thread = matchid.Groups[2].Value;
                             int _index = Int32.Parse(_cpu);
                             App.hwsensors.InitLibreMulti(HWSensorName.CPULogicalsLoad, hardware.Identifier.ToString(), "CPU Cores Load", _index, sensor.Identifier.ToString(), sensor.Name);
-                            Trace.WriteLine($"Libre CPU Cores w/Thread Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
-                        }
-                    }
-                    else
-                    {
-                        Match match = Regex.Match(sensor.Name, @".*Core #(?<core>\d+).*$", RegexOptions.IgnoreCase);
-                        if (match.Success)
-                        {
-                            string _cpu = match.Groups[1].Value;
-                            Trace.WriteLine($"Libre CPU Cores Load #{_cpu}");
-                            int _index = Int32.Parse(_cpu);
-                            App.hwsensors.InitLibreMulti(HWSensorName.CPULogicalsLoad, hardware.Identifier.ToString(), "CPU Cores Load", _index, sensor.Identifier.ToString(), sensor.Name);
-                            Trace.WriteLine($"Libre CPU Cores Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                            if (matcht.Success)
+                            {
+                                Trace.WriteLine($"Libre CPU Cores w/Threads Load #{_cpu} #{_thread}");
+                                Trace.WriteLine($"Libre CPU Cores w/Threads Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                            }
+                            if (match.Success)
+                            {
+                                Trace.WriteLine($"Libre CPU Cores Load #{_cpu}");
+                                Trace.WriteLine($"Libre CPU Cores Load #{_index} Sensor added #{sensor.Index} {sensor.Identifier} HW={hardware.Identifier}");
+                            }
                         }
                     }
 
@@ -580,6 +578,8 @@ namespace BenchMaestro
                 }
                 if (_dumphwm)
                 {
+                    sb.AppendLine();
+                    sb.AppendLine(computer.GetReport()); 
                     string path = @".\dumphwm.txt";
                     if (!File.Exists(path)) File.Delete(path);
 
@@ -1021,9 +1021,15 @@ namespace BenchMaestro
                                 MonitoringPooling = MonitoringPoolingSlow;
                                 Trace.WriteLine($"MonitoringStart STARTED on load on Logical: {_cpu} {_cpuload} {MonitoringStart}");
                             }
+                            else if (_cpuload == -99999)
+                            {
+                                MonitoringStart = DateTime.Now;
+                                MonitoringStarted = true;
+                                MonitoringPooling = MonitoringPoolingSlow;
+                                Trace.WriteLine($"MonitoringStart STARTED can't read Load on Logical: {_cpu} {MonitoringStart}");
+                            }
                         }
                     }
-
                     if (MonitoringStarted)
                     {
                         bool _libre = false;

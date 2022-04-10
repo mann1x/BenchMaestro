@@ -417,6 +417,7 @@ namespace BenchMaestro
             InitUI = true;
 
             Trace.WriteLine($"STMT={WindowSettings.Default.BtnSTMT}");
+
             if (WindowSettings.Default.BtnSTMT)
             {
                 RadioSTMT.IsChecked = true;
@@ -428,15 +429,7 @@ namespace BenchMaestro
                 RadioCustom.IsChecked = true;
             }
 
-            foreach (string thr in WindowSettings.Default.Threads)
-            {
-                Trace.WriteLine($" RESTORING CB {thr}");
-                IEnumerable<CheckBox> elements = FindVisualChildren<CheckBox>(this).Where(x => x.Tag != null && x.Tag.ToString() == thr.ToString());
-                foreach (CheckBox cb in elements)
-                {
-                    cb.IsChecked = true;
-                }
-            }
+            RestoreCustomCPPC();
 
             if (App.systemInfo.CPULogicalProcessors <= 32) tMax.Visibility = Visibility.Collapsed;
             if (App.systemInfo.CPULogicalProcessors < 32) t32.Visibility = Visibility.Collapsed;
@@ -448,34 +441,55 @@ namespace BenchMaestro
             if (App.systemInfo.CPULogicalProcessors < 4) t4.Visibility = Visibility.Collapsed;
             if (App.systemInfo.CPULogicalProcessors < 2) t2.Visibility = Visibility.Collapsed;
 
-            Thickness coreborder = new Thickness(1, 1, 1, 1);
-            Thickness coremargin = new Thickness(3, 3, 3, 3);
-
-            CustomCPPC.Items.Clear();
-
-
-            foreach (int _core in App.systemInfo.CPPCCustomOrder)
-            {
-                string _strcore = _core.ToString();
-                CustomCPPC.Items.Add(new ListBoxItem { Tag = _strcore, Content = _strcore, BorderBrush = Brushes.Lavender, BorderThickness = coreborder, Margin = coremargin });
-            }
-
-
-            if (WindowSettings.Default.cbCustomCPPC)
-            {
-                cbCustomCPPC.IsChecked = true;
-                App.systemInfo.CPPCActiveOrder = App.systemInfo.CPPCCustomOrder;
-                App.systemInfo.CPPCActiveLabel = App.GetCustomLabel();
-            }
-            else
-            {
-                cbCustomCPPC.IsChecked = false;
-                App.systemInfo.CPPCActiveOrder = App.systemInfo.CPPCOrder;
-                App.systemInfo.CPPCActiveLabel = App.systemInfo.CPPCLabel;
-            }
-
             InitUI = false;
         }
+
+        private void RestoreCustomCPPC()
+        {
+            try
+            {
+                Thickness coreborder = new Thickness(1, 1, 1, 1);
+                Thickness coremargin = new Thickness(3, 3, 3, 3);
+
+                foreach (string thr in WindowSettings.Default.Threads)
+                {
+                    Trace.WriteLine($" RESTORING CB {thr}");
+                    IEnumerable<CheckBox> elements = FindVisualChildren<CheckBox>(this).Where(x => x.Tag != null && x.Tag.ToString() == thr.ToString());
+                    foreach (CheckBox cb in elements)
+                    {
+                        cb.IsChecked = true;
+                    }
+                }
+
+                CustomCPPC.Items.Clear();
+
+                foreach (int _core in App.systemInfo.CPPCCustomOrder)
+                {
+                    string _strcore = _core.ToString();
+                    CustomCPPC.Items.Add(new ListBoxItem { Tag = _strcore, Content = _strcore, BorderBrush = Brushes.Lavender, BorderThickness = coreborder, Margin = coremargin });
+                }
+
+                if (WindowSettings.Default.cbCustomCPPC)
+                {
+                    cbCustomCPPC.IsChecked = true;
+                    App.systemInfo.CPPCActiveOrder = App.systemInfo.CPPCCustomOrder;
+                    App.systemInfo.CPPCActiveLabel = App.GetCustomLabel();
+                }
+                else
+                {
+                    cbCustomCPPC.IsChecked = false;
+                    App.systemInfo.CPPCActiveOrder = App.systemInfo.CPPCOrder;
+                    App.systemInfo.CPPCActiveLabel = App.systemInfo.CPPCLabel;
+                }
+
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"RestorCustomCPPC exception: {ex}");
+            }
+        }
+
+
         private void NewBenchXMRSTAKRX(object sender, RoutedEventArgs e)
         {
 

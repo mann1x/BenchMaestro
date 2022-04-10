@@ -137,42 +137,58 @@ namespace BenchMaestro
 
 		public static int[] GetThreads()
 		{
-			if (!App.systemInfo.STMT)
-			{
-				List<int> activethreads = new();
-
-				foreach (string thr in BenchMaestro.Properties.Settings.Default.Threads)
+			try
+            {
+				if (!App.systemInfo.STMT)
 				{
-					if (thr == "Max")
+					List<int> activethreads = new();
+
+					foreach (string thr in BenchMaestro.Properties.Settings.Default.Threads)
 					{
-						if (systemInfo.CPULogicalProcessors > 32) activethreads.Add(systemInfo.CPULogicalProcessors);
+						if (thr == "Max")
+						{
+							if (systemInfo.CPULogicalProcessors > 32) activethreads.Add(systemInfo.CPULogicalProcessors);
 
+						}
+						else
+						{
+							int _threads = Convert.ToInt32(thr);
+							if (_threads <= systemInfo.CPULogicalProcessors) activethreads.Add(_threads);
+						}
 					}
-					else
+					int[] _return = new int[activethreads.Count];
+					int i = 0;
+
+					activethreads.Sort();
+
+					foreach (int athr in activethreads)
 					{
-						int _threads = Convert.ToInt32(thr);
-						if (_threads <= systemInfo.CPULogicalProcessors) activethreads.Add(_threads);
+						_return[i] = athr;
+						i++;
 					}
+					return _return;
 				}
-				int[] _return = new int[activethreads.Count];
-				int i = 0;
-
-				activethreads.Sort();
-
-				foreach (int athr in activethreads)
-				{
-					_return[i] = athr;
-					i++;
-				}
-				return _return;
+				return new int[] { 1, systemInfo.CPULogicalProcessors };
 			}
-			return new int[] { 1, systemInfo.CPULogicalProcessors };
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"GetThreads exception: {ex}");
+				return new int[] { 1, systemInfo.CPULogicalProcessors };
+			}
 		}
 		public static int GetLastThread(int _base = 1)
 		{
-			int _thr = ProcessorInfo.LastThreadID();
-			if (_base == 0) _thr--;
-			return _thr;
+			try
+            {
+				int _thr = ProcessorInfo.LastThreadID();
+				if (_base == 0) _thr--;
+				return _thr;
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"GetLastThread exception: {ex}");
+				return 1;
+			}
 		}
 		public static void SetCPUSource(HWSensorSource _source)
 		{
@@ -201,14 +217,22 @@ namespace BenchMaestro
 		}
 		public static string GetCustomLabel()
 		{
-			string CPPCLabel = "";
-			for (int i = 0; i < systemInfo.CPPCCustomOrder.Length; i++)
-			{
-				CPPCLabel += String.Format("{0} ", systemInfo.CPPCCustomOrder[i]);
-				if (i != systemInfo.CPPCCustomOrder.Length - 1) CPPCLabel += ", ";
+			try
+            {
+				string CPPCLabel = "";
+				for (int i = 0; i < systemInfo.CPPCCustomOrder.Length; i++)
+				{
+					CPPCLabel += String.Format("{0} ", systemInfo.CPPCCustomOrder[i]);
+					if (i != systemInfo.CPPCCustomOrder.Length - 1) CPPCLabel += ", ";
 
+				}
+				return CPPCLabel;
 			}
-			return CPPCLabel;
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"GetCustomLabel exception: {ex}");
+				return "";
+			}
 		}
 		public static int GetIdleStableTime()
 		{
@@ -229,76 +253,83 @@ namespace BenchMaestro
 
 		protected override void OnStartup(StartupEventArgs e)
 		{
-			instanceMutex = new Mutex(true, mutexName, out bMutex);
+			try
+            {
+				instanceMutex = new Mutex(true, mutexName, out bMutex);
 
-			if (!bMutex)
-			{
-				InteropMethods.PostMessage((IntPtr)InteropMethods.HWND_BROADCAST, InteropMethods.WM_SHOWME,
-					IntPtr.Zero, IntPtr.Zero);
-				Current.Shutdown();
-				Environment.Exit(0);
-			}
-
-			GC.KeepAlive(instanceMutex);
-
-			Trace.Listeners.Add(dailylistener);
-
-			WindowsIdentity identity = WindowsIdentity.GetCurrent();
-			WindowsPrincipal principal = new WindowsPrincipal(identity);
-
-			if (principal.IsInRole(WindowsBuiltInRole.Administrator) == false && principal.IsInRole(WindowsBuiltInRole.User) == true)
-			{
-				ProcessStartInfo objProcessInfo = new ProcessStartInfo();
-				objProcessInfo.UseShellExecute = true;
-				objProcessInfo.FileName = System.AppContext.BaseDirectory + Assembly.GetExecutingAssembly().GetName().Name + ".exe";
-				objProcessInfo.Verb = "runas";
-				try
+				if (!bMutex)
 				{
-					Process proc = Process.Start(objProcessInfo);
-					Application.Current.Shutdown();
+					InteropMethods.PostMessage((IntPtr)InteropMethods.HWND_BROADCAST, InteropMethods.WM_SHOWME,
+						IntPtr.Zero, IntPtr.Zero);
+					Current.Shutdown();
+					Environment.Exit(0);
 				}
-				catch (Exception ex)
+
+				GC.KeepAlive(instanceMutex);
+
+				Trace.Listeners.Add(dailylistener);
+
+				WindowsIdentity identity = WindowsIdentity.GetCurrent();
+				WindowsPrincipal principal = new WindowsPrincipal(identity);
+
+				if (principal.IsInRole(WindowsBuiltInRole.Administrator) == false && principal.IsInRole(WindowsBuiltInRole.User) == true)
 				{
-					Trace.WriteLine($"OnStartup Exception: {ex.Message}");
+					ProcessStartInfo objProcessInfo = new ProcessStartInfo();
+					objProcessInfo.UseShellExecute = true;
+					objProcessInfo.FileName = System.AppContext.BaseDirectory + Assembly.GetExecutingAssembly().GetName().Name + ".exe";
+					objProcessInfo.Verb = "runas";
+					try
+					{
+						Process proc = Process.Start(objProcessInfo);
+						Application.Current.Shutdown();
+					}
+					catch (Exception ex)
+					{
+						Trace.WriteLine($"OnStartup Exception: {ex.Message}");
+					}
 				}
+
+				base.OnStartup(e);
+
+				SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED);
+
+				systemInfo = new();
+
+				MainWindow window = new();
+
+				Version _version = Assembly.GetExecutingAssembly().GetName().Version;
+				version = string.Format("v{0}.{1}.{2}", _version.Major, _version.Minor, _version.Build);
+				_versionInfo = string.Format("{0}.{1}.{2}", _version.Major, _version.Minor, _version.Build);
+				systemInfo.AppVersion = version;
+
+				Trace.WriteLine($"BenchMaestro Version {_versionInfo}");
+
+				SettingsInit();
+
+				RunsViewModel runs = new RunsViewModel();
+
+				window.DataContext = new
+				{
+					runs,
+					settings = BenchMaestro.Properties.Settings.Default,
+					systemInfo
+				};
+
+				HWMonitor.Init();
+
+				InitColors();
+
+				HWMStart();
+
+				Trace.WriteLine($"OnStartup App End");
+
+				window.ShowDialog();
+
 			}
-
-			base.OnStartup(e);
-
-			SetThreadExecutionState(EXECUTION_STATE.ES_DISPLAY_REQUIRED | EXECUTION_STATE.ES_CONTINUOUS | EXECUTION_STATE.ES_SYSTEM_REQUIRED | EXECUTION_STATE.ES_SYSTEM_REQUIRED);
-
-			systemInfo = new();
-
-			MainWindow window = new();
-
-			Version _version = Assembly.GetExecutingAssembly().GetName().Version;
-			version = string.Format("v{0}.{1}.{2}", _version.Major, _version.Minor, _version.Build);
-			_versionInfo = string.Format("{0}.{1}.{2}", _version.Major, _version.Minor, _version.Build);
-			systemInfo.AppVersion = version;
-
-			Trace.WriteLine($"BenchMaestro Version {_versionInfo}");
-
-			SettingsInit();
-
-			RunsViewModel runs = new RunsViewModel();
-
-			window.DataContext = new
+			catch (Exception ex)
 			{
-				runs,
-				settings = BenchMaestro.Properties.Settings.Default,
-				systemInfo
-			};
-
-			HWMonitor.Init();
-
-			InitColors();
-
-			HWMStart();
-
-			Trace.WriteLine($"OnStartup App End");
-
-			window.ShowDialog();
-
+				Trace.WriteLine($"OnStartup exception: {ex}");
+			}
 		}
 
 		public static void HWMStart()
@@ -333,48 +364,59 @@ namespace BenchMaestro
 		}
 		public static void SettingsInit()
 		{
-			if (BenchMaestro.Properties.Settings.Default.CustomCPPC.Length > 0 && BenchMaestro.Properties.Settings.Default.CustomCPPC.Length == systemInfo.CPUCores)
-			{
-				string[] _split = BenchMaestro.Properties.Settings.Default.CustomCPPC.ToString().Split(", ");
-				Trace.WriteLine($"RESTORE CUSTOMCPPC {BenchMaestro.Properties.Settings.Default.CustomCPPC}");
-				int i = 0;
-				systemInfo.CPPCCustomOrder = new int[_split.Length];
-				foreach (string _core in _split)
+			try
+            {
+				bool _restored = false;
+				if (BenchMaestro.Properties.Settings.Default.CustomCPPC.Length > 0)
 				{
-					systemInfo.CPPCCustomOrder[i] = Convert.ToInt32(_core);
-					i++;
+					string[] _split = BenchMaestro.Properties.Settings.Default.CustomCPPC.ToString().Split(", ");
+					Trace.WriteLine($"RESTORE CUSTOMCPPC {BenchMaestro.Properties.Settings.Default.CustomCPPC}");
+					if (_split.Length == systemInfo.CPUCores)
+                    {
+						int i = 0;
+						systemInfo.CPPCCustomOrder = new int[_split.Length];
+						foreach (string _core in _split)
+						{
+							systemInfo.CPPCCustomOrder[i] = Convert.ToInt32(_core);
+							i++;
+						}
+						_restored = true;
+					}
 				}
-			}
-			else
-			{
-				systemInfo.CPPCCustomOrder = new int[systemInfo.CPUCores];
-				Trace.WriteLine($"CPUCORES {systemInfo.CPUCores} SIZE CUSTOM {systemInfo.CPPCCustomOrder.Length}");
-				Trace.WriteLine($"CPPCORDER {String.Join(", ", systemInfo.CPPCOrder)}");
-				for (int i = 0; i < systemInfo.CPPCOrder.Length; ++i)
+				if (!_restored)
 				{
-					Trace.WriteLine($"CPUCORES {systemInfo.CPPCOrder[i]} INDEX CUSTOM {i}");
-					systemInfo.CPPCCustomOrder[i] = systemInfo.CPPCOrder[i];
+					systemInfo.CPPCCustomOrder = new int[systemInfo.CPUCores];
+					Trace.WriteLine($"CPUCORES {systemInfo.CPUCores} SIZE CUSTOM {systemInfo.CPPCCustomOrder.Length}");
+					Trace.WriteLine($"CPPCORDER {String.Join(", ", systemInfo.CPPCOrder)}");
+					for (int i = 0; i < systemInfo.CPPCOrder.Length; ++i)
+					{
+						Trace.WriteLine($"CPUCORES {systemInfo.CPPCOrder[i]} INDEX CUSTOM {i}");
+						systemInfo.CPPCCustomOrder[i] = systemInfo.CPPCOrder[i];
+					}
+					BenchMaestro.Properties.Settings.Default.CustomCPPC = String.Join(", ", systemInfo.CPPCCustomOrder);
+					BenchMaestro.Properties.Settings.Default.Save();
 				}
-				BenchMaestro.Properties.Settings.Default.CustomCPPC = String.Join(", ", systemInfo.CPPCCustomOrder);
-				BenchMaestro.Properties.Settings.Default.Save();
-			}
 
-			systemInfo.CPPCActiveOrder = systemInfo.CPPCOrder;
-			systemInfo.CPPCActiveLabel = systemInfo.CPPCLabel;
-			if (BenchMaestro.Properties.Settings.Default.cbCustomCPPC)
+				systemInfo.CPPCActiveOrder = systemInfo.CPPCOrder;
+				systemInfo.CPPCActiveLabel = systemInfo.CPPCLabel;
+				if (BenchMaestro.Properties.Settings.Default.cbCustomCPPC)
+				{
+					systemInfo.CPPCActiveOrder = systemInfo.CPPCCustomOrder;
+					systemInfo.CPPCActiveLabel = GetCustomLabel();
+				}
+
+				if (BenchMaestro.Properties.Settings.Default.Threads == null) BenchMaestro.Properties.Settings.Default.Threads = new StringCollection();
+
+				Trace.WriteLine($"STMT {BenchMaestro.Properties.Settings.Default.BtnSTMT}");
+				systemInfo.STMT = BenchMaestro.Properties.Settings.Default.BtnSTMT;
+				systemInfo.CPPCCustomEnabled = BenchMaestro.Properties.Settings.Default.BtnSTMT;
+
+				SetLastThreadAffinity();
+			}
+			catch (Exception ex)
 			{
-				systemInfo.CPPCActiveOrder = systemInfo.CPPCCustomOrder;
-				systemInfo.CPPCActiveLabel = GetCustomLabel();
+				Trace.WriteLine($"Application_Exit exception: {ex}");
 			}
-
-			if (BenchMaestro.Properties.Settings.Default.Threads == null) BenchMaestro.Properties.Settings.Default.Threads = new StringCollection();
-
-			Trace.WriteLine($"STMT {BenchMaestro.Properties.Settings.Default.BtnSTMT}");
-			systemInfo.STMT = BenchMaestro.Properties.Settings.Default.BtnSTMT;
-			systemInfo.CPPCCustomEnabled = BenchMaestro.Properties.Settings.Default.BtnSTMT;
-
-			SetLastThreadAffinity();
-
 		}
 		private static void Monitor_ElapsedEventHandler(object sender, ElapsedEventArgs e)
 		{
@@ -403,29 +445,38 @@ namespace BenchMaestro
 
 		private void Application_Exit(object sender, ExitEventArgs e)
 		{
-			if (RunningProcess != -1) BenchRun.KillProcID(RunningProcess);
-
-			HWMonitor.Close();
-
-			hwmcts.Dispose();
-			benchcts.Dispose();
-			
-			SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
-
-			if (systemInfo.Zen != null)
-			{
-				systemInfo.Zen.Dispose();
-				systemInfo.Zen = null;
-			}
-
-			if (HWMonitor.computer != null)
+			try
             {
-				HWMonitor.computer = null;
-			}
-			Trace.WriteLine("BenchMaestro closed");
-			Trace.Flush();
-			Trace.Close();
+				if (RunningProcess != -1) BenchRun.KillProcID(RunningProcess);
 
+				HWMonitor.Close();
+
+				hwmcts.Dispose();
+				benchcts.Dispose();
+
+				SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
+
+				if (!object.ReferenceEquals(null, systemInfo.Zen))
+				{
+					systemInfo.Zen.Dispose();
+					systemInfo.Zen = null;
+				}
+
+				if (!object.ReferenceEquals(null, HWMonitor.computer))
+				{
+					HWMonitor.computer = null;
+				}
+			}
+			catch (Exception ex)
+            {
+				Trace.WriteLine($"Application_Exit exception: {ex}");
+			}
+			finally
+            {
+				Trace.WriteLine("BenchMaestro closed");
+				Trace.Flush();
+				Trace.Close();
+			}
 		}
 		private void InitColors()
 		{

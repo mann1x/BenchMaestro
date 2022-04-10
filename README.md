@@ -34,6 +34,11 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.20 Alpha
+    - Add: CpuId debug and tests for P/E Cores
+    - Fix: Save and restore custom CPPC (thx Luggage)
+    - Fix: Improved handling of Intel P/E Cores with Libre (thx stahlhart)
+    - Fix: Improved cleaning at exit (thx stahlhart)
 - v1.0.19 Alpha
     - Fix: Moved the extracted bench binary check before idle check (thx hahagu)
     - Fix: Opening links from About (thx The_King)
