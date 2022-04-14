@@ -23,6 +23,7 @@ namespace BenchMaestro
         public static bool MonitoringStarted = false;
         public static bool MonitoringStopped = false;
         public static bool MonitoringBenchStarted = false;
+        public static DateTime MonitoringBenchStartedTS = DateTime.MinValue;
         public static bool MonitoringParsed = false;
         public static bool MonitoringPause = false;
         public static bool MonitoringIdle = false;
@@ -222,6 +223,13 @@ namespace BenchMaestro
                 App.systemInfo.UpdateLiveCPUClock($"{Math.Round((double)_cpuload, 0)}% CPU Load");
                 App.systemInfo.UpdateLiveCPUTemp($"{Math.Round((double)_cputemp, 1)}°C");
                 App.systemInfo.UpdateLiveCPUPower($"{Math.Round((double)_cpupower, 0)}W");
+                float? _tdcamp = App.hwsensors.GetValue(HWSensorName.CPUTDC);
+                float? _edcamp = App.hwsensors.GetValue(HWSensorName.CPUEDC);
+                string _liveadditional = "";
+                if (_tdcamp > 0) _liveadditional += $"TDC: {Math.Round((double)_tdcamp, 0)}A ";
+                if (_edcamp > 0) _liveadditional += $"EDC: {Math.Round((double)_edcamp, 0)}A ";
+                if (_liveadditional.Length > 0)
+                    App.systemInfo.UpdateLiveCPUAdditional(_liveadditional);
 
             }
             catch (Exception ex)
@@ -389,25 +397,25 @@ namespace BenchMaestro
                 if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Voltage && sensor.Name == "Core (SVI2 TFN)" && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUVoltage, sensor.Identifier.ToString(), sensor.Name);
-                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                    Trace.WriteLine($"Libre AMD CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
                 if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage && sensor.Name == "Vcore" && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUVoltage, sensor.Identifier.ToString(), sensor.Name);
-                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                    Trace.WriteLine($"Libre Intel CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
                 if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage && sensor.Name == "CPU SA" && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUSAVoltage, sensor.Identifier.ToString(), sensor.Name);
-                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                    Trace.WriteLine($"Libre CPUSA Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
                 if (hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage && sensor.Name == "CPU I/O" && CPUSource == HWSensorSource.Libre)
                 {
                     App.hwsensors.InitLibre(HWSensorName.CPUIOVoltage, sensor.Identifier.ToString(), sensor.Name);
-                    Trace.WriteLine($"Libre CPU Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
+                    Trace.WriteLine($"Libre CPUIO Voltage Sensor added {sensor.Identifier} HW={hardware.Identifier}");
                 }
 
                 if (hardware.HardwareType == HardwareType.Cpu && sensor.SensorType == SensorType.Voltage && sensor.Name == "SoC (SVI2 TFN)" && CPUSource == HWSensorSource.Libre)
@@ -795,7 +803,7 @@ namespace BenchMaestro
                     if (_bold)
                     {
                         if (_coresmaxv < _sensormax && _sensormax > -99999) _coresmaxv = _sensormax;
-                        _coresavgv = _coresavgv == -99999 ? _coresavgv : (_coresavgv + _sensoravg) / 2;
+                        _coresavgv = _coresavgv == -99999 ? _sensoravg : (_coresavgv + _sensoravg) / 2;
                     }
                     App.CurrentRun.CPUCoresVoltages.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 3), (float)Math.Round(_sensormax, 3), _bold, "0.000"));
                     Trace.WriteLine($"[Core {_core} VID Avg: {Math.Round(_sensoravg, 3)} Max: {Math.Round(_sensormax, 3)}]");
@@ -816,7 +824,7 @@ namespace BenchMaestro
                     if (_bold)
                     {
                         if (_coresmaxt < _sensormax && _sensormax > -99999) _coresmaxt = _sensormax;
-                        _coresavgt = _coresavgt == -99999 ? _coresavgt : (_coresavgt + _sensoravg) / 2;
+                        _coresavgt = _coresavgt == -99999 ? _sensoravg : (_coresavgt + _sensoravg) / 2;
                     }
                     App.CurrentRun.CPUCoresTemps.Add(new DetailsGrid($"#{_core}", (float)Math.Round(_sensoravg, 0), (float)Math.Round(_sensormax, 0), _bold, "0.0"));
                     Trace.WriteLine($"[Core {_core} Temp Avg: {Math.Round(_sensoravg, 0)} Max: {Math.Round(_sensormax, 0)} ]");
@@ -873,6 +881,8 @@ namespace BenchMaestro
                 }
             }
 
+            App.CurrentRun.CoresAvgVoltage = _coresavgv;
+            App.CurrentRun.CoresMaxVoltage = _coresmaxv;
 
             App.CurrentRun.CoresAvgTemp = Math.Round(_coresavgt, 1);
             App.CurrentRun.CoresMaxTemp = Math.Round(_coresmaxt, 1);
@@ -891,9 +901,6 @@ namespace BenchMaestro
 
             App.CurrentRun.CPUAvgLoad = Math.Round(_coresavgl, 0);
             App.CurrentRun.CPUMaxLoad = Math.Round(_coresmaxl, 0);
-
-            App.CurrentRun.CoresAvgVoltage = _coresavgv;
-            App.CurrentRun.CoresMaxVoltage = _coresmaxv;
 
             if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp) && App.hwsensors.IsAny(HWSensorName.CCD2L3Temp))
             {
@@ -1013,8 +1020,16 @@ namespace BenchMaestro
                         {
                             double _cpuload = (double)App.hwsensors.GetValue(HWSensorName.CPULogicalsLoad, _cpu - 1);
 
-                            Trace.WriteLine($"MonitoringStart Check for load on Logical: {_cpu} {_cpuload}");
-                            if (_cpuload > 80)
+                            TimeSpan _deltastart = DateTime.Now - MonitoringBenchStartedTS;
+                            Trace.WriteLine($"MonitoringStart Check for load on Logical ({_deltastart.TotalSeconds:0}s): {_cpu} {_cpuload}");
+                            if (_deltastart.TotalSeconds > 10)
+                            {
+                                MonitoringStart = DateTime.Now;
+                                MonitoringStarted = true;
+                                MonitoringPooling = MonitoringPoolingSlow;
+                                Trace.WriteLine($"MonitoringStart STARTED on timeout detection: {_deltastart.TotalSeconds:0}s {MonitoringStart}");
+                            }
+                            else if (_cpuload > 80)
                             {
                                 MonitoringStart = DateTime.Now;
                                 MonitoringStarted = true;

@@ -58,6 +58,8 @@ namespace BenchMaestro
             {
                 return (false, "CONFIG", 0, "", "");
             }
+            
+            string erroraff_pattern = @"^\[.*\] : WARNING setting affinity failed.";
             string start_pattern = @"^\[.*\] : Start a (?<seconds>.*) second benchmark...";
             string tscore_pattern = @"^\[.*\] : Benchmark Thread (?<thread>\d+) cpu: (?<score>.*) (?<scoreunit>.*)";
             string end_pattern = @"^\[.*\] : Benchmark Total: (?<score>.*) (?<scoreunit>.*)";
@@ -67,6 +69,12 @@ namespace BenchMaestro
             if (start_m.Success)
             {
                 return (true, "START", 0, start_m.Groups[1].Value, "");
+            }
+            Regex erroraff_rgx = new Regex(erroraff_pattern, RegexOptions.Multiline);
+            Match erroraff_m = erroraff_rgx.Match(_line);
+            if (erroraff_m.Success)
+            {
+                return (false, "Affinity error, reboot", 0, start_m.Groups[1].Value, "");
             }
             Regex tscore_rgx = new Regex(tscore_pattern, RegexOptions.Multiline);
             Match tscore_m = tscore_rgx.Match(_line);
@@ -194,10 +202,11 @@ namespace BenchMaestro
                 App.TaskRunning = true;
                 App.scoreMinWidth = 0;
 
+                App.benchcts = new();
                 CancellationToken benchtoken = new CancellationToken();
-                benchtoken = (CancellationToken)App.benchcts.Token;
+                benchtoken = App.benchcts.Token;
 
-                Trace.WriteLine($"RUN BENCH 1");
+                Trace.WriteLine($"RUN BENCH 1 Benchname={Benchname}");
 
                 App.hwmtimer.Interval = HWMonitor.MonitoringPooling;
                 HWMonitor.EndCheckLowLoad = EndChecklowLoad;
@@ -221,7 +230,7 @@ namespace BenchMaestro
 
                 UpdateRunStart();
 
-                Trace.WriteLine($"RUN BENCH 1B {threads.Count()}");
+                Trace.WriteLine($"RUN BENCH 1B Iterations={threads.Count()}");
 
                 foreach (int _thrds in threads)
                 {
@@ -229,7 +238,7 @@ namespace BenchMaestro
 
                     App.IterationPretimeTS = DateTime.Now;
 
-                    Trace.WriteLine($"RUN BENCH 2");
+                    Trace.WriteLine($"RUN BENCH 2 Benchname={Benchname} Threads={_thrds}");
 
                     BenchScore _scoreRun = Module1.GetRunForThreads(scoreRun, _thrds, Benchname);
 
@@ -258,48 +267,24 @@ namespace BenchMaestro
 
                     string CPPCOrder = String.Join(", ", CPPC);
 
-                    Trace.WriteLine($"CPPC: {CPPCOrder}");
+                    Trace.WriteLine($"[0based] CPPC: {CPPCOrder}");
 
                     using (StreamWriter sw = File.CreateText(path))
                     {
                         sw.WriteLine("\"cpu_threads_conf\" :");
                         sw.WriteLine("[");
 
-                        int _cpu = 0;
-
-                        for (int i = 0; i < _thrds; i++)
+                        int bitMask = 0;
+                        bitMask = App.GetRunCoresAndLogicals(_scoreRun, _thrds);
+                        foreach (int cpu in _scoreRun.RunLogicals)
                         {
-                            int _cppcidx = i;
-
-                            if (i > CPUCores - 1) _cppcidx = i - CPUCores;
-
-                            int _core = CPPC[_cppcidx] + 1;
-
-                            if (App.systemInfo.HyperThreading)
-                            {
-                                _cpu = i < CPUCores ? CPPC[_cppcidx] * 2 : (CPPC[_cppcidx] * 2) + 1;
-                            }
-                            else
-                            {
-                                _cpu = CPPC[i];
-                                if (!_scoreRun.RunCores.Contains(_cpu)) _scoreRun.RunCores.Add(_cpu);
-                            }
-
-
-                            int _cpu1 = _cpu + 1;
-
-                            if (!_scoreRun.RunCores.Contains(_core)) _scoreRun.RunCores.Add(_core);
-                            if (!_scoreRun.RunLogicals.Contains(_cpu1)) _scoreRun.RunLogicals.Add(_cpu1);
-
-                            sw.WriteLine($"{{ \"low_power_mode\" : false, \"affine_to_cpu\" : {_cpu} }},");
-                            Trace.WriteLine($"Affinity (0 based) : {_cpu} (1): {_cpu1}");
-
+                            sw.WriteLine($"{{ \"low_power_mode\" : false, \"affine_to_cpu\" : {cpu-1} }},");
                         }
                         sw.WriteLine("]");
                     }
 
-                    Trace.WriteLine($"RunCores: {string.Join(", ", _scoreRun.RunCores.ToArray())}");
-                    Trace.WriteLine($"RunLogicals: {string.Join(", ", _scoreRun.RunLogicals.ToArray())}");
+                    Trace.WriteLine($"[1based] RunCores: {string.Join(", ", _scoreRun.RunCores.ToArray())}");
+                    Trace.WriteLine($"[1based] RunLogicals: {string.Join(", ", _scoreRun.RunLogicals.ToArray())}");
 
                     string _args = BenchArgs.Replace("###runtime###", App.CurrentRun.Runtime.ToString());
 
@@ -325,6 +310,7 @@ namespace BenchMaestro
                         App.CurrentRun.FinishString = "Bench binary not found";
                         UpdateFinished(App.CurrentRun.FinishString);
                         Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
+                        App.benchcts.Cancel();
                         return;
                     }
 
@@ -357,10 +343,11 @@ namespace BenchMaestro
                         if (benchtoken.IsCancellationRequested)
                         {
                             _scoreRun.Finished = DateTime.Now;
-                            _scoreRun.ExitStatus = "Aborted by user";
                             UpdateScore("Error");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                            App.CurrentRun.FinishString = "Aborted by user";
+                            if (App.CurrentRun.FinishString.Length < 1)
+                                App.CurrentRun.FinishString = "Aborted by user";
+                            _scoreRun.ExitStatus = App.CurrentRun.FinishString;
                             UpdateFinished(App.CurrentRun.FinishString);
                             Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                             return;
@@ -378,13 +365,15 @@ namespace BenchMaestro
                                 if (benchtoken.IsCancellationRequested)
                                 {
                                     _scoreRun.Finished = DateTime.Now;
-                                    _scoreRun.ExitStatus = "Aborted by user";
                                     UpdateScore("Error");
                                     UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                                    App.CurrentRun.FinishString = "Aborted by user";
+                                    if (App.CurrentRun.FinishString.Length < 1)
+                                        App.CurrentRun.FinishString = "Aborted by user";
+                                    _scoreRun.ExitStatus = App.CurrentRun.FinishString;
                                     UpdateFinished(App.CurrentRun.FinishString);
                                     Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
-                                    throw new OperationCanceledException();
+                                    return;
+                                    //throw new OperationCanceledException();
                                 }
                                 UpdateProgress(-1);
                                 Trace.WriteLine($"Seelping for staticwait");
@@ -505,11 +494,15 @@ namespace BenchMaestro
 
                             if (!parseStatus)
                             {
-                                UpdateMainStatus($"Benchmark execution error: {parseMsg}");
+                                _scoreRun.Finished = DateTime.Now;
                                 UpdateScore("Error");
+                                UpdateMainStatus($"Benchmark execution error: {parseMsg}");
                                 SetLiveBindings(_scoreRun, false);
-                                App.benchrunning = false;
-                                return;
+                                App.CurrentRun.FinishString = $"{parseMsg}";
+                                _scoreRun.ExitStatus = parseMsg;
+                                UpdateFinished(App.CurrentRun.FinishString);
+                                Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
+                                App.benchcts.Cancel();
                             }
                             else
                             {
@@ -519,6 +512,7 @@ namespace BenchMaestro
                                     App.IterationPretime = (int)_pretimespan.TotalSeconds;
                                     App.IterationRuntimeTS = DateTime.Now;
                                     HWMonitor.MonitoringBenchStarted = true;
+                                    HWMonitor.MonitoringBenchStartedTS = DateTime.Now;
                                     UpdateScore("Running...");
                                     UpdateMainStatus($"Benchmark {_thrds}t running...");
                                     Trace.WriteLine("Benchmark START");
@@ -538,6 +532,14 @@ namespace BenchMaestro
                                     TimeSpan _runtimespan = DateTime.Now - App.IterationRuntimeTS;
                                     App.IterationRuntime = (int)_runtimespan.TotalSeconds;
                                     App.IterationPostimeTS = DateTime.Now;
+                                    float? _valscore = parseFloat;
+                                    string _prefix = parseString1[0..^_unit.Length];
+                                    if (_prefix.Length > 0)
+                                    {
+                                        _valscore = (float?)HWMonitor.SetScaleValueFromPrefix((double)parseFloat, _prefix);
+                                    }
+                                    _scoreRun.ScoreScaled = (float)Math.Round((decimal)_valscore,0);
+                                    Trace.WriteLine($"Score scaled={_scoreRun.ScoreScaled}");
                                     _scoreRun.Score = parseFloat;
                                     _scoreRun.ScoreUnit = parseString1;
                                     UpdateScore("");
@@ -562,11 +564,12 @@ namespace BenchMaestro
                         {
                             SetLiveBindings(_scoreRun, false);
                             _scoreRun.Finished = DateTime.Now;
-                            _scoreRun.ExitStatus = "Aborted by user";
                             //hwmcts.Cancel();
                             UpdateScore("Error");
                             UpdateMainStatus($"Benchmark aborted while running {_thrds}T");
-                            App.CurrentRun.FinishString = "Aborted by user";
+                            if (App.CurrentRun.FinishString.Length < 1)
+                                App.CurrentRun.FinishString = "Aborted by user";
+                            _scoreRun.ExitStatus = App.CurrentRun.FinishString;
                             UpdateFinished(App.CurrentRun.FinishString);
                             Trace.WriteLine($"{Benchname} Out of Loop at Threads: {_thrds}");
                             return;

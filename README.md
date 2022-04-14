@@ -34,6 +34,21 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.21 Alpha
+    - Add: Improved monitoring start detection
+    - Add: Performance per watt score
+    - Add: Set process to last thread for scheduling instead of last processor thread
+    - Add: Proper threads sheduling with support for P/E-cores
+    - Add: Display of P/E-cores and threads for Alder Lake
+    - Add: Detection of AVX-512 instruction set
+    - Add: Scheduler priorities integration, works with all CPUs, supersedes CPPC tags if available as it should match it
+    - Add: Testing with 20t for comparisons with Alder Lake
+    - Add: Manual check for update button in Settings menu
+    - Add: Live display of TDC and EDC for Zen
+    - Fix: Offset for Zen1 X for Core and correct L3 Temps (thx The_King)
+    - Fix: Correct threads for CPUMiner thread scores
+    - Fix: Bug in Cores VIDs and Temps stats 
+    - Fix: Improved stop and error handling for bench runs
 - v1.0.20 Alpha
     - Add: CpuId debug and tests for P/E Cores
     - Fix: Save and restore custom CPPC (thx Luggage)

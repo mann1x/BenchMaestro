@@ -36,7 +36,8 @@ namespace BenchMaestro
         static string Benchname = "MainMenu";
         static bool InitUI = true;
         static bool WinLoaded = false;
-        
+        string AutoUpdaterUrl = "https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json";
+
         XMRSTAKRXWindow XMRSTAKRXWin;
         CPUMINERSSE2Window CPUMINERSSE2Win;
         CPUMINERSSE42Window CPUMINERSSE42Win;
@@ -113,11 +114,12 @@ namespace BenchMaestro
 
         private void Window_SizeChanged(object sender, EventArgs e)
         {
-            Trace.WriteLine($"SizeChanged Window Initialized {WindowSettings.Default.Initialized}");
+            //Trace.WriteLine($"SizeChanged Window Initialized {WindowSettings.Default.Initialized}");
             if (WindowSettings.Default.Initialized && WinLoaded)
             {
                 SaveWinPos();
             }
+            UpdateLayout();
         }
         private void SaveWinPos()
         {
@@ -214,6 +216,11 @@ namespace BenchMaestro
             {
                 BtnBenchCPUMINERSSE42.Visibility = Visibility.Collapsed;
             }
+            if (!App.systemInfo.IntelAVX512)
+            {
+                BtnBenchCPUMINERAVX512.Visibility = Visibility.Collapsed;
+                BtnBenchCPUMINERAVX512SHAVAES.Visibility = Visibility.Collapsed;
+            }
 
             if (App.ZenPTSubject.Length > 0)
             {
@@ -226,7 +233,7 @@ namespace BenchMaestro
             AutoUpdater.RunUpdateAsAdmin = false;
             AutoUpdater.Synchronous = false;
             AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
-            AutoUpdater.Start("https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json");
+            AutoUpdater.Start(AutoUpdaterUrl);
 
             UpdateLayout();
         }
@@ -250,6 +257,7 @@ namespace BenchMaestro
                     HashingAlgorithm = json.checksum.hashingAlgorithm
                 }
             };
+            App.systemInfo.SetLastVersionOnServer($"{args.UpdateInfo.CurrentVersion} @ {DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss")}");
         }
 
         private void RadioMode(object sender, RoutedEventArgs e)
@@ -401,6 +409,11 @@ namespace BenchMaestro
                 screenshot.Dispose();
             }
         }
+        
+        private void ButtonCheckUpdate(object sender, RoutedEventArgs e)
+        {
+            AutoUpdater.Start(AutoUpdaterUrl);
+        }
         private void ButtonReset(object sender, RoutedEventArgs e)
         {
             WindowSettings.Default.Reset();
@@ -434,6 +447,7 @@ namespace BenchMaestro
             if (App.systemInfo.CPULogicalProcessors <= 32) tMax.Visibility = Visibility.Collapsed;
             if (App.systemInfo.CPULogicalProcessors < 32) t32.Visibility = Visibility.Collapsed;
             if (App.systemInfo.CPULogicalProcessors < 24) t24.Visibility = Visibility.Collapsed;
+            if (App.systemInfo.CPULogicalProcessors < 20) t20.Visibility = Visibility.Collapsed;
             if (App.systemInfo.CPULogicalProcessors < 16) t16.Visibility = Visibility.Collapsed;
             if (App.systemInfo.CPULogicalProcessors < 12) t12.Visibility = Visibility.Collapsed;
             if (App.systemInfo.CPULogicalProcessors < 8) t8.Visibility = Visibility.Collapsed;
@@ -499,6 +513,7 @@ namespace BenchMaestro
                 XMRSTAKRXWin.DataContext = this.DataContext;
             }
             XMRSTAKRXWin.Show();
+            XMRSTAKRXWin.Focus();
 
         }
         private void NewBenchCPUMINERSSE2(object sender, RoutedEventArgs e)
@@ -510,6 +525,7 @@ namespace BenchMaestro
                 CPUMINERSSE2Win.DataContext = this.DataContext;
             }
             CPUMINERSSE2Win.Show();
+            CPUMINERSSE2Win.Focus();
 
         }
         private void NewBenchCPUMINERSSE42(object sender, RoutedEventArgs e)
@@ -521,6 +537,7 @@ namespace BenchMaestro
                 CPUMINERSSE42Win.DataContext = this.DataContext;
             }
             CPUMINERSSE42Win.Show();
+            CPUMINERSSE42Win.Focus();
 
         }
         private void NewBenchCPUMINERAVX(object sender, RoutedEventArgs e)
@@ -532,6 +549,7 @@ namespace BenchMaestro
                 CPUMINERAVXWin.DataContext = this.DataContext;
             }
             CPUMINERAVXWin.Show();
+            CPUMINERAVXWin.Focus();
 
         }
         private void NewBenchCPUMINERAVX2(object sender, RoutedEventArgs e)
@@ -543,6 +561,7 @@ namespace BenchMaestro
                 CPUMINERAVX2Win.DataContext = this.DataContext;
             }
             CPUMINERAVX2Win.Show();
+            CPUMINERAVX2Win.Focus();
 
         }
         private void NewBenchCPUMINERAVX2SHA(object sender, RoutedEventArgs e)
@@ -554,6 +573,7 @@ namespace BenchMaestro
                 CPUMINERAVX2SHAWin.DataContext = this.DataContext;
             }
             CPUMINERAVX2SHAWin.Show();
+            CPUMINERAVX2SHAWin.Focus();
 
         }
 
@@ -566,6 +586,7 @@ namespace BenchMaestro
                 CPUMINERAVX2SHAVAESWin.DataContext = this.DataContext;
             }
             CPUMINERAVX2SHAVAESWin.Show();
+            CPUMINERAVX2SHAVAESWin.Focus();
 
         }
         private void NewBenchCPUMINERAVX512(object sender, RoutedEventArgs e)
@@ -577,6 +598,7 @@ namespace BenchMaestro
                 CPUMINERAVX512Win.DataContext = this.DataContext;
             }
             CPUMINERAVX512Win.Show();
+            CPUMINERAVX512Win.Focus();
 
         }
         private void NewBenchCPUMINERAVX512SHAVAES(object sender, RoutedEventArgs e)
@@ -588,6 +610,7 @@ namespace BenchMaestro
                 CPUMINERAVX512SHAVAESWin.DataContext = this.DataContext;
             }
             CPUMINERAVX512SHAVAESWin.Show();
+            CPUMINERAVX512SHAVAESWin.Focus();
 
         }
 

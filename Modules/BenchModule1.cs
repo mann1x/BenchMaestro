@@ -36,11 +36,28 @@ namespace BenchMaestro
                 int _row = 0;
                 string _value = "";
 
+                /// SCORE
+
+                TextBlock _textblock = App.CurrentRun.ScoreBox2;
+
+                if (App.CurrentRun.Score >= 0 && App.CurrentRun.CPUAvgPower > 0)
+                {
+                    _textblock.Visibility = Visibility.Visible;
+                    double _scorepw;
+                    string _scorepwscale;
+                    App.CurrentRun.ScorePerWatt = App.CurrentRun.ScoreScaled / (float)App.CurrentRun.CPUAvgPower;
+                    (_scorepw, _scorepwscale) = HWMonitor.GetScaleValueAndPrefix((float)App.CurrentRun.ScorePerWatt);
+
+                    _textblock.Inlines.Add(new Run { Text = $"{Math.Round((decimal)_scorepw, 2)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.scorebrush });
+                    _textblock.Inlines.Add(new Run { Text = $" {_scorepwscale}{App.CurrentRun.BenchScoreUnit} per Watt", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
+                }
+
                 /// TEMP
 
-                TextBlock _textblock = App.CurrentRun.CPUTempBox;
+                _textblock = App.CurrentRun.CPUTempBox;
                 Grid _gridblock = App.CurrentRun.CPUTempGrid;
                 _gridblock.VerticalAlignment = VerticalAlignment.Center;
+
                 _row = 0;
 
                 if (App.CurrentRun.CPUAvgTemp > 0)
@@ -81,7 +98,7 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"Cores: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"Cores: {Math.Round(App.CurrentRun.CoresAvgTemp, 1)}", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
                     _tb1a.Inlines.Add(new Run { Text = $" {degrees} ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -917,6 +934,8 @@ namespace BenchMaestro
 
             Thickness dpadding = new Thickness(8, 0, 8, 0);
 
+            Thickness smargin = new Thickness(2, 2, 2, 2);
+
             App.BenchScoreUnit = BenchScoreUnit;
 
             foreach (int _threads in threads)
@@ -941,14 +960,32 @@ namespace BenchMaestro
 
                 // SCORE
 
-                TextBlock _score = new TextBlock { FontSize = 20, Background = App.whitebrush, Foreground = App.scorebrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
-                Grid.SetColumn(_score, _column);
-                Grid.SetRow(_score, _row);
+                StackPanel _pscorestack = new StackPanel { Margin = App.thickness, Background = App.whitebrush };
+                _pscorestack.HorizontalAlignment = HorizontalAlignment.Stretch;
+                _pscorestack.VerticalAlignment = VerticalAlignment.Stretch;
+                Grid.SetColumn(_pscorestack, _column);
+                Grid.SetRow(_pscorestack, _row);
+
+                StackPanel _scorestack = new StackPanel { Background = App.whitebrush };
+                _scorestack.HorizontalAlignment = HorizontalAlignment.Stretch;
+                _scorestack.VerticalAlignment = VerticalAlignment.Stretch;
+                _scorestack.Margin = smargin;
+                _pscorestack.Children.Add(_scorestack);
+
+                TextBlock _score = new TextBlock { FontSize = 20, Background = App.whitebrush, Foreground = App.scorebrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
                 _score.TextAlignment = TextAlignment.Center;
                 _score.Inlines.Add(new Run { Text = "Queued", FontSize = 20, FontWeight = FontWeights.Bold });
-                _score.Margin = App.thickness;
-                ScoreList.Children.Add(_score);
+                _scorestack.Children.Add(_score);
                 _run.ScoreBox = _score;
+
+                TextBlock _score2 = new TextBlock { FontSize = 14, Background = App.whitebrush, Foreground = App.scorebrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch };
+                _score2.TextAlignment = TextAlignment.Center;
+                _scorestack.Children.Add(_score2);
+                _score2.Visibility = Visibility.Collapsed;
+                _run.ScoreBox2 = _score2;
+
+                ScoreList.Children.Add(_pscorestack);
+
                 _row++;
 
                 /// CPU TEMP
@@ -1232,6 +1269,7 @@ namespace BenchMaestro
                 {
                     TextBlock _textblock = App.CurrentRun.FinishedBox;
                     _textblock.FontSize = 12;
+                    if (App.CurrentRun.Finished == DateTime.MinValue) App.CurrentRun.Finished = DateTime.Now;
                     _textblock.Text = $"Finish: {App.CurrentRun.Finished}";
                     if (_exitstatus.Length > 0)
                     {
@@ -1283,6 +1321,11 @@ namespace BenchMaestro
                     bindLive.Mode = BindingMode.OneWay;
                     bindLive.Source = App.systemInfo;
                     BindingOperations.SetBinding(_scoreRun.CPUPowerBox, TextBlock.TextProperty, bindLive);
+                    //CPU Additional
+                    bindLive = new Binding("LiveCPUAdditional");
+                    bindLive.Mode = BindingMode.OneWay;
+                    bindLive.Source = App.systemInfo;
+                    BindingOperations.SetBinding(_scoreRun.AdditionalBox, TextBlock.TextProperty, bindLive);
                 }
                 else
                 {
@@ -1290,9 +1333,11 @@ namespace BenchMaestro
                     BindingOperations.ClearBinding(_scoreRun.CPUTempBox, TextBlock.TextProperty);
                     BindingOperations.ClearBinding(_scoreRun.CPUClockBox, TextBlock.TextProperty);
                     BindingOperations.ClearBinding(_scoreRun.CPUPowerBox, TextBlock.TextProperty);
+                    BindingOperations.ClearBinding(_scoreRun.AdditionalBox, TextBlock.TextProperty);
                     _scoreRun.CPUTempBox.Text = "N/A";
                     _scoreRun.CPUClockBox.Text = "N/A";
                     _scoreRun.CPUPowerBox.Text = "N/A";
+                    _scoreRun.AdditionalBox.Text = "N/A";
                 }
             }
             catch (Exception ex)

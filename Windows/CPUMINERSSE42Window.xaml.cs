@@ -126,6 +126,7 @@ namespace BenchMaestro
         private void Window_SizeChanged(object sender, EventArgs e)
         {
             if (WindowSettings.Default.Initialized && WindowIsInit) SaveWinPos();
+            UpdateLayout();
         }
 
 
@@ -339,6 +340,8 @@ namespace BenchMaestro
                 {
                     BtnStartLabel.IsEnabled = false;
 
+                    App.CurrentRun.FinishString = "Aborted by user";
+
                     UpdateMainStatus("Aborting run...");
                     // Request cancellation.
 
@@ -364,7 +367,6 @@ namespace BenchMaestro
                     }
 
                     UpdateMainStatus("User aborted");
-                    App.CurrentRun.FinishString = "User aborted";
 
                     App.benchcts = new CancellationTokenSource();
 

@@ -22,6 +22,7 @@ namespace BenchMaestro
 	{
 		public Computer LibreComputer = new Computer();
 		public string AppVersion { get; set; }
+		public string LastVersionOnServer { get; set; }
 		public bool STMT { get; set; }
 		public string BoardManufacturer { get; set; }
 		public string BoardModel { get; set; }
@@ -80,9 +81,17 @@ namespace BenchMaestro
 		public bool Zen1X { get; set; }
 		public bool ZenPlus { get; set; }
 
+		public bool IntelAVX512 { get; set; }
+		public bool IntelHybrid { get; set; }
+		public List<int> Pcores { get; set; }
+		public List<int> Ecores { get; set; }
+		public List<int> Plogicals { get; set; }
+		public List<int> Elogicals { get; set; }
+
 		public string LiveCPUTemp { get; set; }
 		public string LiveCPUClock { get; set; }
 		public string LiveCPUPower { get; set; }
+		public string LiveCPUAdditional { get; set; }
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -156,9 +165,17 @@ namespace BenchMaestro
 			CPPCTagsLabel = "";
 			HyperThreading = false;
 
+			LastVersionOnServer = "N/A";
+
 			CPPCOrder = new int[CPUCores];
 			CPPCOrder1 = new int[CPUCores];
 			CPPCTags = new int[CPUCores];
+
+			IntelHybrid = false;
+			Pcores = new();
+			Ecores = new();
+			Plogicals = new();
+			Elogicals = new();
 
 			try
 			{
@@ -193,6 +210,7 @@ namespace BenchMaestro
 				LiveCPUTemp = "N/A";
 				LiveCPUClock = "N/A";
 				LiveCPUPower = "N/A";
+				LiveCPUAdditional = "N/A";
 
 				WinMaxSize = 600;
 
@@ -209,6 +227,8 @@ namespace BenchMaestro
 				CPPCTagsInit();
 
 				CpuIdInit();
+
+				CpuSetInit();
 
 				ZenStates = false;
 				ZenPerCCDTemp = false;
@@ -535,6 +555,13 @@ namespace BenchMaestro
 				BoardLabel = $"{BoardModel} [BIOS Version {BoardBIOS}]\n{BoardManufacturer}";
 				ProcessorsLabel = $"{CPUCores}";
 				if (HyperThreading) ProcessorsLabel += $" [Threads: {CPULogicalProcessors}]";
+				if (IntelHybrid)
+				{
+					ProcessorsLabel += $" P-Cores: {Pcores.Count}";
+					if (Plogicals.Count > Pcores.Count) ProcessorsLabel += $" [{Plogicals.Count}T]";
+					ProcessorsLabel += $" E-Cores: {Ecores.Count}";
+					if (Elogicals.Count > Ecores.Count) ProcessorsLabel += $" [{Elogicals.Count}T]";
+				}
 				if (ZenStates)
 				{
 					string _CPULabel = "";
@@ -849,18 +876,7 @@ namespace BenchMaestro
 						//Trace.WriteLine($"CPPC i: {i} Core: {CPPC[i, 0]} Perf: {CPPC[i, 1]}");
 					}
 
-					for (int i = 0; i < CPPC.GetLength(0); i++)
-					{
-						CPPCPerfLabel += String.Format("{0}#{1}", CPPC[i, 0], CPPC[i, 1]);
-						if (i != CPPC.GetLength(0) - 1) CPPCPerfLabel += ", ";
-					}
-
-					for (int i = 0; i < CPPC.GetLength(0); i++)
-					{
-						CPPCLabel += String.Format("{0} ", CPPC[i, 0]);
-						if (i != CPPC.GetLength(0) - 1) CPPCLabel += ", ";
-
-					}
+					CPPCLabels();
 
 					string path = @".\dumpcppc.txt";
 					if (!File.Exists(path)) File.Delete(path);
@@ -896,6 +912,32 @@ namespace BenchMaestro
 				Trace.WriteLine($"CPPC Tags EventReader Exception: {e}");
 			}
 		}
+
+		public void CPPCLabels()
+		{
+			try
+			{
+				CPPCLabel = "";
+				CPPCPerfLabel = "";
+					
+				for (int i = 0; i<CPPC.GetLength(0); i++)
+				{
+					CPPCPerfLabel += String.Format("{0}#{1}", CPPC[i, 0], CPPC[i, 1]);
+					if (i != CPPC.GetLength(0) - 1) CPPCPerfLabel += ", ";
+				}
+
+				for (int i = 0; i<CPPC.GetLength(0); i++)
+				{
+					CPPCLabel += String.Format("{0} ", CPPC[i, 0]);
+					if (i != CPPC.GetLength(0) - 1) CPPCLabel += ", ";
+
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"CPPCLabels Exception: {ex}");
+			}
+		}
 		public void CpuIdInit()
 		{
 			try
@@ -913,34 +955,58 @@ namespace BenchMaestro
 				HWMonitor.computer.Open();
 				HWMonitor.computer.Accept(new UpdateVisitor());
 
-
-				LibreHardwareMonitor.Hardware.CPU.CpuId _cpuid = LibreHardwareMonitor.Hardware.CPU.CpuId.Get(0, 0);
-				Trace.WriteLine($"CPUID_0 {_cpuid.Data[0, 0]:X}");
-				Trace.WriteLine($"CPUID_EXT {_cpuid.ExtData[0, 0]:X}");
-
-				uint offset = LibreHardwareMonitor.Hardware.CPU.CpuId.CPUID_0;
-				uint offsetext = LibreHardwareMonitor.Hardware.CPU.CpuId.CPUID_EXT;
-
 				uint hybridreg = 0x0;
 				uint hybridflag = 0x0;
 				uint coretypereg = 0x0;
-				uint coretype = 0x0;
+				ulong coretype = 0x0;
 				string hybridstr = "";
 				string coretypestr = "";
+				uint avx512 = 0x0;
+				uint avx512reg = 0x0;
+				string avx512str = "No";
 
 				for (int j = 0; j < CPULogicalProcessors; j++)
 				{
 					Trace.WriteLine($" CPU Logical Processor: {j}");
-					hybridreg = _cpuid.Data[0x07, 3];
-					hybridflag = BitSlice(hybridreg, 15, 15);
-					coretypereg = _cpuid.ExtData[0x1A, 0];
-					coretype = BitSlice(coretypereg, 24, 31);
+
+					LibreHardwareMonitor.Hardware.CPU.CpuId _cpuid = LibreHardwareMonitor.Hardware.CPU.CpuId.Get(0, j);
+					Trace.WriteLine($"CPUID_0 {_cpuid.Data[0, 0]:X}");
+					Trace.WriteLine($"CPUID_EXT {_cpuid.ExtData[0, 0]:X}");
+
+					uint offset = LibreHardwareMonitor.Hardware.CPU.CpuId.CPUID_0;
+					uint offsetext = LibreHardwareMonitor.Hardware.CPU.CpuId.CPUID_EXT;
+
+					try
+					{
+						if (_cpuid.Data.GetLength(0) >= 0x7)
+						{
+							hybridreg = _cpuid.Data[0x7, 3];
+							hybridflag = BitSlice(hybridreg, 15, 15);
+						}
+						if (_cpuid.Data.GetLength(0) >= 0x1A)
+                        {
+							coretypereg = _cpuid.Data[0x1A, 0];
+							coretype = BitSlice(coretypereg, 24, 31);
+						}
+						if (_cpuid.Data.GetLength(0) >= 0xD)
+						{
+							avx512reg = _cpuid.Data[0xD, 3];
+							avx512 = BitSlice(hybridreg, 5, 5);
+						}
+					}
+					catch (Exception ex)
+                    {
+						Trace.WriteLine($" Error Reading Hybrid/Coretype: {ex}");
+						hybridreg = 3;
+						coretypereg = 0;
+					}
 					switch (hybridflag)
 					{
 						case 0:
 							hybridstr = "No";
 							break;
 						case 1:
+							IntelHybrid = true;
 							hybridstr = "Yes";
 							break;
 						default:
@@ -949,52 +1015,188 @@ namespace BenchMaestro
 					}
 					switch (coretype)
 					{
-						case 0x10:
+						case 0x20:
+							if (!Ecores.Contains(ProcessorInfo.PhysicalCore(j)))
+								Ecores.Add(ProcessorInfo.PhysicalCore(j));
+							Elogicals.Add(j + 1);
 							coretypestr = "E-Core";
 							break;
-						case 1:
+						case 0x40:
+							if (!Pcores.Contains(ProcessorInfo.PhysicalCore(j)))
+								Pcores.Add(ProcessorInfo.PhysicalCore(j));
+							Plogicals.Add(j + 1);
 							coretypestr = "P-Core";
 							break;
 						default:
 							coretypestr = "Unknown";
 							break;
 					}
-					Trace.WriteLine($" Hybrid: [{hybridstr}] CoreType: [{coretypestr}]");
+					switch (avx512)
+					{
+						case 0:
+							avx512str = "No";
+							break;
+						case 1:
+							IntelAVX512 = true;
+							avx512str = "Yes";
+							break;
+						default:
+							avx512str = "Unknown";
+							break;
+					}
+					Trace.WriteLine($" Hybrid: [{hybridstr}] CoreType: [{coretypestr}] AVX-512: [{avx512str}]");
 
 					Trace.WriteLine("");
 					Trace.WriteLine(" Function  EAX       EBX       ECX       EDX");
+					string _line = "";
 					for (int i = 0; i < _cpuid.Data.GetLength(0); i++)
 					{
-						Trace.Write(" ");
-						Trace.Write((i + offset).ToString("X8", CultureInfo.InvariantCulture));
+						_line = " ";
+						_line += (i + offset).ToString("X8", CultureInfo.InvariantCulture);
 						for (int ij = 0; ij < 4; ij++)
 						{
-							Trace.Write("  ");
-							Trace.Write(_cpuid.Data[i, ij].ToString("X8", CultureInfo.InvariantCulture));
+							_line += "  ";
+							_line += _cpuid.Data[i, ij].ToString("X8", CultureInfo.InvariantCulture);
 						}
-						Trace.WriteLine("");
+						Trace.WriteLine(_line);
+
 
 					}
 					Trace.WriteLine(" Function  EAX       EBX       ECX       EDX");
 					for (int i = 0; i < _cpuid.ExtData.GetLength(0); i++)
 					{
-						Trace.Write(" ");
-						Trace.Write((i + offsetext).ToString("X8", CultureInfo.InvariantCulture));
+						_line = " ";
+						_line += (i + offsetext).ToString("X8", CultureInfo.InvariantCulture);
 						for (int ij = 0; ij < 4; ij++)
 						{
-							Trace.Write("  ");
-							Trace.Write(_cpuid.ExtData[i, ij].ToString("X8", CultureInfo.InvariantCulture));
+							_line += "  ";
+							_line += _cpuid.ExtData[i, ij].ToString("X8", CultureInfo.InvariantCulture);
 						}
-						Trace.WriteLine("");
+						Trace.WriteLine(_line);
 
 					}
 					Trace.WriteLine("");
+
 				}
-				//Environment.Exit(-1);
+				
+				if (IntelHybrid)
+                {
+					string pcoresstr = String.Join(", ", Pcores.ToArray());
+					string plogicalsstr = String.Join(", ", Plogicals.ToArray());
+					string ecoresstr = String.Join(", ", Ecores.ToArray());
+					string elogicalsstr = String.Join(", ", Elogicals.ToArray());
+					Trace.WriteLine($"P-Cores: {pcoresstr}");
+					Trace.WriteLine($"P-Logicals: {plogicalsstr}");
+					Trace.WriteLine($"E-Cores: {ecoresstr}");
+					Trace.WriteLine($"E-Logicals: {elogicalsstr}");
+				}
 			}
 			catch (Exception ex)
 			{
 				Trace.WriteLine($"CpuIdInit Exception: {ex}");
+			}
+		}
+		
+		public void CpuSetInit()
+		{
+			try
+			{
+				Trace.WriteLine($"CpuSetInfo");
+				Trace.WriteLine($"");
+
+				Trace.WriteLine($"CoresByScheduling:");
+				var coresbysched = ProcessorInfo.CoresByScheduling();
+
+				if (ProcessorInfo.IsCoresBySchedulingAllZeros())
+				{
+					Trace.WriteLine($"Not available");
+				}
+				else
+				{
+					for (int ix = 0; ix < coresbysched.Count(); ++ix)
+					{
+						Trace.WriteLine($"#{coresbysched[ix][0]}:{coresbysched[ix][1]}");
+					}
+
+					CPPC = new int[CPUCores, 2];
+
+					for (int ii = 0; ii < CPPC.GetLength(0); ii++)
+					{
+						CPPC[ii, 0] = -100;
+						CPPC[ii, 1] = -100;
+					}
+
+					CPPCOrder = new int[CPUCores];
+					CPPCOrder1 = new int[CPUCores];
+
+					for (int i = 0; i < CPPC.GetLength(0); i++)
+					{
+						int _highestcpu = 0;
+						int _highestperf = 0;
+						int _highestindex = 0;
+						int _tag = 0;
+						for (int ix = CPPC.GetLength(0) - 1; ix > -1; ix--)
+						{
+							//Trace.WriteLine($"CPPC Scheduler Testing ix: {ix} core: {coresbysched[ix][0]} perf: {coresbysched[ix][1]} IsIn: {CPPCFoundAlready(ix)}");
+							if (_highestperf <= coresbysched[ix][1] && !CPPCFoundAlready(coresbysched[ix][0]))
+							{
+								//Trace.WriteLine($"CPPC Highest ix: {ix} perf: {coresbysched[ix][1]}");
+								_highestperf = coresbysched[ix][1];
+								_tag = CPPCTags[coresbysched[ix][0]];
+								_highestcpu = coresbysched[ix][0];
+								_highestindex = ix;
+							}
+						}
+						CPPCOrder[i] = _highestcpu;
+						CPPCOrder1[i] = _highestcpu + 1;
+						CPPC[i, 0] = _highestcpu;
+						CPPC[i, 1] = _tag;
+
+						string _cppctrace = "";
+						for (int iz = 0; iz < CPPC.GetLength(0); iz++)
+						{
+							_cppctrace += String.Format("{0}#{1} ", CPPC[iz, 0], CPPC[iz, 1]);
+						}
+						Trace.WriteLine($"Scheduler CPPC: {_cppctrace}");
+						//Trace.WriteLine($"Scheduler CPPC i: {i} Core: {CPPC[i, 0]} Tag: {CPPC[i, 1]}");
+					}
+				}
+				Trace.WriteLine($"");
+
+				Trace.WriteLine($"CoresByEfficiency:");
+				var coresbyeff = ProcessorInfo.CoresByEfficiency();
+				if (ProcessorInfo.IsCoresByEfficiencyAllZeros())
+				{
+					Trace.WriteLine($"Not available");
+				}
+				else
+				{
+					for (int ix = 0; ix < coresbyeff.Count(); ++ix)
+					{
+						Trace.WriteLine($"#{coresbyeff[ix][0]}:{coresbyeff[ix][1]}");
+					}
+				}
+				Trace.WriteLine($"");
+				for (int i = 0; i < CPULogicalProcessors; ++i)
+				{
+					Trace.WriteLine($"CPU Logical Processor: {i + 1}");
+					Trace.WriteLine($" ProcessorInfo.LogicalProcessorIndex: {ProcessorInfo.CpuSetLogicalProcessorIndex(i) + 1}");
+					Trace.WriteLine($" ProcessorInfo.EfficiencyClass: {ProcessorInfo.CpuSetEfficiencyClass(i)}");
+					Trace.WriteLine($" ProcessorInfo.CoreIndex: {ProcessorInfo.CpuSetCoreIndex(i)}");
+					Trace.WriteLine($" ProcessorInfo.NumaNodeIndex: {ProcessorInfo.CpuSetNumaNodeIndex(i)}");
+					Trace.WriteLine($" ProcessorInfo.LastLevelCacheIndex: {ProcessorInfo.CpuSetLastLevelCacheIndex(i)}");
+					Trace.WriteLine($" ProcessorInfo.Group: {ProcessorInfo.CpuSetGroup(i)}");
+					Trace.WriteLine($" ProcessorInfo.SchedulingClass: {ProcessorInfo.CpuSetSchedulingClass(i)}");
+					Trace.WriteLine($" ProcessorInfo.AllocationTag: {ProcessorInfo.CpuSetAllocationTag(i)}");
+					Trace.WriteLine($" ProcessorInfo.Parked: {ProcessorInfo.CpuSetParked(i)}");
+					Trace.WriteLine($" ProcessorInfo.Allocated: {ProcessorInfo.CpuSetAllocated(i)}");
+				}
+
+				CPPCLabels();
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"CpuSetsInit Exception: {ex}");
 			}
 		}
 		public void ZenMainInit()
@@ -1156,11 +1358,13 @@ namespace BenchMaestro
 								Regex model_rgx = new Regex(model_pattern, RegexOptions.Multiline);
 								Match model_m = model_rgx.Match(Zen.info.cpuName);
 
+								string generation = "";
+								string ex = "";
+								string model = "";
+
 								if (model_m.Success)
 								{
 									string[] results = model_rgx.GetGroupNames();
-									string generation = "";
-									string ex = "";
 
 									foreach (var name in results)
 									{
@@ -1172,6 +1376,10 @@ namespace BenchMaestro
 										if (name == "score" && grp.Value.Length > 0)
 										{
 											generation = grp.Value.TrimEnd('\r', '\n').Trim();
+										}
+										if (name == "model" && grp.Value.Length > 0)
+										{
+											model = grp.Value.TrimEnd('\r', '\n').Trim();
 										}
 									}
 									if (ex == "X") Zen1X = true;
@@ -1202,8 +1410,8 @@ namespace BenchMaestro
 								}
 								App.hwsensors.InitZen(HWSensorName.CPUPower, 22);
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, 26);
-								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 158);
-								App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 159);
+								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 127);
+								App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 128);
 								App.hwsensors.InitZen(HWSensorName.CPUFSB, 31);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
@@ -1226,6 +1434,17 @@ namespace BenchMaestro
 								for (int _cpu = 1; _cpu <= CPULogicalProcessors; ++_cpu)
 								{
 									App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
+								}
+
+								float tempoffset = 0;
+
+								if (ex == "X" && model == "700" && generation == "2") tempoffset = -10.0f;
+								if (ex == "X" && generation == "1") tempoffset = -20.0f;
+								if (tempoffset > 0)
+								{
+									App.hwsensors.SetValueOffset(HWSensorName.CCD1L3Temp, tempoffset);
+									App.hwsensors.SetValueOffset(HWSensorName.CCD2L3Temp, tempoffset);
+									App.hwsensors.SetValueOffset(HWSensorName.CPUCoresTemps, tempoffset);
 								}
 
 								Trace.WriteLine($"Configuring Zen Source done");
@@ -1754,6 +1973,18 @@ namespace BenchMaestro
 			LiveCPUClock = _value.Length > 0 ? _value : "N/A";
 			//Trace.WriteLine($"{_value}");
 			OnChange("LiveCPUClock");
+		}
+		public void UpdateLiveCPUAdditional(string _value)
+		{
+			LiveCPUAdditional = _value.Length > 0 ? _value : "N/A";
+			//Trace.WriteLine($"{_value}");
+			OnChange("LiveCPUAdditional");
+		}
+		public void SetLastVersionOnServer(string _value)
+		{
+			LastVersionOnServer = _value.Length > 0 ? _value : "N/A";
+			//Trace.WriteLine($"{_value}");
+			OnChange("LastVersionOnServer");
 		}
 		protected void OnChange(string info)
 		{

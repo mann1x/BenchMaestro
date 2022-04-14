@@ -16,8 +16,11 @@ namespace BenchMaestro
         public string FinishString { get; set; }
         public Window RunWindow { get; set; }
         public TextBlock ScoreBox { get; set; }
+        public TextBlock ScoreBox2 { get; set; }
         public float? Score { get; set; }
         public float? ScoreMax { get; set; }
+        public float? ScoreScaled { get; set; }
+        public float? ScorePerWatt { get; set; }
         public string BenchScoreUnit { get; set; }
         public float?[] Scores { get; set; }
         public string ScoreUnit { get; set; }

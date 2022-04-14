@@ -72,7 +72,7 @@ namespace BenchMaestro
 		public static bool benchrunning = false;
 		public static bool benchclosed = true;
 		public static double scoreMinWidth = 0;
-
+		public static List<int> TieredLogicals = new();
 		public static int BenchIterations = 1;
 		public static string BenchScoreUnit;
 		public static int IterationPretime = 20;
@@ -215,6 +215,118 @@ namespace BenchMaestro
 			}
 			return 180;
 		}
+		public static int GetRunCoresAndLogicals(BenchScore _scoreRun, int _thrds)
+        {
+			int bitMask = 0;
+
+			try
+			{
+				int CPUCores = App.systemInfo.CPUCores;
+				int[] CPPC = App.systemInfo.CPPCActiveOrder;
+
+				int _logical = 0;
+				int _core = 0;
+				int _logical1 = 1;
+				int _core1 = 1;
+
+				List<int> _runlogicals = new();
+				List<int> _runcores = new();
+
+				(_runlogicals, _runcores) = GetTieredLists();
+
+				for (int i = 0; i < _thrds; i++)
+				{
+
+					_logical = _runlogicals[i];
+					_logical1 = _logical + 1;
+					_core = _runcores[i];
+					_core1 = _core + 1;
+
+					if (!_scoreRun.RunCores.Contains(_core1)) _scoreRun.RunCores.Add(_core1);
+					_scoreRun.RunLogicals.Add(_logical1);
+
+					bitMask |= 1 << (_logical);
+
+					Trace.WriteLine($"Affinity (0based) : {_logical} (1based): {_logical1}");
+				}
+
+				TieredLogicals = _runlogicals;
+				return bitMask;
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"GetRunCoresAndLogicals exception: {ex}");
+				return 0;
+			}
+		}
+		public static (List<int>, List<int>) GetTieredLists()
+		{
+			List<int> _runlogicals = new();
+			List<int> _runcores = new();
+
+			try
+			{
+				int tcore = 0;
+				int[] CPPC = App.systemInfo.CPPCActiveOrder;
+
+				//TIER 1 - No E-Core if Hybrid, First Thread
+				for (int j = 0; j < CPPC.Length; ++j)
+				{
+					tcore = CPPC[j];
+					//Trace.WriteLine($"t1 tcore {tcore} isecore={systemInfo.Ecores.Contains(tcore)} tcoreloglen={ProcessorInfo.HardwareCores[tcore].LogicalCores.Length}");
+					if (!systemInfo.IntelHybrid || (systemInfo.IntelHybrid && !systemInfo.Ecores.Contains(tcore)))
+					{
+						//Trace.WriteLine($"t1 add {tcore} logical={ProcessorInfo.HardwareCores[tcore].LogicalCores[0]}");
+						_runcores.Add(tcore);
+						_runlogicals.Add(ProcessorInfo.HardwareCores[tcore].LogicalCores[0]);
+					}
+				}
+
+				//TIER 2 No E-Core if Hybrid, Second Thread
+				for (int j = 0; j < CPPC.Length; ++j)
+				{
+					tcore = CPPC[j];
+					//Trace.WriteLine($"t2 tcore {tcore} isecore={systemInfo.Ecores.Contains(tcore)} tcoreloglen={ProcessorInfo.HardwareCores[tcore].LogicalCores.Length}");
+					if ((!systemInfo.IntelHybrid || (systemInfo.IntelHybrid && !systemInfo.Ecores.Contains(tcore))) && ProcessorInfo.HardwareCores[tcore].LogicalCores.Length > 1)
+					{
+						//Trace.WriteLine($"t2 add {tcore} logical={ProcessorInfo.HardwareCores[tcore].LogicalCores[1]}");
+						_runcores.Add(tcore);
+						_runlogicals.Add(ProcessorInfo.HardwareCores[tcore].LogicalCores[1]);
+					}
+				}
+
+				//TIER 3 E-Core if Hybrid, First Thread
+				for (int j = 0; j < CPPC.Length; ++j)
+				{
+					tcore = CPPC[j];
+					if (systemInfo.IntelHybrid && systemInfo.Ecores.Contains(tcore))
+					{
+						_runcores.Add(tcore);
+						_runlogicals.Add(ProcessorInfo.HardwareCores[tcore].LogicalCores[0]);
+					}
+				}
+
+				//TIER 4 E-Core if Hybrid, Second Thread
+				for (int j = 0; j < CPPC.Length; ++j)
+				{
+					tcore = CPPC[j];
+					if (systemInfo.IntelHybrid && systemInfo.Ecores.Contains(tcore) && ProcessorInfo.HardwareCores[tcore].LogicalCores.Length > 1)
+					{
+						_runcores.Add(tcore);
+						_runlogicals.Add(ProcessorInfo.HardwareCores[tcore].LogicalCores[1]);
+					}
+				}
+
+				Trace.WriteLine($"Tiered RunCores: {String.Join(", ", _runcores.ToArray())}");
+				Trace.WriteLine($"Tiered RunLogicals: {String.Join(", ", _runlogicals.ToArray())}");
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"GetTieredLists exception: {ex}");
+			}
+			return (_runlogicals, _runcores);
+		}
+
 		public static string GetCustomLabel()
 		{
 			try
@@ -268,6 +380,7 @@ namespace BenchMaestro
 				GC.KeepAlive(instanceMutex);
 
 				Trace.Listeners.Add(dailylistener);
+				Trace.AutoFlush = true;
 
 				WindowsIdentity identity = WindowsIdentity.GetCurrent();
 				WindowsPrincipal principal = new WindowsPrincipal(identity);
@@ -411,11 +524,20 @@ namespace BenchMaestro
 				systemInfo.STMT = BenchMaestro.Properties.Settings.Default.BtnSTMT;
 				systemInfo.CPPCCustomEnabled = BenchMaestro.Properties.Settings.Default.BtnSTMT;
 
-				SetLastThreadAffinity();
+				List<int> _runlogicals = new();
+				List<int> _runcores = new();
+
+				(_runlogicals, _runcores) = GetTieredLists();
+
+				SetLastTieredThreadAffinity(_runlogicals);
+
+				_runlogicals = null;
+				_runcores = null;
+
 			}
 			catch (Exception ex)
 			{
-				Trace.WriteLine($"Application_Exit exception: {ex}");
+				Trace.WriteLine($"SettingsInit exception: {ex}");
 			}
 		}
 		private static void Monitor_ElapsedEventHandler(object sender, ElapsedEventArgs e)
@@ -449,34 +571,37 @@ namespace BenchMaestro
             {
 				if (RunningProcess != -1) BenchRun.KillProcID(RunningProcess);
 
-				HWMonitor.Close();
+				try
+                {
+					hwmcts.Dispose();
+					benchcts.Dispose();
 
-				hwmcts.Dispose();
-				benchcts.Dispose();
+					SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
 
-				SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
+					if (!object.ReferenceEquals(null, systemInfo.Zen))
+					{
+						systemInfo.Zen.Dispose();
+						systemInfo.Zen = null;
+					}
 
-				if (!object.ReferenceEquals(null, systemInfo.Zen))
-				{
-					systemInfo.Zen.Dispose();
-					systemInfo.Zen = null;
+					if (!object.ReferenceEquals(null, HWMonitor.computer))
+					{
+						HWMonitor.computer = null;
+					}
+					HWMonitor.Close();
 				}
+				catch
+                {
 
-				if (!object.ReferenceEquals(null, HWMonitor.computer))
-				{
-					HWMonitor.computer = null;
-				}
+                }
 			}
 			catch (Exception ex)
             {
 				Trace.WriteLine($"Application_Exit exception: {ex}");
 			}
-			finally
-            {
-				Trace.WriteLine("BenchMaestro closed");
-				Trace.Flush();
-				Trace.Close();
-			}
+			Trace.WriteLine("BenchMaestro closed");
+			Trace.Flush();
+			Trace.Close();
 		}
 		private void InitColors()
 		{
@@ -567,16 +692,41 @@ namespace BenchMaestro
 			}
 		}
 
-		public static void SetLastThreadAffinity()
+		public static void SetLastThreadAffinity(int thread = -1)
         {
 			try
             {
-				Process thisprocess = Process.GetCurrentProcess();
-				thisprocess.ProcessorAffinity = (IntPtr)(1L << App.GetLastThread(0));
+				using (Process thisprocess = Process.GetCurrentProcess())
+                {
+					if (thread == -1) thread = App.GetLastThread(0);
+					if (thisprocess.ProcessorAffinity != (IntPtr)(1L << App.GetLastThread(0)))
+						thisprocess.ProcessorAffinity = (IntPtr)(1L << App.GetLastThread(0));
+				}
 			}
 			catch (Exception ex)
 			{
 				Trace.WriteLine($"SetLastThreadAffinity exception: {ex}");
+			}
+		}
+		public static void SetLastTieredThreadAffinity(List<int> tieredlist)
+		{
+			try
+			{
+				Trace.WriteLine($"Setting Process affinity, tiered list: {tieredlist.Any()}");
+				if (tieredlist.Any()) 
+				{
+					using (Process thisprocess = Process.GetCurrentProcess())
+					{
+						Trace.WriteLine($"Setting Process affinity from: {thisprocess.ProcessorAffinity} to #{tieredlist.Last()}: {(IntPtr)(1L << tieredlist.Last())}");
+						if (thisprocess.ProcessorAffinity != (IntPtr)(1L << tieredlist.Last()))
+							thisprocess.ProcessorAffinity = (IntPtr)(1L << tieredlist.Last());
+						Trace.WriteLine($"New Process affinity: {thisprocess.ProcessorAffinity}");
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"SetLastTieredThreadAffinity exception: {ex}");
 			}
 		}
 
