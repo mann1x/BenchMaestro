@@ -34,6 +34,8 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.22 Alpha
+    - Fix: Bug preventing metrics display with CPUMiner
 - v1.0.21 Alpha
     - Add: Improved monitoring start detection
     - Add: Performance per watt score

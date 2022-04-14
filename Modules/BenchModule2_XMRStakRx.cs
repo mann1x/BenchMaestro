@@ -180,10 +180,10 @@ namespace BenchMaestro
                         UpdateMainStatus($"Benchmark execution error, exitcode: {App.BenchProc.ExitCode}");
                         UpdateScore("Error");
                         App.CurrentRun.FinishString = $"[{App.BenchProc.ExitCode}] System unstable?";
-                        UpdateFinished(App.CurrentRun.FinishString);
                         App.benchrunning = false;
                         HWMonitor.MonitoringParsed = true;
                     }
+                    UpdateFinished(App.CurrentRun.FinishString);
 
                 }
 
