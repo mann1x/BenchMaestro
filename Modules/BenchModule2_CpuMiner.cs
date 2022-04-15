@@ -222,6 +222,10 @@ namespace BenchMaestro
                 string parseString2 = "";
                 string _unit = App.BenchScoreUnit;
 
+                HWMonitor.AddMonDevice(HWSensorDevice.CPU);
+                HWMonitor.RemoveMonDevice(HWSensorDevice.MainBoard);
+                HWMonitor.RemoveMonDevice(HWSensorDevice.GPU);
+
                 App.hwsensors.SetEnabled(HWSensorName.CPULogicalsScores, true);
                 App.hwsensors.InitSensorLogicalsScore(HWSensorName.CPULogicalsScores, _unit, true);
 

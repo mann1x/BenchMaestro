@@ -1361,6 +1361,7 @@ namespace BenchMaestro
 								string generation = "";
 								string ex = "";
 								string model = "";
+								string series = "";
 
 								if (model_m.Success)
 								{
@@ -1373,13 +1374,17 @@ namespace BenchMaestro
 										{
 											ex = grp.Value.TrimEnd('\r', '\n').Trim();
 										}
-										if (name == "score" && grp.Value.Length > 0)
+										if (name == "generation" && grp.Value.Length > 0)
 										{
 											generation = grp.Value.TrimEnd('\r', '\n').Trim();
 										}
 										if (name == "model" && grp.Value.Length > 0)
 										{
 											model = grp.Value.TrimEnd('\r', '\n').Trim();
+										}
+										if (name == "series" && grp.Value.Length > 0)
+										{
+											series = grp.Value.TrimEnd('\r', '\n').Trim();
 										}
 									}
 									if (ex == "X") Zen1X = true;
@@ -1440,12 +1445,15 @@ namespace BenchMaestro
 
 								if (ex == "X" && model == "700" && generation == "2") tempoffset = -10.0f;
 								if (ex == "X" && generation == "1") tempoffset = -20.0f;
-								if (tempoffset > 0)
+								if (tempoffset != 0)
 								{
+									Trace.WriteLine($"Setting Zen Temp Offset={tempoffset}");
 									App.hwsensors.SetValueOffset(HWSensorName.CCD1L3Temp, tempoffset);
 									App.hwsensors.SetValueOffset(HWSensorName.CCD2L3Temp, tempoffset);
 									App.hwsensors.SetValueOffset(HWSensorName.CPUCoresTemps, tempoffset);
 								}
+
+								Trace.WriteLine($"Zen Flags series={series} generation={generation} model={model} ex={ex} ZenPlus={ZenPlus} Zen1X={Zen1X}");
 
 								Trace.WriteLine($"Configuring Zen Source done");
 							}

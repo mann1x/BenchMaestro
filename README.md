@@ -34,6 +34,10 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.23 Alpha
+    - Fix: Zen1 offset for L3 temperature (thx The_King)
+    - Fix: Zen1+ detection
+    - Fix: Completely disabled Libre for Zen
 - v1.0.22 Alpha
     - Fix: Bug preventing metrics display with CPUMiner
 - v1.0.21 Alpha

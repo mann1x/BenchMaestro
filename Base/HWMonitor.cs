@@ -710,12 +710,12 @@ namespace BenchMaestro
             App.CurrentRun.SOCAvgVoltage = (double)App.hwsensors.GetAvg(HWSensorName.SOCVoltage);
             Trace.WriteLine($"CPU AVG SOC {App.CurrentRun.SOCAvgVoltage} MAX {App.CurrentRun.SOCMaxVoltage}");
 
-            App.CurrentRun.CCD1MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD1Temp);
-            App.CurrentRun.CCD1AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1Temp);
+            App.CurrentRun.CCD1MaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CCD1Temp) + App.hwsensors.GetOffset(HWSensorName.CCD1Temp));
+            App.CurrentRun.CCD1AvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CCD1Temp) + App.hwsensors.GetOffset(HWSensorName.CCD1Temp));
             Trace.WriteLine($"CPU AVG CCD1 {App.CurrentRun.CCD1AvgTemp} MAX {App.CurrentRun.CCD1MaxTemp}");
 
-            App.CurrentRun.CCD2MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD2Temp);
-            App.CurrentRun.CCD2AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD2Temp);
+            App.CurrentRun.CCD2MaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CCD2Temp) + App.hwsensors.GetOffset(HWSensorName.CCD2Temp));
+            App.CurrentRun.CCD2AvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CCD2Temp) + App.hwsensors.GetOffset(HWSensorName.CCD2Temp));
             Trace.WriteLine($"CPU AVG CCD2 {App.CurrentRun.CCD2AvgTemp} MAX {App.CurrentRun.CCD2MaxTemp}");
 
             App.CurrentRun.CCDSAvgTemp = (double)App.hwsensors.GetMax(HWSensorName.CCDSTemp);
@@ -902,15 +902,36 @@ namespace BenchMaestro
             App.CurrentRun.CPUAvgLoad = Math.Round(_coresavgl, 0);
             App.CurrentRun.CPUMaxLoad = Math.Round(_coresmaxl, 0);
 
-            if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp) && App.hwsensors.IsAny(HWSensorName.CCD2L3Temp))
+            if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp) || App.hwsensors.IsAny(HWSensorName.CCD2L3Temp))
             {
-                App.CurrentRun.L3AvgTemp = (double)(App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp) + App.hwsensors.GetAvg(HWSensorName.CCD2L3Temp)) / 2;
-                App.CurrentRun.L3MaxTemp = (double)(App.hwsensors.GetMax(HWSensorName.CCD1L3Temp) + App.hwsensors.GetMax(HWSensorName.CCD2L3Temp)) / 2;
-            }
-            else if (App.hwsensors.IsAny(HWSensorName.CCD1L3Temp))
-            {
-                App.CurrentRun.L3AvgTemp = (double)App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp);
-                App.CurrentRun.L3MaxTemp = (double)App.hwsensors.GetMax(HWSensorName.CCD1L3Temp);
+                float _ccd1l3avg = (float)App.hwsensors.GetAvg(HWSensorName.CCD1L3Temp);
+                float _ccd2l3avg = (float)App.hwsensors.GetAvg(HWSensorName.CCD2L3Temp);
+                float _ccd1l3max = (float)App.hwsensors.GetMax(HWSensorName.CCD1L3Temp);
+                float _ccd2l3max = (float)App.hwsensors.GetMax(HWSensorName.CCD2L3Temp);
+
+                if (_ccd1l3avg > 0 && _ccd2l3avg > 0)
+                {
+                    _ccd1l3avg = _ccd1l3avg + (float)App.hwsensors.GetOffset(HWSensorName.CCD1L3Temp);
+                    _ccd2l3avg = _ccd2l3avg + (float)App.hwsensors.GetOffset(HWSensorName.CCD2L3Temp);
+                    _ccd1l3max = _ccd1l3max + (float)App.hwsensors.GetOffset(HWSensorName.CCD1L3Temp);
+                    _ccd2l3max = _ccd2l3max + (float)App.hwsensors.GetOffset(HWSensorName.CCD2L3Temp);
+                    App.CurrentRun.L3AvgTemp = (double)(_ccd1l3avg + _ccd2l3avg) / 2;
+                    App.CurrentRun.L3MaxTemp = (double)(_ccd1l3max + _ccd2l3max) / 2;
+                } 
+                else if (_ccd1l3avg > 0)
+                {
+                    _ccd1l3avg = _ccd1l3avg + (float)App.hwsensors.GetOffset(HWSensorName.CCD1L3Temp);
+                    _ccd1l3max = _ccd1l3max + (float)App.hwsensors.GetOffset(HWSensorName.CCD1L3Temp);
+                    App.CurrentRun.L3AvgTemp = (double)_ccd1l3avg;
+                    App.CurrentRun.L3MaxTemp = (double)_ccd1l3max;
+                }
+                else if (_ccd1l3avg > 0)
+                {
+                    _ccd2l3avg = _ccd2l3avg + (float)App.hwsensors.GetOffset(HWSensorName.CCD2L3Temp);
+                    _ccd2l3max = _ccd2l3max + (float)App.hwsensors.GetOffset(HWSensorName.CCD2L3Temp);
+                    App.CurrentRun.L3AvgTemp = (double)_ccd2l3avg;
+                    App.CurrentRun.L3MaxTemp = (double)_ccd2l3max;
+                }
             }
 
             if (App.systemInfo.ZenPPT > 0)
@@ -1000,10 +1021,22 @@ namespace BenchMaestro
 
                     bool _libre = false;
 
-                    if (MonitoringIdle) _libre = true;
-                    if (MonitoringDevices.Contains(HWSensorDevice.CPU) && CPUSource == HWSensorSource.Libre) _libre = true;
-                    if (MonitoringDevices.Contains(HWSensorDevice.GPU) && GPUSource == HWSensorSource.Libre) _libre = true;
-                    if (MonitoringDevices.Contains(HWSensorDevice.MainBoard) && BoardSource == HWSensorSource.Libre) _libre = true;
+                    //if (MonitoringIdle) _libre = true;
+                    if (MonitoringDevices.Contains(HWSensorDevice.CPU) && CPUSource == HWSensorSource.Libre)
+                    {
+                        Trace.WriteLine("Libre CPU");
+                        _libre = true;
+                    }
+                    if (MonitoringDevices.Contains(HWSensorDevice.GPU) && GPUSource == HWSensorSource.Libre)
+                    {
+                        Trace.WriteLine("Libre GPU");
+                        _libre = true;
+                    }
+                    if (MonitoringDevices.Contains(HWSensorDevice.MainBoard) && BoardSource == HWSensorSource.Libre)
+                    {
+                        Trace.WriteLine("Libre Board");
+                        _libre = true;
+                    }
 
                     if (_libre)
                     {
@@ -1066,20 +1099,20 @@ namespace BenchMaestro
                 if (MonitoringIdle)
                 {
                     Trace.WriteLine($"MonitoringIdle check CPU temp and load");
-
-                    if (App.hwsensors.IsEnabled(HWSensorName.CPUMBTemp))
+                    int _cputemp = (int)App.hwsensors.GetValue(HWSensorName.CPUMBTemp);
+                    if (App.hwsensors.IsEnabled(HWSensorName.CPUMBTemp) && _cputemp > 0)
                     {
-                        computer.Accept(new UpdateVisitor());
-                        IdleCurrentCPUTemp = (int)App.hwsensors.GetValue(HWSensorName.CPUMBTemp);
+                        IdleCurrentCPUTemp = _cputemp;
                     }
                     else
                     {
-                        IdleCurrentCPUTemp = (int)App.hwsensors.GetValue(HWSensorName.CPUTemp);
+                        _cputemp = (int)App.hwsensors.GetValue(HWSensorName.CPUTemp);
+                        if (_cputemp > 0) IdleCurrentCPUTemp = _cputemp;
                     }
                     IdleCurrentCPULoad = (int)App.hwsensors.GetValue(HWSensorName.CPULoad);
                     Trace.WriteLine($"MonitoringIdle current CPU Temp: {IdleCurrentCPUTemp} Load {IdleCurrentCPULoad}");
 
-                    if (IdleCurrentCPUTemp == -999) IdleCPUTempSensor = false;
+                    if (IdleCurrentCPUTemp == -99999) IdleCPUTempSensor = false;
 
                 }
 

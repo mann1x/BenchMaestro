@@ -383,6 +383,7 @@ namespace BenchMaestro
                     if (_sensor.Name == _name)
                     {
                         _sensor.ValueOffset = _offset;
+                        Trace.WriteLine($"HWSensor SetValueOffset {_sensor.Name} to {_offset}");
                     }
                 }
             }
