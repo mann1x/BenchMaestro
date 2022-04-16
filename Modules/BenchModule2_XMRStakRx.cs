@@ -30,15 +30,17 @@ namespace BenchMaestro
             {
                 TimeSpan _runningspan = DateTime.Now - App.TSRunStart;
 
-                int _projectedruntime = (App.IterationPretime + App.IterationRuntime + App.IterationPostime + 5) * App.BenchIterations;
+                int _projectedruntime = (App.IterationPretime + App.IterationRuntime + App.IterationPostime + 2) * App.BenchIterations;
 
                 DateTime _endingts = App.TSRunStart.AddSeconds(_projectedruntime);
 
-                TimeSpan _remaining = _endingts - App.TSRunStart;
+                TimeSpan _remaining = _endingts - DateTime.Now;
 
                 int _percentage = (int)_runningspan.TotalSeconds * 95 / _projectedruntime;
 
                 ProgressBar.Value = _percentage > 95 ? 95 : _percentage;
+
+                App.systemInfo.UpdateLiveFinished($"{_runningspan.ToReadableString()} run - {_remaining.ToReadableString()} left");
 
                 //Trace.WriteLine($"PB% {_percentage} REM {(int)_remaining.TotalSeconds - (int)_runningspan.TotalSeconds} ELA {(int)_runningspan.TotalSeconds} PROJ {_projectedruntime} PRE {IterationPretime} RUN {IterationRuntime} POST {IterationPostime} ITER {BenchCurrentIteration}");
             }

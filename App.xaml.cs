@@ -30,8 +30,8 @@ namespace BenchMaestro
 
 	public partial class App : Application
 	{
-		public static DailyTraceListener dailylistener = new DailyTraceListener(@".\TraceLog.txt");
-		
+		public static DailyTraceListener dailylistener = new DailyTraceListener(@".\Logs\TraceLog.txt");
+
 		internal const string mutexName = "Local\\BenchMaestro";
 		internal static Mutex instanceMutex;
 		internal bool bMutex;
@@ -102,6 +102,19 @@ namespace BenchMaestro
 		public static SolidColorBrush whitebrush = new SolidColorBrush();
 		public static Thickness thickness;
 
+		[DllImport("kernel32", SetLastError = true)]
+		static extern bool FreeLibrary(IntPtr hModule);
+
+		public static void UnloadModule(string moduleName)
+		{
+			foreach (ProcessModule mod in Process.GetCurrentProcess().Modules)
+			{
+				if (mod.ModuleName == moduleName)
+				{
+					FreeLibrary(mod.BaseAddress);
+				}
+			}
+		}
 		// Sleep Control
 		[DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
 		static extern EXECUTION_STATE SetThreadExecutionState(EXECUTION_STATE esFlags);
@@ -138,7 +151,7 @@ namespace BenchMaestro
 		public static int[] GetThreads()
 		{
 			try
-            {
+			{
 				if (!App.systemInfo.STMT)
 				{
 					List<int> activethreads = new();
@@ -179,7 +192,7 @@ namespace BenchMaestro
 		public static int GetLastThread(int _base = 1)
 		{
 			try
-            {
+			{
 				int _thr = ProcessorInfo.LastThreadID();
 				if (_base == 0) _thr--;
 				return _thr;
@@ -216,7 +229,7 @@ namespace BenchMaestro
 			return 180;
 		}
 		public static int GetRunCoresAndLogicals(BenchScore _scoreRun, int _thrds)
-        {
+		{
 			int bitMask = 0;
 
 			try
@@ -330,7 +343,7 @@ namespace BenchMaestro
 		public static string GetCustomLabel()
 		{
 			try
-            {
+			{
 				string CPPCLabel = "";
 				for (int i = 0; i < systemInfo.CPPCCustomOrder.Length; i++)
 				{
@@ -366,7 +379,7 @@ namespace BenchMaestro
 		protected override void OnStartup(StartupEventArgs e)
 		{
 			try
-            {
+			{
 				instanceMutex = new Mutex(true, mutexName, out bMutex);
 
 				if (!bMutex)
@@ -378,6 +391,10 @@ namespace BenchMaestro
 				}
 
 				GC.KeepAlive(instanceMutex);
+
+				Directory.CreateDirectory(@".\Logs");
+
+				CleanUpOldFiles();
 
 				Trace.Listeners.Add(dailylistener);
 				Trace.AutoFlush = true;
@@ -478,14 +495,14 @@ namespace BenchMaestro
 		public static void SettingsInit()
 		{
 			try
-            {
+			{
 				bool _restored = false;
 				if (BenchMaestro.Properties.Settings.Default.CustomCPPC.Length > 0)
 				{
 					string[] _split = BenchMaestro.Properties.Settings.Default.CustomCPPC.ToString().Split(", ");
 					Trace.WriteLine($"RESTORE CUSTOMCPPC {BenchMaestro.Properties.Settings.Default.CustomCPPC}");
 					if (_split.Length == systemInfo.CPUCores)
-                    {
+					{
 						int i = 0;
 						systemInfo.CPPCCustomOrder = new int[_split.Length];
 						foreach (string _core in _split)
@@ -568,11 +585,11 @@ namespace BenchMaestro
 		private void Application_Exit(object sender, ExitEventArgs e)
 		{
 			try
-            {
+			{
 				if (RunningProcess != -1) BenchRun.KillProcID(RunningProcess);
 
 				try
-                {
+				{
 					hwmcts.Dispose();
 					benchcts.Dispose();
 
@@ -589,14 +606,16 @@ namespace BenchMaestro
 						HWMonitor.computer = null;
 					}
 					HWMonitor.Close();
+
+					UnloadModule("BenchMaestro.sys");
 				}
 				catch
-                {
+				{
 
-                }
+				}
 			}
 			catch (Exception ex)
-            {
+			{
 				Trace.WriteLine($"Application_Exit exception: {ex}");
 			}
 			Trace.WriteLine("BenchMaestro closed");
@@ -693,11 +712,11 @@ namespace BenchMaestro
 		}
 
 		public static void SetLastThreadAffinity(int thread = -1)
-        {
+		{
 			try
-            {
+			{
 				using (Process thisprocess = Process.GetCurrentProcess())
-                {
+				{
 					if (thread == -1) thread = App.GetLastThread(0);
 					if (thisprocess.ProcessorAffinity != (IntPtr)(1L << App.GetLastThread(0)))
 						thisprocess.ProcessorAffinity = (IntPtr)(1L << App.GetLastThread(0));
@@ -713,7 +732,7 @@ namespace BenchMaestro
 			try
 			{
 				Trace.WriteLine($"Setting Process affinity, tiered list: {tieredlist.Any()}");
-				if (tieredlist.Any()) 
+				if (tieredlist.Any())
 				{
 					using (Process thisprocess = Process.GetCurrentProcess())
 					{
@@ -727,6 +746,46 @@ namespace BenchMaestro
 			catch (Exception ex)
 			{
 				Trace.WriteLine($"SetLastTieredThreadAffinity exception: {ex}");
+			}
+		}
+		public static void CleanUpOldFiles()
+		{
+			try
+			{
+
+				Directory.GetFiles(@".\Logs", "*.txt")
+							.Select(f => new FileInfo(f))
+							.Where(f => f.LastWriteTime < DateTime.Now.AddDays(-30))
+							.ToList()
+							.ForEach(f => f.Delete());
+
+				Directory.GetFiles(@".\","dump*.txt")
+							.Select(f => new FileInfo(f))
+							.Where(f => f.LastWriteTime < DateTime.Now.AddDays(-1))
+							.ToList()
+							.ForEach(f => f.Delete());
+
+				Directory.GetFiles(@".\","TraceLog*.txt")
+							.Select(f => new FileInfo(f))
+							.Where(f => f.LastWriteTime < DateTime.Now.AddDays(-1))
+							.ToList()
+							.ForEach(f => f.Delete());
+
+				Directory.GetFiles(@".\","*.tmp")
+							.Select(f => new FileInfo(f))
+							.Where(f => f.LastWriteTime < DateTime.Now.AddDays(-1))
+							.ToList()
+							.ForEach(f => f.Delete());
+
+				Directory.GetFiles(@".\","BenchMaestro-v*.zip")
+							.Select(f => new FileInfo(f))
+							.Where(f => f.LastWriteTime < DateTime.Now.AddDays(-1))
+							.ToList()
+							.ForEach(f => f.Delete());
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"CleanUpOldFiles exception: {ex}");
 			}
 		}
 

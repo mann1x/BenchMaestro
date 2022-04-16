@@ -34,6 +34,16 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.24 Alpha
+    - Add: Bold and colored live stats
+    - Add: Live running and remaining runtime
+    - Add: Unload of WinRing DLL at exit
+    - Add: Logs moved to Logs subdir
+    - Add: Automatic cleanup of leftovers
+    - Add: Automatic cleanup of Logs after 30 days
+    - Add: Button in settings to open Logs folder
+    - Add: Button in take screenshot Camera window to open the Screenshots folder
+    - Fix: Lighter load for Zen live display
 - v1.0.23 Alpha
     - Fix: Zen1 offset for L3 temperature (thx The_King)
     - Fix: Zen1+ detection

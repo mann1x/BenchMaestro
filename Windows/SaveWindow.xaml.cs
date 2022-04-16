@@ -84,6 +84,15 @@ namespace BenchMaestro.Windows
         {
             Clipboard.SetDataObject(screenshot);
             statusStrip1.Visibility = Visibility.Visible;
+            stripCliboard.Visibility = Visibility.Visible;
+            stripScreenshotsFolder.Visibility = Visibility.Collapsed;
+        }
+        private void ButtonScreenshotsFolder(object sender, RoutedEventArgs e)
+        {
+            Process.Start("explorer.exe", @".\Screenshots");
+            statusStrip1.Visibility = Visibility.Visible;
+            stripCliboard.Visibility = Visibility.Collapsed;
+            stripScreenshotsFolder.Visibility = Visibility.Visible;
         }
 
         public void Dispose()

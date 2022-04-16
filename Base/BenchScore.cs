@@ -101,6 +101,7 @@ namespace BenchMaestro
         public DateTime Started { get; set; }
         public int StartedTemp { get; set; }
         public TextBlock FinishedBox { get; set; }
+        public TextBlock LiveFinishedBox { get; set; }
         public DateTime Finished { get; set; }
         public string ExitStatus { get; set; }
         public string ConfigTag { get; set; }

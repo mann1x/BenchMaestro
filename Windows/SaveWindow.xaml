@@ -7,8 +7,8 @@
     xmlns:adonisControls="clr-namespace:AdonisUI.Controls;assembly=AdonisUI"
     mc:Ignorable="d"
     Title="BenchMaestro Screenshot"
-    Height="64"
     Width="300"
+    Height="80"
     SizeToContent="WidthAndHeight"
     ResizeMode="NoResize"
     WindowStartupLocation="CenterOwner"
@@ -26,6 +26,7 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="auto" />
             <RowDefinition Height="auto" />
+            <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
 
         <Button x:Name="buttonCopyToClipboard" Grid.Column="0" Content="Copy" VerticalAlignment="Top" Width="70"
@@ -37,9 +38,13 @@
         <Button x:Name="buttonSaveAs" Grid.Row="0" Grid.Column="3" Content="Save As..." VerticalAlignment="Top"
                 Width="70" Margin="3" Click="ButtonSaveAs_Click" />
 
-        <StatusBar x:Name="statusStrip1" Grid.Row="1" Grid.ColumnSpan="3" Grid.Column="0" Visibility="Collapsed"
+        <Button x:Name="buttonOpenScreenshotsFolder" Grid.Column="0" Grid.Row="1" Grid.ColumnSpan="4" Content="Open Screenshots folder" VerticalAlignment="Top" Width="160"
+                Margin="3" Click="ButtonScreenshotsFolder" />
+
+        <StatusBar x:Name="statusStrip1" Grid.Row="2" Grid.ColumnSpan="4" Grid.Column="0" Visibility="Collapsed"
                    Padding="3">
-            <StatusBarItem Content="Screenshot copied to clipboard." />
+            <StatusBarItem x:Name="stripCliboard" Content="Screenshot copied to clipboard." Visibility="Collapsed" />
+            <StatusBarItem x:Name="stripScreenshotsFolder" Content="Open Screenshots folder in Explorer." Visibility="Collapsed" />
         </StatusBar>
     </Grid>
 </adonisControls:AdonisWindow>

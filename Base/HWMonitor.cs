@@ -146,6 +146,8 @@ namespace BenchMaestro
             {
                 bool _refreshpt = App.systemInfo.ZenRefreshPowerTable();
 
+                float _livetdc = 0;
+                float _liveedc = 0;
 
                 if (!_refreshpt)
                 {
@@ -158,7 +160,10 @@ namespace BenchMaestro
                     if (_sensor.SensorValues == HWSensorValues.Single)
                     {
                         //Trace.WriteLine($"Zen Sensor update {_sensor.Name} PTOffset={_sensor.ZenPTOffset}");
-                        _sensor.Values.Add(App.systemInfo.Zen.powerTable.Table[_sensor.ZenPTOffset] * _sensor.ZenMulti);
+                        float _value = App.systemInfo.Zen.powerTable.Table[_sensor.ZenPTOffset] * _sensor.ZenMulti;
+                        _sensor.Values.Add(_value);
+                        if (_sensor.Name == HWSensorName.CPUTDC) _livetdc = _value;
+                        if (_sensor.Name == HWSensorName.CPUEDC) _liveedc = _value;
                         //Trace.WriteLine($"Zen Sensor update {_sensor.Name}={_sensor.Values.Last()}");
                     }
                     else
@@ -223,14 +228,11 @@ namespace BenchMaestro
                 App.systemInfo.UpdateLiveCPUClock($"{Math.Round((double)_cpuload, 0)}% CPU Load");
                 App.systemInfo.UpdateLiveCPUTemp($"{Math.Round((double)_cputemp, 1)}°C");
                 App.systemInfo.UpdateLiveCPUPower($"{Math.Round((double)_cpupower, 0)}W");
-                float? _tdcamp = App.hwsensors.GetValue(HWSensorName.CPUTDC);
-                float? _edcamp = App.hwsensors.GetValue(HWSensorName.CPUEDC);
                 string _liveadditional = "";
-                if (_tdcamp > 0) _liveadditional += $"TDC: {Math.Round((double)_tdcamp, 0)}A ";
-                if (_edcamp > 0) _liveadditional += $"EDC: {Math.Round((double)_edcamp, 0)}A ";
+                if (_livetdc > 0) _liveadditional += $"TDC: {Math.Round((double)_livetdc, 0)}A ";
+                if (_liveedc > 0) _liveadditional += $"EDC: {Math.Round((double)_liveedc, 0)}A ";
                 if (_liveadditional.Length > 0)
                     App.systemInfo.UpdateLiveCPUAdditional(_liveadditional);
-
             }
             catch (Exception ex)
             {
@@ -588,7 +590,7 @@ namespace BenchMaestro
                 {
                     sb.AppendLine();
                     sb.AppendLine(computer.GetReport()); 
-                    string path = @".\dumphwm.txt";
+                    string path = @".\Logs\dumphwm.txt";
                     if (!File.Exists(path)) File.Delete(path);
 
                     using (StreamWriter sw = File.CreateText(path))
@@ -648,7 +650,7 @@ namespace BenchMaestro
                 }
                 if (_dumphwmidle)
                 {
-                    string path = @".\dumphwmidle.txt";
+                    string path = @".\Logs\dumphwmidle.txt";
                     if (!File.Exists(path)) File.Delete(path);
 
                     using (StreamWriter sw = File.CreateText(path))
@@ -1024,17 +1026,17 @@ namespace BenchMaestro
                     //if (MonitoringIdle) _libre = true;
                     if (MonitoringDevices.Contains(HWSensorDevice.CPU) && CPUSource == HWSensorSource.Libre)
                     {
-                        Trace.WriteLine("Libre CPU");
+                        //Trace.WriteLine("Libre CPU");
                         _libre = true;
                     }
                     if (MonitoringDevices.Contains(HWSensorDevice.GPU) && GPUSource == HWSensorSource.Libre)
                     {
-                        Trace.WriteLine("Libre GPU");
+                        //Trace.WriteLine("Libre GPU");
                         _libre = true;
                     }
                     if (MonitoringDevices.Contains(HWSensorDevice.MainBoard) && BoardSource == HWSensorSource.Libre)
                     {
-                        Trace.WriteLine("Libre Board");
+                        //Trace.WriteLine("Libre Board");
                         _libre = true;
                     }
 

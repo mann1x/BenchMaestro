@@ -92,6 +92,7 @@ namespace BenchMaestro
 		public string LiveCPUClock { get; set; }
 		public string LiveCPUPower { get; set; }
 		public string LiveCPUAdditional { get; set; }
+		public string LiveFinished { get; set; }
 
 		public event PropertyChangedEventHandler PropertyChanged;
 
@@ -878,7 +879,7 @@ namespace BenchMaestro
 
 					CPPCLabels();
 
-					string path = @".\dumpcppc.txt";
+					string path = @".\Logs\dumpcppc.txt";
 					if (!File.Exists(path)) File.Delete(path);
 
 					using (StreamWriter sw = File.CreateText(path))
@@ -1910,7 +1911,7 @@ namespace BenchMaestro
 								sb.AppendLine(line);
 							}
 
-							string path = @".\dumpzenpt.txt";
+							string path = @".\Logs\dumpzenpt.txt";
 							if (!File.Exists(path)) File.Delete(path);
 
 							using (StreamWriter sw = File.CreateText(path))
@@ -1987,6 +1988,12 @@ namespace BenchMaestro
 			LiveCPUAdditional = _value.Length > 0 ? _value : "N/A";
 			//Trace.WriteLine($"{_value}");
 			OnChange("LiveCPUAdditional");
+		}
+		public void UpdateLiveFinished(string _value)
+		{
+			LiveFinished = _value.Length > 0 ? _value : "N/A";
+			//Trace.WriteLine($"{_value}");
+			OnChange("LiveFinished");
 		}
 		public void SetLastVersionOnServer(string _value)
 		{

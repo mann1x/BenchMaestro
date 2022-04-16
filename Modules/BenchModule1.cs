@@ -1112,8 +1112,19 @@ namespace BenchMaestro
                 _finished.TextAlignment = TextAlignment.Center;
                 _finished.Margin = App.thickness;
                 _finished.Text = "N/A";
+                _finished.Visibility = Visibility.Visible;
                 ScoreList.Children.Add(_finished);
                 _run.FinishedBox = _finished;
+
+                TextBlock _livefinished = new TextBlock { FontSize = 14, Background = App.boxbrush2, Foreground = App.blackbrush, HorizontalAlignment = HorizontalAlignment.Stretch, VerticalAlignment = VerticalAlignment.Stretch, Padding = dpadding };
+                Grid.SetColumn(_livefinished, _column);
+                Grid.SetRow(_livefinished, _row);
+                _livefinished.TextAlignment = TextAlignment.Center;
+                _livefinished.Margin = App.thickness;
+                _livefinished.Text = "N/A";
+                _livefinished.Visibility = Visibility.Collapsed;
+                ScoreList.Children.Add(_livefinished);
+                _run.LiveFinishedBox = _livefinished;
                 _row++;
 
                 /// DETAILS
@@ -1326,6 +1337,22 @@ namespace BenchMaestro
                     bindLive.Mode = BindingMode.OneWay;
                     bindLive.Source = App.systemInfo;
                     BindingOperations.SetBinding(_scoreRun.AdditionalBox, TextBlock.TextProperty, bindLive);
+                    //Finished
+                    bindLive = new Binding("LiveFinished");
+                    bindLive.Mode = BindingMode.OneWay;
+                    bindLive.Source = App.systemInfo;
+                    BindingOperations.SetBinding(_scoreRun.LiveFinishedBox, TextBlock.TextProperty, bindLive);
+                    _scoreRun.CPUTempBox.FontWeight = FontWeights.SemiBold;
+                    _scoreRun.CPUClockBox.FontWeight = FontWeights.SemiBold;
+                    _scoreRun.CPUPowerBox.FontWeight = FontWeights.SemiBold;
+                    _scoreRun.AdditionalBox.FontWeight = FontWeights.SemiBold;
+                    _scoreRun.CPUTempBox.Foreground = App.tempbrush;
+                    _scoreRun.CPUClockBox.Foreground = App.clockbrush1;
+                    _scoreRun.CPUPowerBox.Foreground = App.powerbrush;
+                    _scoreRun.AdditionalBox.Foreground = App.voltbrush;
+                    _scoreRun.FinishedBox.Foreground = App.blackbrush;
+                    _scoreRun.FinishedBox.Visibility = Visibility.Collapsed;
+                    _scoreRun.LiveFinishedBox.Visibility = Visibility.Visible;
                 }
                 else
                 {
@@ -1334,10 +1361,22 @@ namespace BenchMaestro
                     BindingOperations.ClearBinding(_scoreRun.CPUClockBox, TextBlock.TextProperty);
                     BindingOperations.ClearBinding(_scoreRun.CPUPowerBox, TextBlock.TextProperty);
                     BindingOperations.ClearBinding(_scoreRun.AdditionalBox, TextBlock.TextProperty);
+                    BindingOperations.ClearBinding(_scoreRun.LiveFinishedBox, TextBlock.TextProperty);
+                    _scoreRun.CPUTempBox.FontWeight = FontWeights.Normal;
+                    _scoreRun.CPUClockBox.FontWeight = FontWeights.Normal;
+                    _scoreRun.CPUPowerBox.FontWeight = FontWeights.Normal;
+                    _scoreRun.AdditionalBox.FontWeight = FontWeights.Normal;
+                    _scoreRun.CPUTempBox.Foreground = App.blackbrush;
+                    _scoreRun.CPUClockBox.Foreground = App.blackbrush;
+                    _scoreRun.CPUPowerBox.Foreground = App.blackbrush;
+                    _scoreRun.AdditionalBox.Foreground = App.blackbrush;
+                    _scoreRun.FinishedBox.Foreground = App.blackbrush;
                     _scoreRun.CPUTempBox.Text = "N/A";
                     _scoreRun.CPUClockBox.Text = "N/A";
                     _scoreRun.CPUPowerBox.Text = "N/A";
                     _scoreRun.AdditionalBox.Text = "N/A";
+                    _scoreRun.FinishedBox.Visibility = Visibility.Visible;
+                    _scoreRun.LiveFinishedBox.Visibility = Visibility.Collapsed;
                 }
             }
             catch (Exception ex)

@@ -36,7 +36,7 @@ namespace BenchMaestro
         static string Benchname = "MainMenu";
         static bool InitUI = true;
         static bool WinLoaded = false;
-        string AutoUpdaterUrl = "https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json";
+        readonly string AutoUpdaterUrl = "https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json";
 
         XMRSTAKRXWindow XMRSTAKRXWin;
         CPUMINERSSE2Window CPUMINERSSE2Win;
@@ -257,7 +257,7 @@ namespace BenchMaestro
                     HashingAlgorithm = json.checksum.hashingAlgorithm
                 }
             };
-            App.systemInfo.SetLastVersionOnServer($"{args.UpdateInfo.CurrentVersion} @ {DateTime.Now.ToString("dddd, dd MMMM yyyy HH:mm:ss")}");
+            App.systemInfo.SetLastVersionOnServer($"{args.UpdateInfo.CurrentVersion} @ {DateTime.Now:dddd, dd MMMM yyyy HH:mm:ss}");
         }
 
         private void RadioMode(object sender, RoutedEventArgs e)
@@ -367,7 +367,7 @@ namespace BenchMaestro
             }
             catch (Exception ex)
             {
-                Trace.WriteLine($"Hyperlink_RequestNavigate Exception ({e.Uri.ToString()}): {ex}");
+                Trace.WriteLine($"Hyperlink_RequestNavigate Exception ({e.Uri}): {ex}");
             }
         }
         private void CustomCPPC_Save(object sender, RoutedEventArgs e)
@@ -641,9 +641,23 @@ namespace BenchMaestro
         }
         private void btnRefreshInfo_Click(object sender, RoutedEventArgs e)
         {
-            App.systemInfo.ZenRefreshStatic(true);
-            App.systemInfo.ZenRefreshCO();
+            if (!object.ReferenceEquals(null, App.systemInfo.Zen))
+            {
+                App.systemInfo.ZenRefreshStatic(true);
+                App.systemInfo.ZenRefreshCO();
+            }
             App.systemInfo.RefreshLabels();
         }
+        private void TabItemEnter(object sender, RoutedEventArgs e)
+        {
+            SizeToContent = SizeToContent.WidthAndHeight;
+            SetValue(MinWidthProperty, Width);
+            SetValue(MinHeightProperty, Height);
+        }
+        private void ButtonLogsFolder(object sender, RoutedEventArgs e)
+        {
+            Process.Start("explorer.exe", @".\Logs");
+        }
+
     }
 }
