@@ -34,6 +34,8 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.25 Alpha
+    - Fix: Logs directory creation issue
 - v1.0.24 Alpha
     - Add: Bold and colored live stats
     - Add: Live running and remaining runtime

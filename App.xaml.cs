@@ -380,6 +380,8 @@ namespace BenchMaestro
 		{
 			try
 			{
+				Directory.CreateDirectory(@".\Logs");
+
 				instanceMutex = new Mutex(true, mutexName, out bMutex);
 
 				if (!bMutex)
@@ -391,8 +393,6 @@ namespace BenchMaestro
 				}
 
 				GC.KeepAlive(instanceMutex);
-
-				Directory.CreateDirectory(@".\Logs");
 
 				CleanUpOldFiles();
 
