@@ -196,7 +196,7 @@ namespace BenchMaestro
                             double _scrollh = Height - sv.TranslatePoint(new Point(0, 0), null).Y;
                             double _scrollmh = MaxHeight - sv.TranslatePoint(new Point(0, 0), null).Y;
                             double _scrollth = sv.TranslatePoint(new Point(0, 0), null).Y;
-                            double _tsh = sv.ScrollableHeight + sv.ExtentHeight;
+                            double _tsh = sv.ExtentHeight;
                             //Trace.WriteLine($"_scroller tTP={App.CurrentRun.DetailsBox.TranslatePoint(new Point(0, this.Height), this)} TP={App.CurrentRun.DetailsScroller.TranslatePoint(new Point(0, 0), null)} H={App.CurrentRun.DetailsScroller.ActualHeight} WH={this.Height}");
                             if (expanded)
                             {
@@ -233,46 +233,64 @@ namespace BenchMaestro
 
         private void ButtonScreenshot_Click(object sender, RoutedEventArgs e)
         {
-            var screenshot = new Screenshot();
-            var bitmap = screenshot.CaptureActiveWindow();
-
-            App.ss_filename = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss_") + WinTitle + ".png";
-
-            using (var saveWnd = new SaveWindow(bitmap))
-            {
-                saveWnd.Owner = this;
-                saveWnd.ShowDialog();
-                screenshot.Dispose();
-            }
+            Module1.ButtonScreenshot_Click2(sender, e, this, WinTitle);
         }
 
         public void SetStart()
         {
-            Dispatcher.Invoke((Action)(() =>
+            try
             {
-                BtnStartLabel.Text = "Start";
-            }));
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    BtnStartLabel.Text = "Start";
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"SetStart Exception: {e}");
+            }
         }
         public void SetEnabled()
         {
-            Dispatcher.Invoke((Action)(() =>
+            try
             {
-                BtnStartLabel.IsEnabled = true;
-            }));
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    BtnStartLabel.IsEnabled = true;
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"SetEnabled Exception: {e}");
+            }
         }
         public void SetLiveBindings(BenchScore _scoreRun, bool enabled)
         {
-            Dispatcher.Invoke((Action)(() =>
+            try
             {
-                Module1.SetLiveBindings2(_scoreRun, enabled);
-            }));
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Module1.SetLiveBindings2(_scoreRun, enabled);
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"SetLiveBindings Exception: {e}");
+            }
         }
         public void UpdateStarted()
         {
-            Dispatcher.Invoke((Action)(() =>
+            try
             {
-                Module1.UpdateStarted2();
-            }));
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Module1.UpdateStarted2();
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"UpdateStarted Exception: {e}");
+            }
         }
         public void STCWin()
         {
@@ -287,17 +305,31 @@ namespace BenchMaestro
         }
         public void UpdateFinished(string _exitstatus = "")
         {
-            Dispatcher.Invoke((Action)(() =>
+            try
             {
-                Module1.UpdateFinished2(_exitstatus);
-            }));
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Module1.UpdateFinished2(_exitstatus);
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"UpdateFinished Exception: {e}");
+            }
         }
         public void UpdateScore(string _score = "")
         {
-            Dispatcher.Invoke((Action)(() =>
+            try
             {
-                Module1.UpdateScore2(_score);
-            }));
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Module1.UpdateScore2(_score);
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"UpdateScore Exception: {e}");
+            }
         }
         public void UpdateRunStop()
         {
@@ -341,7 +373,7 @@ namespace BenchMaestro
                 {
                     BtnStartLabel.IsEnabled = false;
 
-                    App.CurrentRun.FinishString = "Aborted by user";
+                    if (App.CurrentRun != null) App.CurrentRun.FinishString = "Aborted by user";
                     
                     UpdateMainStatus("Aborting run...");
                     // Request cancellation.
@@ -483,13 +515,20 @@ namespace BenchMaestro
 
         public void UpdateMainStatus(string _msgstatus)
         {
-            Dispatcher.Invoke((Action)(() =>
+            try
             {
-                MainStatus.Text = $"{_msgstatus}";
-                if (App.CurrentRun != null) App.CurrentRun.RunLog += $"\n\rMAIN STATUS MESSAGE: {_msgstatus}";
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    MainStatus.Text = $"{_msgstatus}";
+                    if (App.CurrentRun != null) App.CurrentRun.RunLog += $"\n\rMAIN STATUS MESSAGE: {_msgstatus}";
 
 
-            }));
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"UpdateMainStatus Exception: {e}");
+            }
         }
 
         public void StartBench()

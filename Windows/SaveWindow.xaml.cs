@@ -12,7 +12,7 @@ namespace BenchMaestro.Windows
     /// </summary>
     public partial class SaveWindow : IDisposable
     {
-        private static Bitmap screenshot;
+        public static Bitmap screenshot;
 
         public SaveWindow(Bitmap bitmap)
         {
@@ -97,7 +97,7 @@ namespace BenchMaestro.Windows
 
         public void Dispose()
         {
-            ((IDisposable) screenshot).Dispose();
+            //((IDisposable) screenshot).Dispose();
         }
     }
 }

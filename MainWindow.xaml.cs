@@ -73,12 +73,7 @@ namespace BenchMaestro
         private void Window_SourceInitialized(object sender, EventArgs e)
         {
             Trace.WriteLine($"SourceInit Window Initialized {WindowSettings.Default.Initialized}");
-            SizeToContent = SizeToContent.WidthAndHeight;
-            SetValue(MinWidthProperty, Width);
-            SetValue(MinHeightProperty, Height);
-            ClearValue(SizeToContentProperty);
             App.systemInfo.WinMaxSize = System.Windows.SystemParameters.WorkArea.Height;
-
 
             if (WindowSettings.Default.Initialized)
             {
@@ -97,7 +92,6 @@ namespace BenchMaestro
             }
             else
             {
-                SizeToContent = SizeToContent.WidthAndHeight;
                 double screenWidth = System.Windows.SystemParameters.PrimaryScreenWidth;
                 double screenHeight = System.Windows.SystemParameters.PrimaryScreenHeight;
                 double windowWidth = this.Width;
@@ -109,6 +103,12 @@ namespace BenchMaestro
                 WindowSettings.Default.Initialized = true;
                 SaveWinPos();
             }
+
+            SizeToContent = SizeToContent.WidthAndHeight;
+            SetValue(MinWidthProperty, Width);
+            SetValue(MinHeightProperty, Height);
+            ClearValue(SizeToContentProperty);
+
             WinLoaded = true;
         }
 

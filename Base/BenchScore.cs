@@ -113,6 +113,9 @@ namespace BenchMaestro
         public string AlgoFeatures { get; set; }
         public string Algo { get; set; }
 
+        public MemoryConfig MEMCFG { get; set; }
+        public List<MemoryModule> modules { get; set; }
+        public List<String> MemPartNumbers { get; set; }
         public List<int> RunCores { get; set; }
         public List<int> RunLogicals { get; set; }
 

@@ -142,6 +142,7 @@
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
                                     <RowDefinition Height="*"/>
+                                    <RowDefinition Height="*"/>
                                 </Grid.RowDefinitions>
                                 <TextBlock Grid.Column="0" Grid.Row="1" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center" >Config Tag:</TextBlock>
                                 <Grid Grid.Column="1" Grid.Row="1">
@@ -174,30 +175,34 @@
                            Text="Processors:"/>
                                 <TextBlock Grid.Column="1" Grid.Row="4" x:Name="ProcessorsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" 
                            Text="{Binding systemInfo.ProcessorsLabel, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
-                                <TextBlock Grid.Column="0" Grid.Row="5" x:Name="COCounts" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                                <TextBlock Grid.Column="0" Grid.Row="5" x:Name="MemoryRow" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" 
+                           Text="Memory:"/>
+                                <TextBlock Grid.Column="1" Grid.Row="5" x:Name="MemoryLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" 
+                           Text="{Binding systemInfo.MemoryLabel, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="6" x:Name="COCounts" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center"
                            Text="CO Counts:" Visibility="Collapsed"/>
-                                <TextBlock Grid.Column="1" Grid.Row="5" x:Name="COCountsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Padding="5" VerticalAlignment="Center" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}" 
+                                <TextBlock Grid.Column="1" Grid.Row="6" x:Name="COCountsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Padding="5" VerticalAlignment="Center" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}" 
                            Text="{Binding systemInfo.ZenCOLabel, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}" Visibility="Collapsed"/>
-                                <TextBlock Grid.Column="0" Grid.Row="6" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="CPPC Active:"/>
-                                <TextBlock Grid.Column="1" Grid.Row="6" x:Name="CPPCActiveLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" 
-                           Text="{Binding systemInfo.CPPCActiveLabel, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 <TextBlock Grid.Column="0" Grid.Row="7" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center"
-                           Text="CPPC Order:"/>
-                                <TextBlock Grid.Column="1" Grid.Row="7" Name="CPPCLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left"
-                           Text="{Binding systemInfo.CPPCLabel}"/>
+                           Text="CPPC Active:"/>
+                                <TextBlock Grid.Column="1" Grid.Row="7" x:Name="CPPCActiveLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" 
+                           Text="{Binding systemInfo.CPPCActiveLabel, Mode=OneWay, UpdateSourceTrigger=PropertyChanged}"/>
                                 <TextBlock Grid.Column="0" Grid.Row="8" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center"
+                           Text="CPPC Order:"/>
+                                <TextBlock Grid.Column="1" Grid.Row="8" Name="CPPCLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left"
+                           Text="{Binding systemInfo.CPPCLabel}"/>
+                                <TextBlock Grid.Column="0" Grid.Row="9" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center"
                            Text="CPPC Tags:"/>
-                                <TextBlock Grid.Column="1" Grid.Row="8" Name="CPPCTagsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Padding="5" VerticalAlignment="Center" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
+                                <TextBlock Grid.Column="1" Grid.Row="9" Name="CPPCTagsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Padding="5" VerticalAlignment="Center" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
                            Text="{Binding systemInfo.CPPCTagsLabel}"/>
-                                <TextBlock Grid.Column="0" Grid.Row="9" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center" 
+                                <TextBlock Grid.Column="0" Grid.Row="10" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center" 
                            Text="CPPC Perf:"/>
-                                <TextBlock Grid.Column="1" Grid.Row="9" Name="CPPCPerfLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Padding="5" VerticalAlignment="Center" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
+                                <TextBlock Grid.Column="1" Grid.Row="10" Name="CPPCPerfLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Padding="5" VerticalAlignment="Center" Background="{DynamicResource {x:Static adonisUi:Brushes.Layer3BackgroundBrush}}"
                            Text="{Binding systemInfo.CPPCPerfLabel}"/>
-                                <TextBlock Grid.Column="0" Grid.Row="10" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center" ToolTip="Drag and drop the Cores in the order you want"
+                                <TextBlock Grid.Column="0" Grid.Row="11" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" VerticalAlignment="Center" ToolTip="Drag and drop the Cores in the order you want"
                            Text="CPPC Custom:"/>
 
-                                <Grid Grid.Column="1" Grid.Row="10" VerticalAlignment="Center" Margin="5 5 5 5">
+                                <Grid Grid.Column="1" Grid.Row="11" VerticalAlignment="Center" Margin="5 5 5 5">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="1"/>
@@ -229,8 +234,8 @@
 
                                 </Grid>
 
-                                <TextBlock Grid.Column="0" Grid.Row="11" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right"  VerticalAlignment="Center" Text="Threads:"/>
-                                <StackPanel Grid.Column="1" Grid.Row="11">
+                                <TextBlock Grid.Column="0" Grid.Row="12" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right"  VerticalAlignment="Center" Text="Threads:"/>
+                                <StackPanel Grid.Column="1" Grid.Row="12">
                                     <Grid Margin="2 2 2 2" VerticalAlignment="Center">
                                         <Grid.ColumnDefinitions>
                                             <ColumnDefinition Width="Auto"/>
@@ -308,7 +313,7 @@
                                     </Grid>
                                     
                                 </StackPanel>
-                                <Button x:Name="BtnNewZenPT" Grid.Column="0" Grid.Row="12" Grid.ColumnSpan="2" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Center"  VerticalAlignment="Center" Click="BtnNewZenPT_Click" Visibility="Collapsed">
+                                <Button x:Name="BtnNewZenPT" Grid.Column="0" Grid.Row="13" Grid.ColumnSpan="2" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Center"  VerticalAlignment="Center" Click="BtnNewZenPT_Click" Visibility="Collapsed">
                                     Unknown Zen Power Table, please click here to open an issue on GitHub, thanks!
                                 </Button>
                             </Grid>

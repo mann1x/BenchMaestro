@@ -20,6 +20,8 @@ using SharpCompress.Archives.SevenZip;
 using SharpCompress.Common;
 using SharpCompress.Archives;
 using ZenStates.Core;
+using BenchMaestro.Windows;
+using System.Drawing;
 
 namespace BenchMaestro
 {
@@ -101,6 +103,13 @@ namespace BenchMaestro
 		public static SolidColorBrush blackbrush = new SolidColorBrush();
 		public static SolidColorBrush whitebrush = new SolidColorBrush();
 		public static Thickness thickness;
+
+		public static Screenshot screenshot = new Screenshot();
+		public static Bitmap bitmap;
+		public static bool bscreenshot = false;
+		public static bool bscreenshotdetails = false;
+		public static bool bscreenshotrendered = false;
+		public static Window screenshotwin;
 
 		[DllImport("kernel32", SetLastError = true)]
 		static extern bool FreeLibrary(IntPtr hModule);
@@ -590,14 +599,17 @@ namespace BenchMaestro
 
 				try
 				{
-					hwmcts.Dispose();
-					benchcts.Dispose();
+					hwmcts?.Dispose();
+					benchcts?.Dispose();
+
+					((IDisposable)SaveWindow.screenshot)?.Dispose();
+					((IDisposable)screenshot)?.Dispose();
 
 					SetThreadExecutionState(EXECUTION_STATE.ES_CONTINUOUS);
 
 					if (!object.ReferenceEquals(null, systemInfo.Zen))
 					{
-						systemInfo.Zen.Dispose();
+						systemInfo.Zen?.Dispose();
 						systemInfo.Zen = null;
 					}
 
@@ -621,6 +633,8 @@ namespace BenchMaestro
 			Trace.WriteLine("BenchMaestro closed");
 			Trace.Flush();
 			Trace.Close();
+			Current.Shutdown();
+			Environment.Exit(0);
 		}
 		private void InitColors()
 		{
@@ -787,6 +801,11 @@ namespace BenchMaestro
 			{
 				Trace.WriteLine($"CleanUpOldFiles exception: {ex}");
 			}
+		}
+		public static void SetSSRendered(object sender, EventArgs e)
+		{
+			Trace.WriteLine($"Dispatcher");
+			bscreenshotrendered = true;
 		}
 
 	}

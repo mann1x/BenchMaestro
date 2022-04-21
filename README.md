@@ -34,6 +34,15 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.26 Alpha
+    - Add: Taking a benchmark window screenshot will expand the details and capture them all
+    - Add: Read and display memory modules info
+    - Add: Read and display memory timings for Zen in details (thx irusanov ZenTimings)
+    - Add: Read and display memory voltages info for Zen (thx irusanov ZenTimings)
+    - Add: Read and display OS details in Board information
+    - Fix: Copy to clipboard screenshot lost after closing SaveScreenshot window
+    - Fix: More robust application exit and handling of exceptions
+    - Fix: Various layout issues with details expanders
 - v1.0.25 Alpha
     - Fix: Logs directory creation issue
 - v1.0.24 Alpha

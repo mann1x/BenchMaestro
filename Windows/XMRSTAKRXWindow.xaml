@@ -65,7 +65,8 @@
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
                     <RowDefinition Height="*"/>
-                </Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
                 <Grid Grid.Column="1" Grid.ColumnSpan="3">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -98,14 +99,16 @@
                 <TextBlock Grid.Column="1" Grid.ColumnSpan="2" Grid.Row="2" Name="ConfigTag" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding Path=settings.ConfigTag, Mode=OneWay, NotifyOnSourceUpdated=True, NotifyOnTargetUpdated=True}" TargetUpdated="UpdateConfigTag" />
                 <TextBlock Grid.Column="2" Grid.Row="2" x:Name="RunSettingsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Visibility="Hidden">Run settings:</TextBlock>
                 <TextBlock Grid.Column="3" Grid.Row="2" x:Name="RunSettingsBlock" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="" />
-                <TextBlock Grid.Column="0" Grid.Row="3" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right">CPU:</TextBlock>
-                <TextBlock Grid.Column="1" Grid.Row="3" Name="CPULabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.CPULabel}"/>
-                <TextBlock Grid.Column="0" Grid.Row="4" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right">Board:</TextBlock>
-                <TextBlock Grid.Column="1" Grid.Row="4" Name="BoardLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.BoardLabel}"/>
+                <TextBlock Grid.Column="0" Grid.Row="3" Grid.RowSpan="2" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right">CPU:</TextBlock>
+                <TextBlock Grid.Column="1" Grid.Row="3" Grid.RowSpan="2" Name="CPULabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.CPULabel}"/>
+                <TextBlock Grid.Column="0" Grid.Row="5" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right">Board:</TextBlock>
+                <TextBlock Grid.Column="1" Grid.Row="5" Name="BoardLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.BoardLabel}"/>
                 <TextBlock Grid.Column="2" Grid.Row="3" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Text="Processors:"/>
                 <TextBlock Grid.Column="3" Grid.Row="3" Name="ProcessorsLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.ProcessorsLabel}"/>
-                <TextBlock Grid.Column="2" Grid.Row="4" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Text="CPPC Order:"/>
-                <TextBlock Grid.Column="3" Grid.Row="4" Name="CPPCLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.CPPCActiveLabel}"/>
+                <TextBlock Grid.Column="2" Grid.Row="4" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Text="Memory:"/>
+                <TextBlock Grid.Column="3" Grid.Row="4" Name="MemoryLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.MemoryLabel}"/>
+                <TextBlock Grid.Column="2" Grid.Row="5" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Right" Text="CPPC Order:"/>
+                <TextBlock Grid.Column="3" Grid.Row="5" Name="CPPCLabel" Width="Auto" Margin="{adonisUi:Space}" HorizontalAlignment="Left" Text="{Binding systemInfo.CPPCActiveLabel}"/>
             </Grid>
 
                 <Grid Grid.Row="5" Grid.ColumnSpan="4" Margin="4,5,4,5" Name="ScoreList">

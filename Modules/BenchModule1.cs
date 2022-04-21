@@ -12,6 +12,7 @@ using System.Windows.Data;
 using System.Windows.Documents;
 using System.Windows.Threading;
 using System.Windows;
+using BenchMaestro.Windows;
 
 namespace BenchMaestro
 {
@@ -892,6 +893,211 @@ namespace BenchMaestro
 
                 }
 
+                void AddTimings( string _header)
+                {
+
+                    Trace.WriteLine($"Start {_header}");
+
+                    Thickness dthickness = new Thickness(4, 3, 4, 3);
+                    GridLength _rowheigth = new GridLength(1, GridUnitType.Star);
+
+                    _stackpanel.Visibility = Visibility.Visible;
+                    _scroller.Visibility = Visibility.Visible;
+                    _gridblock.Visibility = Visibility.Visible;
+                    _textblock.Visibility = Visibility.Collapsed;
+
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+
+                    TextBlock _tbh = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                    _tbh.Inlines.Add(new Run { Text = _header, FontSize = 9, FontWeight = FontWeights.Bold, Foreground = App.clockbrush1 });
+                    Grid.SetColumn(_tbh, 0);
+                    Grid.SetRow(_tbh, _row);
+                    Grid.SetColumnSpan(_tbh, 6);
+                    _tbh.TextAlignment = TextAlignment.Center;
+                    _gridblock.Children.Add(_tbh);
+
+                    _row++;
+
+                    FontWeight _wbold = FontWeights.Bold;
+                    FontWeight _wnormal = FontWeights.Normal;
+
+                    int _colspan = 1;
+                    int _col = 0;
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+
+                    string name = "";
+                    string value = "";
+
+                    void AddTiming(string name, string value)
+                    {
+
+                        TextBlock _tb1a = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                        _tb1a.Inlines.Add(new Run { Text = $"{name}", FontSize = 9, FontWeight = _wnormal, Foreground = App.blackbrush });
+                        Grid.SetColumn(_tb1a, _col);
+                        Grid.SetRow(_tb1a, _row);
+                        Grid.SetColumnSpan(_tb1a, _colspan);
+                        _tb1a.TextAlignment = TextAlignment.Left;
+                        _gridblock.Children.Add(_tb1a);
+
+                        TextBlock _tb1b = new TextBlock { Margin = dthickness, Background = App.boxbrush1, HorizontalAlignment = HorizontalAlignment.Stretch };
+                        _tb1b.Inlines.Add(new Run { Text = $"{value}", FontSize = 9, FontWeight = _wbold, Foreground = App.blackbrush });
+                        Grid.SetColumn(_tb1b, _col+1);
+                        Grid.SetRow(_tb1b, _row);
+                        Grid.SetColumnSpan(_tb1b, _colspan);
+                        _tb1b.TextAlignment = TextAlignment.Right;
+                        _gridblock.Children.Add(_tb1b);
+
+                    }
+
+                    int row0 = _row;
+
+                    AddTiming("tCL", $"{App.systemInfo.MEMCFG.CL}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRCDWR", $"{App.systemInfo.MEMCFG.RCDWR}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRCDRD", $"{App.systemInfo.MEMCFG.RCDRD}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRP", $"{App.systemInfo.MEMCFG.RP}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRAS", $"{App.systemInfo.MEMCFG.RAS}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRC", $"{App.systemInfo.MEMCFG.RC}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRRDS", $"{App.systemInfo.MEMCFG.RRDS}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRRDL", $"{App.systemInfo.MEMCFG.RRDL}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tFAW", $"{App.systemInfo.MEMCFG.FAW}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tWTRS", $"{App.systemInfo.MEMCFG.WTRS}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tWTRL", $"{App.systemInfo.MEMCFG.WTRL}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tWR", $"{App.systemInfo.MEMCFG.WR}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRFC(ns)", $"{App.systemInfo.MEMCFG.RFCns}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRFC", $"{App.systemInfo.MEMCFG.RFC}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRFC2", $"{App.systemInfo.MEMCFG.RFC2}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tRFC4", $"{App.systemInfo.MEMCFG.RFC4}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tMOD", $"{App.systemInfo.MEMCFG.MOD}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tMODPDA", $"{App.systemInfo.MEMCFG.MODPDA}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tPHYWRD", $"{App.systemInfo.MEMCFG.PHYWRD}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+                    AddTiming("tPHYWRL", $"{App.systemInfo.MEMCFG.PHYWRL}");
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+
+                    _row = row0;
+                    _col = 2;
+                    AddTiming("tRDRDSCL", $"{App.systemInfo.MEMCFG.RDRDSCL}");
+                    _row++;
+                    AddTiming("tWRWRSCL", $"{App.systemInfo.MEMCFG.WRWRSCL}");
+                    _row++;
+                    AddTiming("tCWL", $"{App.systemInfo.MEMCFG.CWL}");
+                    _row++;
+                    AddTiming("tRTP", $"{App.systemInfo.MEMCFG.RTP}");
+                    _row++;
+                    AddTiming("tRDWR", $"{App.systemInfo.MEMCFG.RDWR}");
+                    _row++;
+                    AddTiming("tWRRD", $"{App.systemInfo.MEMCFG.WRRD}");
+                    _row++;
+                    AddTiming("tRDRDSC", $"{App.systemInfo.MEMCFG.RDRDSC}");
+                    _row++;
+                    AddTiming("tRDRDSD", $"{App.systemInfo.MEMCFG.RDRDSD}");
+                    _row++;
+                    AddTiming("tRDRDDD", $"{App.systemInfo.MEMCFG.RDRDDD}");
+                    _row++;
+                    AddTiming("tWRWRSC", $"{App.systemInfo.MEMCFG.WRWRSC}");
+                    _row++;
+                    AddTiming("tWRWRSD", $"{App.systemInfo.MEMCFG.WRWRSD}");
+                    _row++;
+                    AddTiming("tWRWRDD", $"{App.systemInfo.MEMCFG.WRWRDD}");
+                    _row++;
+                    AddTiming("tCKE", $"{App.systemInfo.MEMCFG.CKE}");
+                    _row++;
+                    AddTiming("tREFI", $"{App.systemInfo.MEMCFG.REFI}");
+                    _row++;
+                    AddTiming("tREFI(ns)", $"{App.systemInfo.MEMCFG.REFIns}");
+                    _row++;
+                    AddTiming("tSTAG", $"{App.systemInfo.MEMCFG.STAG}");
+                    _row++;
+                    AddTiming("tMRD", $"{App.systemInfo.MEMCFG.MRD}");
+                    _row++;
+                    AddTiming("tMRDPDA", $"{App.systemInfo.MEMCFG.MRDPDA}");
+                    _row++;
+                    AddTiming("tPHYRDL", $"{App.systemInfo.MEMCFG.PHYRDL}");
+                    _row++;
+                    AddTiming("PowerDown", $"{App.systemInfo.MEMCFG.PowerDown}");
+
+                    _row = row0;
+                    _col = 4;
+
+                    AddTiming("Freq.", $"{App.systemInfo.MEMCFG.Frequency}");
+                    _row++;
+                    AddTiming("BGS", $"{App.systemInfo.MEMCFG.BGS}");
+                    _row++;
+                    AddTiming("BGS Alt.", $"{App.systemInfo.MEMCFG.BGSAlt}");
+                    _row++;
+                    AddTiming("GDM", $"{App.systemInfo.MEMCFG.GDM}");
+                    _row++;
+                    AddTiming("Cmd2T", $"{App.systemInfo.MEMCFG.Cmd2T}");
+                    _row++;
+                    AddTiming("Capacity", $"{App.systemInfo.MEMCFG.TotalCapacity}");
+                    _row++;
+                    AddTiming("ProcODT", $"{App.systemInfo.MemProcODT}");
+                    _row++;
+                    AddTiming("RttNom", $"{App.systemInfo.MemRttNom}");
+                    _row++;
+                    AddTiming("RttWr", $"{App.systemInfo.MemRttWr}");
+                    _row++;
+                    AddTiming("RttPark", $"{App.systemInfo.MemRttPark}");
+                    _row++;
+                    AddTiming("ClkDrvStr", $"{App.systemInfo.MemClkDrvStren}");
+                    _row++;
+                    AddTiming("AddrCmdDrvStr", $"{App.systemInfo.MemAddrCmdDrvStren}");
+                    _row++;
+                    AddTiming("CsOdtDrvStr", $"{App.systemInfo.MemCsOdtCmdDrvStren}");
+                    _row++;
+                    AddTiming("CkeDrvStr", $"{App.systemInfo.MemCkeDrvStren}");
+                    _row++;
+                    AddTiming("AddrCmdSetup", $"{App.systemInfo.MemAddrCmdSetup}");
+                    _row++;
+                    AddTiming("CsOdtSetup", $"{App.systemInfo.MemCsOdtSetup}");
+                    _row++;
+                    AddTiming("CkeSetup", $"{App.systemInfo.MemCkeSetup}");
+
+                    _gridblock.RowDefinitions.Add(new RowDefinition { Height = _rowheigth });
+                    _row++;
+
+                    Trace.WriteLine($"Finish {_header}");
+
+                }
+
                 if (App.CurrentRun.CPUFSBAvg > -999) AddDetailAvgMax(App.CurrentRun.CPUFSBAvg, App.CurrentRun.CPUFSBMax, $"CPU FSB Clock", " MHz", "0.00");
                 if (App.CurrentRun.CPUCoresClocks.Any()) AddDetails(App.CurrentRun.CPUCoresClocks, $"Cores Clocks MHz [ Core - Average - Max ]");
                 if (App.CurrentRun.CPUCoresEffClocks.Any()) AddDetails(App.CurrentRun.CPUCoresEffClocks, $"Cores Effective Clocks MHz [ Core - Average - Max ]");
@@ -908,6 +1114,16 @@ namespace BenchMaestro
                     if (App.CurrentRun.CPULogicalsScores.First().Val2 > -99998)
                         _header = $"Threads Scores [ Thread - Avg - Max ]";
                     AddDetails(App.CurrentRun.CPULogicalsScores, _header);
+                }
+
+                App.CurrentRun.MEMCFG = App.systemInfo.MEMCFG;
+                App.CurrentRun.MemPartNumbers = App.systemInfo.MemPartNumbers;
+                App.CurrentRun.modules = App.systemInfo.modules;
+
+                if (App.CurrentRun.modules.Count > 0)
+                {
+                    string _header = $"Memory Modules Timings";
+                    AddTimings(_header);
                 }
 
                 thiswin.SizeToContent = SizeToContent.WidthAndHeight;
@@ -1231,7 +1447,7 @@ namespace BenchMaestro
             {
                 ScrollViewer sv = elements.FirstOrDefault();
                 double _scrollmh = pwin.MaxHeight - sv.TranslatePoint(new System.Windows.Point(0, 0), null).Y;
-                double _tsh = sv.ScrollableHeight + sv.ExtentHeight;
+                double _tsh = sv.ExtentHeight;
                 double svHeight = 0;
                 if (sv.Visibility == Visibility.Visible && _tsh < _scrollmh )
                 {
@@ -1242,10 +1458,11 @@ namespace BenchMaestro
                     svHeight = _scrollmh - 8;
                 }
                 sv.Height = svHeight > 0 ? svHeight : 0;
-                pwin.UpdateLayout();
                 //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
                 //Trace.WriteLine($"ScVis {sv.ComputedVerticalScrollBarVisibility}");
             }
+            pwin.Height = pwin.MaxHeight;
+            pwin.UpdateLayout();
         }
         public static void UpdateScore2(string _score)
         {
@@ -1383,6 +1600,100 @@ namespace BenchMaestro
             {
                 Trace.WriteLine($"SetLiveBindings[{enabled}] Exception: {ex}");
             }
+        }
+
+        public static void ButtonScreenshot_Click2(object sender, RoutedEventArgs e, Window thisWindow, string WinTitle)
+        {
+
+            App.bscreenshot = true;
+            App.bscreenshotdetails = false;
+
+            IEnumerable<ScrollViewer> elements = MainWindow.FindVisualChildren<ScrollViewer>(thisWindow).Where(x => x.Tag != null && x.Tag.ToString().StartsWith("Details"));
+            double curheigth = thisWindow.ActualHeight;
+            double curmaxheigth = thisWindow.MaxHeight;
+            double curminheigth = thisWindow.MinHeight;
+            double maxscrollableheight = 0;
+
+            IEnumerable<Expander> expanders = MainWindow.FindVisualChildren<Expander>(thisWindow);
+
+            double _scrollbase = 0;
+
+            if (elements.Any())
+            {
+                App.bscreenshotdetails = true;
+
+                thisWindow.Dispatcher.Hooks.OperationCompleted += App.SetSSRendered;
+
+                foreach (Expander exp in expanders)
+                {
+                    exp.IsExpanded = true;
+                }
+
+                foreach (var sv in elements)
+                {
+                    _scrollbase = sv.TranslatePoint(new System.Windows.Point(0, 0), null).Y;
+                    double _tsh = sv.ExtentHeight;
+                    double svHeight = _tsh + 16;
+                    maxscrollableheight = _tsh > maxscrollableheight ? svHeight : maxscrollableheight;
+                    sv.Height = svHeight;
+                    //sv.Height = svHeight > 0 ? svHeight : 0;
+                    //Trace.WriteLine($"_svH {svHeight} svaH {sv.ActualHeight} max {maxscrollableheight}");
+                    //Trace.WriteLine($"aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
+                    //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
+                    thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
+                }
+
+                //Trace.WriteLine($"Sshot 0 ah={thisWindow.ActualHeight} aMh={thisWindow.MaxHeight}");
+
+                thisWindow.MaxHeight = maxscrollableheight + _scrollbase + 16;
+                thisWindow.MinHeight = maxscrollableheight + _scrollbase;
+                thisWindow.Height = maxscrollableheight + _scrollbase;
+
+                thisWindow.UpdateLayout();
+
+                //Trace.WriteLine($"Sshot 1 ah={thisWindow.ActualHeight} rH={maxscrollableheight + _scrollbase} aMh={thisWindow.MaxHeight}");
+
+                //thisWindow.UpdateLayout();
+
+                //Trace.WriteLine($"Sshot 2 ah={thisWindow.ActualHeight} rH={maxscrollableheight + _scrollbase} aMh={thisWindow.MaxHeight}");
+
+                App.screenshotwin = thisWindow;
+
+            }
+            App.bscreenshotrendered = false;
+
+            thisWindow.Dispatcher.Invoke(new Action(() => { App.screenshot = new Screenshot(); App.bitmap = App.screenshot.CaptureActiveWindow(); }), DispatcherPriority.ContextIdle);
+            DateTime _start = DateTime.Now;
+            while (!App.bscreenshotrendered)
+            {
+                TimeSpan _delta = DateTime.Now - _start;
+                if (_delta.TotalSeconds > 5) App.bscreenshotrendered = true;
+            }
+
+            App.ss_filename = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss_") + WinTitle + ".png";
+
+            foreach (Expander exp in expanders)
+            {
+                exp.IsExpanded = false;
+            }
+
+            thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
+            thisWindow.SizeToContent = SizeToContent.Manual;
+            thisWindow.MinHeight = curminheigth;
+            thisWindow.MaxHeight = curmaxheigth;
+            thisWindow.Height = curheigth;
+            thisWindow.UpdateLayout();
+
+            using (var saveWnd = new SaveWindow(App.bitmap))
+            {
+                saveWnd.Owner = thisWindow;
+                saveWnd.ShowDialog();
+                App.screenshot.Dispose();
+            }
+
+            App.bscreenshot = false;
+            App.bscreenshotdetails = false;
+
         }
 
     }

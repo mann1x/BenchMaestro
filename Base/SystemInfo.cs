@@ -39,6 +39,8 @@ namespace BenchMaestro
 		public string CPULabel { get; set; }
 		public string BoardLabel { get; set; }
 		public string ProcessorsLabel { get; set; }
+		public string MemoryLabel { get; set; }
+		public string WindowsLabel { get; set; }
 		public bool HyperThreading { get; set; }
 		public int[,] CPPC { get; set; }
 		public int[] CPPCActiveOrder { get; set; }
@@ -95,6 +97,28 @@ namespace BenchMaestro
 		public string LiveFinished { get; set; }
 
 		public event PropertyChangedEventHandler PropertyChanged;
+		public AsusWMI AsusWmi = new AsusWMI();
+
+		public MemoryConfig MEMCFG = new MemoryConfig();
+		public List<MemoryModule> modules = new List<MemoryModule>();
+		public List<BiosACPIFunction> biosFunctions = new List<BiosACPIFunction>();
+		public BiosMemController BMC;
+		public List<String> MemPartNumbers { get; set; }
+		public string MemVdimm { get; set; }
+		public string MemVtt { get; set; }
+		public string MemProcODT { get; set; }
+		public string MemClkDrvStren { get; set; }
+		public string MemAddrCmdDrvStren { get; set; }
+		public string MemCsOdtCmdDrvStren { get; set; }
+		public string MemCkeDrvStren { get; set; }
+
+		public string MemRttNom { get; set; }
+		public string MemRttWr { get; set; }
+		public string MemRttPark { get; set; }
+
+		public string MemAddrCmdSetup { get; set; }
+		public string MemCsOdtSetup { get; set; }
+		public string MemCkeSetup { get; set; }
 
 		private int EmptyTags()
 		{
@@ -162,9 +186,27 @@ namespace BenchMaestro
 			CPUFamily = 0;
 			BoardBIOS = "N/A";
 			BoardManufacturer = "N/A";
+			MemoryLabel = "";
 			BoardModel = "N/A";
 			CPPCTagsLabel = "";
+			WindowsLabel = "";
 			HyperThreading = false;
+			MemPartNumbers = new();
+			MemVdimm = "";
+			MemVtt = "";
+			MemProcODT = "";
+			MemClkDrvStren = "";
+			MemAddrCmdDrvStren = "";
+			MemCsOdtCmdDrvStren = "";
+			MemCkeDrvStren = "";
+
+			MemRttNom = "";
+			MemRttWr = "";
+			MemRttPark = "";
+
+			MemAddrCmdSetup = "";
+			MemCsOdtSetup = "";
+			MemCkeSetup = "";
 
 			LastVersionOnServer = "N/A";
 
@@ -231,6 +273,8 @@ namespace BenchMaestro
 
 				CpuSetInit();
 
+				GetWindowsLabel();
+
 				ZenStates = false;
 				ZenPerCCDTemp = false;
 				ZenBoost = 0;
@@ -256,6 +300,20 @@ namespace BenchMaestro
 
 				ZenMainInit();
 
+				if (!MemPartNumbers.Any())
+                {
+					if (HWMonitor.computer.SMBios.MemoryDevices.Length > 0)
+                    {
+						foreach (var module in HWMonitor.computer.SMBios.MemoryDevices)
+                        {
+							if (module.Size > 0)
+                            {
+								MemPartNumbers.Add(
+									$"{module.BankLocator}: {module.PartNumber} ({module.Size / 1024}GB, {module.Speed}MHz)");
+                            }
+                        }
+                    }
+				}
 			}
 			catch (Exception ex)
 			{
@@ -554,6 +612,9 @@ namespace BenchMaestro
 			{
 				CPULabel = $"{CPUName} [Socket {CPUSocket}]\n{CPUDescription} x{CPUBits}";
 				BoardLabel = $"{BoardModel} [BIOS Version {BoardBIOS}]\n{BoardManufacturer}";
+
+				if (WindowsLabel.Length > 0)
+					BoardLabel += $"{WindowsLabel}";
 				ProcessorsLabel = $"{CPUCores}";
 				if (HyperThreading) ProcessorsLabel += $" [Threads: {CPULogicalProcessors}]";
 				if (IntelHybrid)
@@ -563,6 +624,29 @@ namespace BenchMaestro
 					ProcessorsLabel += $" E-Cores: {Ecores.Count}";
 					if (Elogicals.Count > Ecores.Count) ProcessorsLabel += $" [{Elogicals.Count}T]";
 				}
+
+				string _MemoryLabel = "";
+
+				if (MemPartNumbers.Any())
+				{
+					foreach (var mempart in MemPartNumbers)
+                    {
+						if (_MemoryLabel.Length > 0) _MemoryLabel += $"\n";
+						_MemoryLabel += $"{mempart}";
+					}
+				}
+
+				if (MemVdimm.Length > 0)
+                {
+					if (_MemoryLabel.Length > 0) _MemoryLabel += $"\n";
+					_MemoryLabel += $"VDIMM: {MemVdimm}";
+					if (MemVtt.Length > 0)
+						_MemoryLabel += $" VTT: {MemVtt}";
+				}
+
+				if (_MemoryLabel.Length > 0) MemoryLabel = $"{_MemoryLabel}";
+				if (_MemoryLabel.Length == 0) MemoryLabel = "N/A";
+
 				if (ZenStates)
 				{
 					string _CPULabel = "";
@@ -598,11 +682,11 @@ namespace BenchMaestro
 					if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
 
 					if (ZenCoreMapLabel.Length > 0) ProcessorsLabel += $"\nCoreMap: {ZenCoreMapLabel} ";
-
 				}
 				OnChange("CPULabel");
 				OnChange("BoardLabel");
 				OnChange("ProcessorsLabel");
+				OnChange("MemoryLabel");
 				Trace.WriteLine($"RefreshLabels done");
 			}
 			catch (Exception ex)
@@ -939,6 +1023,25 @@ namespace BenchMaestro
 				Trace.WriteLine($"CPPCLabels Exception: {ex}");
 			}
 		}
+
+		public void GetWindowsLabel()
+		{
+			try
+			{
+				using (var objOS = new ManagementObjectSearcher("SELECT * FROM Win32_OperatingSystem"))
+				{
+					foreach (ManagementObject objMgmt in objOS.Get())
+					{
+						WindowsLabel += $"\n{objMgmt.Properties["Caption"].Value}";
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"GetWindowsLabel Exception: {ex}");
+			}
+		}
+
 		public void CpuIdInit()
 		{
 			try
@@ -1210,18 +1313,27 @@ namespace BenchMaestro
 					try
 					{
 						Zen = new Cpu();
-						Trace.WriteLine($"Zen Name: {Zen.info.cpuName}");
-						Trace.WriteLine($"Zen CodeName: {Zen.info.codeName}");
-						Trace.WriteLine($"Zen Family: {Zen.info.family}");
-						Trace.WriteLine($"Zen Model: {Zen.info.model}");
-						Trace.WriteLine($"Zen BaseModel: {Zen.info.baseModel}");
-						Trace.WriteLine($"Zen ExtModel: {Zen.info.extModel}");
-						Trace.WriteLine($"Zen Socket: {Zen.info.packageType}");
-						Trace.WriteLine($"Zen CpuID: {Zen.info.cpuid:X8}");
-						Trace.WriteLine($"Zen SVI2: {Zen.info.svi2.coreAddress:X8}:{Zen.info.svi2.socAddress:X8}");
-						smucheck = Zen.smu.Version != 0U;
-						Trace.WriteLine($"Zen Test SMU: {smucheck}");
-						Trace.WriteLine($"Zen SMU Type: {Zen.smu.SMU_TYPE}");
+
+						if (!Zen.info.family.Equals(Cpu.Family.UNSUPPORTED) && !Zen.info.codeName.Equals(Cpu.CodeName.Unsupported))
+						{
+							Trace.WriteLine($"Zen Name: {Zen.info.cpuName}");
+							Trace.WriteLine($"Zen CodeName: {Zen.info.codeName}");
+							Trace.WriteLine($"Zen Family: {Zen.info.family}");
+							Trace.WriteLine($"Zen Model: {Zen.info.model}");
+							Trace.WriteLine($"Zen BaseModel: {Zen.info.baseModel}");
+							Trace.WriteLine($"Zen ExtModel: {Zen.info.extModel}");
+							Trace.WriteLine($"Zen Socket: {Zen.info.packageType}");
+							Trace.WriteLine($"Zen CpuID: {Zen.info.cpuid:X8}");
+							Trace.WriteLine($"Zen SVI2: {Zen.info.svi2.coreAddress:X8}:{Zen.info.svi2.socAddress:X8}");
+							smucheck = Zen.smu.Version != 0U;
+							Trace.WriteLine($"Zen Test SMU: {smucheck}");
+							Trace.WriteLine($"Zen SMU Type: {Zen.smu.SMU_TYPE}");
+						} 
+						else
+                        {
+							Trace.WriteLine($"ZenCore DLL: CPU not supported");
+						}
+
 					}
 					catch
 					{
@@ -1231,6 +1343,22 @@ namespace BenchMaestro
 					if (smucheck)
 					{
 						ZenStates = true;
+
+						ReadMemoryModulesInfo();
+
+						if (modules.Count > 0)
+							ReadTimings(modules[0].DctOffset);
+						else
+							ReadTimings();
+
+						if (!AsusWmi.Init())
+						{
+							AsusWmi.Dispose();
+							AsusWmi = null;
+						}
+						BMC = new BiosMemController();
+						ReadMemoryConfig();
+
 
 						uint smu_ver = Zen.smu.Version;
 						uint ver_maj = smu_ver >> 16 & 255U;
@@ -1344,7 +1472,6 @@ namespace BenchMaestro
 							sb.AppendLine(line);
 							sb.AppendLine($"CPUName {CPUName}");
 							sb.AppendLine($"CPUFamily {CPUFamily}");
-
 
 							if (ZenSMUVer == "25.86.0")
 							{
@@ -1965,6 +2092,371 @@ namespace BenchMaestro
 				Trace.WriteLine($"Exception ZenMainInit: {ex}");
 			}
 		}
+		private void ReadMemoryModulesInfo()
+		{
+			using (var searcher = new ManagementObjectSearcher("select * from Win32_PhysicalMemory"))
+			{
+				try
+				{
+					WMI.Connect(@"root\cimv2");
+
+					foreach (var queryObject in searcher.Get().Cast<ManagementObject>())
+					{
+						var capacity = 0UL;
+						var clockSpeed = 0U;
+						var partNumber = "N/A";
+						var bankLabel = "";
+						var manufacturer = "";
+						var deviceLocator = "";
+
+						var temp = WMI.TryGetProperty(queryObject, "Capacity");
+						if (temp != null) capacity = (ulong)temp;
+
+						temp = WMI.TryGetProperty(queryObject, "ConfiguredClockSpeed");
+						if (temp != null) clockSpeed = (uint)temp;
+
+						temp = WMI.TryGetProperty(queryObject, "partNumber");
+						if (temp != null) partNumber = (string)temp;
+
+						temp = WMI.TryGetProperty(queryObject, "BankLabel");
+						if (temp != null) bankLabel = (string)temp;
+
+						temp = WMI.TryGetProperty(queryObject, "Manufacturer");
+						if (temp != null) manufacturer = (string)temp;
+
+						temp = WMI.TryGetProperty(queryObject, "DeviceLocator");
+						if (temp != null) deviceLocator = (string)temp;
+
+						modules.Add(new MemoryModule(partNumber.Trim(), bankLabel.Trim(), manufacturer.Trim(),
+							deviceLocator, capacity, clockSpeed));
+
+						//string bl = bankLabel.Length > 0 ? new string(bankLabel.Where(char.IsDigit).ToArray()) : "";
+						//string dl = deviceLocator.Length > 0 ? new string(deviceLocator.Where(char.IsDigit).ToArray()) : "";
+
+						//comboBoxPartNumber.Items.Add($"#{bl}: {partNumber}");
+						//comboBoxPartNumber.SelectedIndex = 0;
+					}
+				}
+				catch (Exception ex)
+				{
+					Trace.WriteLine($"ReadMemoryModuleInfo Failed to get installed memory parameters: {ex}");
+				}
+			}
+
+			if (modules.Count > 0)
+			{
+				ReadChannelsInfo();
+
+				var totalCapacity = 0UL;
+
+				foreach (var module in modules)
+				{
+					var rank = module.DualRank ? "DR" : "SR";
+					totalCapacity += module.Capacity;
+					MemPartNumbers.Add(
+						$"{module.Slot}: {module.PartNumber} ({module.Capacity / 1024 / (1024 * 1024)}GB, {rank})");
+				}
+
+				if (modules[0].ClockSpeed != 0)
+					MEMCFG.Frequency = modules[0].ClockSpeed;
+
+				if (totalCapacity != 0)
+					MEMCFG.TotalCapacity = $"{totalCapacity / 1024 / (1024 * 1024)}GB";
+			}
+		}
+
+		private void ReadMemoryConfig()
+		{
+			var scope = @"root\wmi";
+			var className = "AMD_ACPI";
+
+			Trace.WriteLine("Zen ReadMemoryConfig");
+
+			try
+			{
+				WMI.Connect($@"{scope}");
+
+				var instanceName = WMI.GetInstanceName(scope, className);
+
+				var classInstance = new ManagementObject(scope,
+					$"{className}.InstanceName='{instanceName}'",
+					null);
+
+				// Get possible values (index) of a memory option in BIOS
+				/*pack = WMI.InvokeMethod(classInstance, "Getdvalues", "pack", "ID", 0x20007);
+                if (pack != null)
+                {
+                    uint[] DValuesBuffer = (uint[])pack.GetPropertyValue("DValuesBuffer");
+                    for (var i = 0; i < DValuesBuffer.Length; i++)
+                    {
+                        Debug.WriteLine("{0}", DValuesBuffer[i]);
+                    }
+                }
+                */
+
+
+				// Get function names with their IDs
+				string[] functionObjects = { "GetObjectID", "GetObjectID2" };
+				foreach (var functionObject in functionObjects)
+				{
+					try
+					{
+						var pack = WMI.InvokeMethod(classInstance, functionObject, "pack", null, 0);
+						if (pack != null)
+						{
+							var ID = (uint[])pack.GetPropertyValue("ID");
+							var IDString = (string[])pack.GetPropertyValue("IDString");
+							var Length = (byte)pack.GetPropertyValue("Length");
+
+							for (var i = 0; i < Length; ++i)
+							{
+								biosFunctions.Add(new BiosACPIFunction(IDString[i], ID[i]));
+								Debug.WriteLine("{0}: {1:X8}", IDString[i], ID[i]);
+							}
+						}
+					}
+					catch
+					{
+						// ignored
+					}
+				}
+
+				// Get APCB config from BIOS. Holds memory parameters.
+				BiosACPIFunction cmd = GetFunctionByIdString("Get APCB Config");
+				if (cmd == null)
+					throw new Exception();
+
+				var apcbConfig = WMI.RunCommand(classInstance, cmd.ID);
+
+				cmd = GetFunctionByIdString("Get memory voltages");
+				if (cmd != null)
+				{
+					var voltages = WMI.RunCommand(classInstance, cmd.ID);
+
+					// MEM_VDDIO is ushort, offset 27
+					// MEM_VTT is ushort, offset 29
+					for (var i = 27; i <= 30; i++)
+					{
+						var value = voltages[i];
+						if (value > 0)
+							apcbConfig[i] = value;
+					}
+				}
+
+				BMC.Table = apcbConfig;
+
+				// When ProcODT is 0, then all other resistance values are 0
+				// Happens when one DIMM installed in A1 or A2 slot
+				if (BMC.Table == null || Zen.utils.AllZero(BMC.Table) || BMC.Config.ProcODT < 1) return;
+
+				var vdimm = Convert.ToSingle(Convert.ToDecimal(BMC.Config.MemVddio) / 1000);
+				if (vdimm > 0)
+				{
+					MemVdimm = $"{vdimm:F4}V";
+					Trace.WriteLine($"Zen ReadMemoryConfig VDIMM BMC {MemVdimm}");
+				}
+				else if (AsusWmi != null && AsusWmi.Status == 1)
+				{
+					var sensor = AsusWmi.FindSensorByName("DRAM Voltage");
+					if (sensor != null)
+                    {
+						MemVdimm = sensor.Value;
+						Trace.WriteLine($"Zen ReadMemoryConfig VDIMM ASUSWMI {MemVdimm}");
+					}
+				}
+
+				var vtt = Convert.ToSingle(Convert.ToDecimal(BMC.Config.MemVtt) / 1000);
+				if (vtt > 0)
+                {
+					MemVtt = $"{vtt:F4}V";
+					Trace.WriteLine($"Zen ReadMemoryConfig VTT BMC {MemVtt}");
+				}
+
+				MemProcODT = BMC.GetProcODTString(BMC.Config.ProcODT);
+
+				MemClkDrvStren = BMC.GetDrvStrenString(BMC.Config.ClkDrvStren);
+				MemAddrCmdDrvStren = BMC.GetDrvStrenString(BMC.Config.AddrCmdDrvStren);
+				MemCsOdtCmdDrvStren = BMC.GetDrvStrenString(BMC.Config.CsOdtCmdDrvStren);
+				MemCkeDrvStren = BMC.GetDrvStrenString(BMC.Config.CkeDrvStren);
+
+				MemRttNom = BMC.GetRttString(BMC.Config.RttNom);
+				MemRttWr = BMC.GetRttWrString(BMC.Config.RttWr);
+				MemRttPark = BMC.GetRttString(BMC.Config.RttPark);
+
+				MemAddrCmdSetup = $"{BMC.Config.AddrCmdSetup}";
+				MemCsOdtSetup = $"{BMC.Config.CsOdtSetup}";
+				MemCkeSetup = $"{BMC.Config.CkeSetup}";
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"ReadMemoryConfig Exception: {ex}");
+			}
+
+			BMC.Dispose();
+		}
+
+		private void ReadChannelsInfo()
+		{
+			try 
+			{ 
+				int dimmIndex = 0;
+
+				// Get the offset by probing the IMC0 to IMC7
+				// It appears that offsets 0x80 and 0x84 are DIMM config registers
+				// When a DIMM is DR, bit 0 is set to 1
+				// 0x50000
+				// offset 0, bit 0 when set to 1 means DIMM1 is installed
+				// offset 8, bit 0 when set to 1 means DIMM2 is installed
+				for (var i = 0; i < 8; i++)
+				{
+					uint channelOffset = (uint)i << 20;
+					bool channel = Zen.utils.GetBits(Zen.ReadDword(channelOffset | 0x50DF0), 19, 1) == 0;
+					bool dimm1 = Zen.utils.GetBits(Zen.ReadDword(channelOffset | 0x50000), 0, 1) == 1;
+					bool dimm2 = Zen.utils.GetBits(Zen.ReadDword(channelOffset | 0x50008), 0, 1) == 1;
+
+					if (channel && (dimm1 || dimm2))
+					{
+						if (dimm1)
+						{
+							MemoryModule module = modules[dimmIndex++];
+							module.Slot = $"{Convert.ToChar(i + 65)}1";
+							module.DctOffset = channelOffset;
+							module.DualRank = Zen.utils.GetBits(Zen.ReadDword(channelOffset | 0x50080), 0, 1) == 1;
+						}
+
+						if (dimm2)
+						{
+							MemoryModule module = modules[dimmIndex++];
+							module.Slot = $"{Convert.ToChar(i + 65)}2";
+							module.DctOffset = channelOffset;
+							module.DualRank = Zen.utils.GetBits(Zen.ReadDword(channelOffset | 0x50084), 0, 1) == 1;
+						}
+					}
+				}
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"ReadChannelsInfo Exception: {ex}");
+			}
+		}
+		private void ReadTimings(uint offset = 0)
+		{
+			try
+            {
+				uint powerDown = Zen.ReadDword(offset | 0x5012C);
+				uint umcBase = Zen.ReadDword(offset | 0x50200);
+				uint bgsa0 = Zen.ReadDword(offset | 0x500D0);
+				uint bgsa1 = Zen.ReadDword(offset | 0x500D4);
+				uint bgs0 = Zen.ReadDword(offset | 0x50050);
+				uint bgs1 = Zen.ReadDword(offset | 0x50058);
+				uint timings5 = Zen.ReadDword(offset | 0x50204);
+				uint timings6 = Zen.ReadDword(offset | 0x50208);
+				uint timings7 = Zen.ReadDword(offset | 0x5020C);
+				uint timings8 = Zen.ReadDword(offset | 0x50210);
+				uint timings9 = Zen.ReadDword(offset | 0x50214);
+				uint timings10 = Zen.ReadDword(offset | 0x50218);
+				uint timings11 = Zen.ReadDword(offset | 0x5021C);
+				uint timings12 = Zen.ReadDword(offset | 0x50220);
+				uint timings13 = Zen.ReadDword(offset | 0x50224);
+				uint timings14 = Zen.ReadDword(offset | 0x50228);
+				uint timings15 = Zen.ReadDword(offset | 0x50230);
+				uint timings16 = Zen.ReadDword(offset | 0x50234);
+				uint timings17 = Zen.ReadDword(offset | 0x50250);
+				uint timings18 = Zen.ReadDword(offset | 0x50254);
+				uint timings19 = Zen.ReadDword(offset | 0x50258);
+				uint timings20 = Zen.ReadDword(offset | 0x50260);
+				uint timings21 = Zen.ReadDword(offset | 0x50264);
+				uint timings22 = Zen.ReadDword(offset | 0x5028C);
+				uint timings23 = timings20 != timings21 ? (timings20 != 0x21060138 ? timings20 : timings21) : timings20;
+
+				float configured = MEMCFG.Frequency;
+				float ratio = Zen.utils.GetBits(umcBase, 0, 7) / 3.0f;
+				float freqFromRatio = ratio * 200;
+
+				MEMCFG.Ratio = ratio;
+
+				// Fallback to ratio when ConfiguredClockSpeed fails
+				if (configured == 0.0f || freqFromRatio > configured)
+				{
+					MEMCFG.Frequency = freqFromRatio;
+				}
+
+
+				MEMCFG.BGS = bgs0 == 0x87654321 && bgs1 == 0x87654321 ? "Disabled" : "Enabled";
+				MEMCFG.BGSAlt = Zen.utils.GetBits(bgsa0, 4, 7) > 0 || Zen.utils.GetBits(bgsa1, 4, 7) > 0
+					? "Enabled"
+					: "Disabled";
+				MEMCFG.GDM = Zen.utils.GetBits(umcBase, 11, 1) > 0 ? "Enabled" : "Disabled";
+				MEMCFG.Cmd2T = Zen.utils.GetBits(umcBase, 10, 1) > 0 ? "2T" : "1T";
+
+				MEMCFG.CL = Zen.utils.GetBits(timings5, 0, 6);
+				MEMCFG.RAS = Zen.utils.GetBits(timings5, 8, 7);
+				MEMCFG.RCDRD = Zen.utils.GetBits(timings5, 16, 6);
+				MEMCFG.RCDWR = Zen.utils.GetBits(timings5, 24, 6);
+
+				MEMCFG.RC = Zen.utils.GetBits(timings6, 0, 8);
+				MEMCFG.RP = Zen.utils.GetBits(timings6, 16, 6);
+
+				MEMCFG.RRDS = Zen.utils.GetBits(timings7, 0, 5);
+				MEMCFG.RRDL = Zen.utils.GetBits(timings7, 8, 5);
+				MEMCFG.RTP = Zen.utils.GetBits(timings7, 24, 5);
+
+				MEMCFG.FAW = Zen.utils.GetBits(timings8, 0, 8);
+
+				MEMCFG.CWL = Zen.utils.GetBits(timings9, 0, 6);
+				MEMCFG.WTRS = Zen.utils.GetBits(timings9, 8, 5);
+				MEMCFG.WTRL = Zen.utils.GetBits(timings9, 16, 7);
+
+				MEMCFG.WR = Zen.utils.GetBits(timings10, 0, 8);
+
+				MEMCFG.TRCPAGE = Zen.utils.GetBits(timings11, 20, 12);
+
+				MEMCFG.RDRDDD = Zen.utils.GetBits(timings12, 0, 4);
+				MEMCFG.RDRDSD = Zen.utils.GetBits(timings12, 8, 4);
+				MEMCFG.RDRDSC = Zen.utils.GetBits(timings12, 16, 4);
+				MEMCFG.RDRDSCL = Zen.utils.GetBits(timings12, 24, 6);
+
+				MEMCFG.WRWRDD = Zen.utils.GetBits(timings13, 0, 4);
+				MEMCFG.WRWRSD = Zen.utils.GetBits(timings13, 8, 4);
+				MEMCFG.WRWRSC = Zen.utils.GetBits(timings13, 16, 4);
+				MEMCFG.WRWRSCL = Zen.utils.GetBits(timings13, 24, 6);
+
+				MEMCFG.RDWR = Zen.utils.GetBits(timings14, 8, 5);
+				MEMCFG.WRRD = Zen.utils.GetBits(timings14, 0, 4);
+
+				MEMCFG.REFI = Zen.utils.GetBits(timings15, 0, 16);
+
+				MEMCFG.MODPDA = Zen.utils.GetBits(timings16, 24, 6);
+				MEMCFG.MRDPDA = Zen.utils.GetBits(timings16, 16, 6);
+				MEMCFG.MOD = Zen.utils.GetBits(timings16, 8, 6);
+				MEMCFG.MRD = Zen.utils.GetBits(timings16, 0, 6);
+
+				MEMCFG.STAG = Zen.utils.GetBits(timings17, 16, 8);
+
+				MEMCFG.XP = Zen.utils.GetBits(timings18, 0, 6);
+				MEMCFG.CKE = Zen.utils.GetBits(timings18, 24, 5);
+
+				MEMCFG.PHYWRL = Zen.utils.GetBits(timings19, 8, 5);
+				MEMCFG.PHYRDL = Zen.utils.GetBits(timings19, 16, 6);
+				MEMCFG.PHYWRD = Zen.utils.GetBits(timings19, 24, 3);
+
+				MEMCFG.RFC = Zen.utils.GetBits(timings23, 0, 11);
+				MEMCFG.RFC2 = Zen.utils.GetBits(timings23, 11, 11);
+				MEMCFG.RFC4 = Zen.utils.GetBits(timings23, 22, 11);
+
+				MEMCFG.PowerDown = Zen.utils.GetBits(powerDown, 28, 1) == 1 ? "Enabled" : "Disabled";
+			}
+			catch (Exception ex)
+			{
+				Trace.WriteLine($"ReadTimings Exception: {ex}");
+			}
+
+		}
+		private BiosACPIFunction GetFunctionByIdString(string name)
+		{
+			return biosFunctions.Find(x => x.IDString == name);
+		}
+
 		public void UpdateLiveCPUTemp(string _value)
         {
 			LiveCPUTemp = _value.Length > 0 ? _value : "N/A";
