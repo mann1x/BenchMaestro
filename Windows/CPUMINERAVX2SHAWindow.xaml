@@ -85,7 +85,7 @@
                         Visibility="Collapsed"/>
                     <TextBlock x:Name="MainStatus" Margin="{adonisUi:Space}" Grid.Column="2" Text="Press Start to run the benchmark..." VerticalAlignment="Center" FontWeight="Bold" TextWrapping="WrapWithOverflow">
                     </TextBlock>
-                    <ProgressBar Grid.Column="2" x:Name="ProgressBar" Visibility="Collapsed" Grid.ColumnSpan="2" Grid.Row="1"
+                    <ProgressBar Grid.Column="2" x:Name="ProgressBar" Visibility="Collapsed" Grid.ColumnSpan="2" Grid.Row="1" Margin="{adonisUi:Space}"
                          Minimum="0"
                          Value="0"
                          Maximum="100"

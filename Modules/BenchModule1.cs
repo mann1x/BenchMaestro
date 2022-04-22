@@ -1618,17 +1618,16 @@ namespace BenchMaestro
 
             double _scrollbase = 0;
 
-            if (elements.Any())
+            if (expanders.Any())
             {
-                App.bscreenshotdetails = true;
-
-                thisWindow.Dispatcher.Hooks.OperationCompleted += App.SetSSRendered;
-
                 foreach (Expander exp in expanders)
                 {
-                    exp.IsExpanded = true;
+                    if (exp.IsExpanded) App.bscreenshotdetails = true;
                 }
+            }
 
+            if (elements.Any() && App.bscreenshotdetails)
+            {
                 foreach (var sv in elements)
                 {
                     _scrollbase = sv.TranslatePoint(new System.Windows.Point(0, 0), null).Y;
@@ -1648,41 +1647,33 @@ namespace BenchMaestro
                 thisWindow.MaxHeight = maxscrollableheight + _scrollbase + 16;
                 thisWindow.MinHeight = maxscrollableheight + _scrollbase;
                 thisWindow.Height = maxscrollableheight + _scrollbase;
-
-                thisWindow.UpdateLayout();
+              
 
                 //Trace.WriteLine($"Sshot 1 ah={thisWindow.ActualHeight} rH={maxscrollableheight + _scrollbase} aMh={thisWindow.MaxHeight}");
 
-                //thisWindow.UpdateLayout();
+                
+                thisWindow.Dispatcher.Invoke(new Action(() => { thisWindow.UpdateLayout(); }), DispatcherPriority.Send);
 
                 //Trace.WriteLine($"Sshot 2 ah={thisWindow.ActualHeight} rH={maxscrollableheight + _scrollbase} aMh={thisWindow.MaxHeight}");
 
                 App.screenshotwin = thisWindow;
 
-            }
-            App.bscreenshotrendered = false;
 
-            thisWindow.Dispatcher.Invoke(new Action(() => { App.screenshot = new Screenshot(); App.bitmap = App.screenshot.CaptureActiveWindow(); }), DispatcherPriority.ContextIdle);
-            DateTime _start = DateTime.Now;
-            while (!App.bscreenshotrendered)
-            {
-                TimeSpan _delta = DateTime.Now - _start;
-                if (_delta.TotalSeconds > 5) App.bscreenshotrendered = true;
             }
+
+            thisWindow.Dispatcher.Invoke(new Action(() => { App.screenshot = new Screenshot(); App.bitmap = App.screenshot.CaptureActiveWindow(); }), DispatcherPriority.Normal);
 
             App.ss_filename = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss_") + WinTitle + ".png";
 
-            foreach (Expander exp in expanders)
+            if (App.bscreenshotdetails)
             {
-                exp.IsExpanded = false;
+                thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
+                thisWindow.SizeToContent = SizeToContent.Manual;
+                thisWindow.MinHeight = curminheigth;
+                thisWindow.MaxHeight = curmaxheigth;
+                thisWindow.Height = curheigth;
+                thisWindow.UpdateLayout();
             }
-
-            thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
-            thisWindow.SizeToContent = SizeToContent.Manual;
-            thisWindow.MinHeight = curminheigth;
-            thisWindow.MaxHeight = curmaxheigth;
-            thisWindow.Height = curheigth;
-            thisWindow.UpdateLayout();
 
             using (var saveWnd = new SaveWindow(App.bitmap))
             {

@@ -34,6 +34,12 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.27 Alpha
+    - New: Benchmark details only captured if expanded
+    - Fix: Lost details in screenshot capture
+    - Fix: Progress bar margin
+    - Fix: Create Screenshots directory at start
+    - Fix: Open Screenshots directory goes to ConfigTag folder if exists
 - v1.0.26 Alpha
     - Add: Taking a benchmark window screenshot will expand the details and capture them all
     - Add: Read and display memory modules info

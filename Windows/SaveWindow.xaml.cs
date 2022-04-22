@@ -2,6 +2,7 @@
 using System.Diagnostics;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Windows;
 using Microsoft.Win32;
 
@@ -89,7 +90,9 @@ namespace BenchMaestro.Windows
         }
         private void ButtonScreenshotsFolder(object sender, RoutedEventArgs e)
         {
-            Process.Start("explorer.exe", @".\Screenshots");
+            string _folder = $".\\ScreenShots\\{Properties.Settings.Default.ConfigTag.ToString().Trim()}";
+            if (!Directory.Exists(_folder)) _folder = @".\Screenshots";
+            Process.Start("explorer.exe", _folder);
             statusStrip1.Visibility = Visibility.Visible;
             stripCliboard.Visibility = Visibility.Collapsed;
             stripScreenshotsFolder.Visibility = Visibility.Visible;

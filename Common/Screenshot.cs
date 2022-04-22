@@ -174,32 +174,31 @@ namespace BenchMaestro
                             Window owner = App.screenshotwin;
                             if (owner != null && App.bscreenshotdetails)
                             {
-                                App.bscreenshotrendered = false;
+
+                                App.screenshotwin.InvalidateVisual();
                                 owner.Dispatcher.Invoke(new Action(() => {
                                     App.screenshotwin.UpdateLayout();
-                                }), DispatcherPriority.ContextIdle);
-                                DateTime _start = DateTime.Now;
-                                while (!App.bscreenshotrendered)
-                                {
-                                    TimeSpan _delta = DateTime.Now - _start;
-                                    if (_delta.TotalSeconds > 5) App.bscreenshotrendered = true;
-                                }
-                                App.bscreenshotrendered = false;
-                                owner.Dispatcher.Invoke(new Action(() => {
-                                    DispatcherFrame frame = new DispatcherFrame();
-                                    Dispatcher.CurrentDispatcher.Invoke(DispatcherPriority.Render, new DispatcherOperationCallback(delegate (object parameter)
+                                }), DispatcherPriority.Send);
+                                Interlocked.CompareExchange(ref App.bscreenshotrendered, 0, 1);
+                                owner.Dispatcher.Hooks.OperationCompleted += App.SetSSRendered;
+                                App.Current.Dispatcher.Invoke(new Action(() => {
+                                    DateTime _start = DateTime.Now;
+                                    long sync = 0;
+                                    while (sync == 0)
                                     {
-                                        frame.Continue = false;
-                                        return null;
-                                    }), null);
-                                    Dispatcher.PushFrame(frame);
-                                }), DispatcherPriority.ContextIdle);
-                                _start = DateTime.Now;
-                                while (!App.bscreenshotrendered)
-                                {
-                                    TimeSpan _delta = DateTime.Now - _start;
-                                    if (_delta.TotalSeconds > 5) App.bscreenshotrendered = true;
-                                }
+                                        //Trace.WriteLine($"Waitforsync");
+                                        sync = Interlocked.Read(ref App.bscreenshotrendered);
+                                        TimeSpan _delta = DateTime.Now - _start;
+                                        if (_delta.TotalSeconds > 5)
+                                        {
+                                            //Trace.WriteLine($"Waitfortimeout");
+                                            Interlocked.CompareExchange(ref App.bscreenshotrendered, 1, 0);
+                                        }
+                                    }
+                                    //Trace.WriteLine($"Waitforsyncdone");
+                                }), DispatcherPriority.Background);
+
+
                                 owner.Dispatcher.Hooks.OperationCompleted -= App.SetSSRendered;
                             }
                             long style = GetWindowLong(hWnd, GWL_STYLE);
