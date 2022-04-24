@@ -34,6 +34,8 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.31 Alpha
+    - Fix: Again AutoUpdater not showing at startup
 - v1.0.30 Alpha
     - Fix: Wrong build number
 - v1.0.29 Alpha

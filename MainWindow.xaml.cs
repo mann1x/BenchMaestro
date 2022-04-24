@@ -23,7 +23,7 @@ using System.Web;
 using System.Reflection;
 using AutoUpdaterDotNET;
 using Newtonsoft.Json;
-
+using System.Windows.Threading;
 
 namespace BenchMaestro
 {
@@ -240,9 +240,14 @@ namespace BenchMaestro
             AutoUpdater.RunUpdateAsAdmin = false;
             AutoUpdater.Synchronous = false;
             AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
-            Dispatcher.Invoke(new Action(() => {
+
+            var autimer = new DispatcherTimer { Interval = TimeSpan.FromSeconds(2) };
+            autimer.Start();
+            autimer.Tick += (sender, args) =>
+            {
+                autimer.Stop();
                 AutoUpdater.Start(AutoUpdaterUrl);
-            }));
+            };
         }
         private void AutoUpdaterOnParseUpdateInfoEvent(ParseUpdateInfoEventArgs args)
         {
