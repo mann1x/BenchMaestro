@@ -37,6 +37,7 @@ namespace BenchMaestro
         static bool InitUI = true;
         static bool WinLoaded = false;
         readonly string AutoUpdaterUrl = "https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestro1.json";
+        //readonly string AutoUpdaterUrl = "https://raw.githubusercontent.com/mann1x/BenchMaestro/master/BenchMaestro/AutoUpdaterBenchMaestroTest.json";
 
         XMRSTAKRXWindow XMRSTAKRXWin;
         CPUMINERSSE2Window CPUMINERSSE2Win;
