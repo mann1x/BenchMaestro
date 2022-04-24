@@ -109,6 +109,7 @@ namespace BenchMaestro
 		public static bool bscreenshot = false;
 		public static bool bscreenshotdetails = false;
 		public static long bscreenshotrendered = 0;
+		public static double screenshotminheigth = 1;
 		public static Window screenshotwin;
 
 		[DllImport("kernel32", SetLastError = true)]
@@ -805,7 +806,7 @@ namespace BenchMaestro
 		}
 		public static void SetSSRendered(object sender, EventArgs e)
 		{
-			//Trace.WriteLine($"Dispatcher");
+			Trace.WriteLine($"Rendered Event");
 			Interlocked.CompareExchange(ref App.bscreenshotrendered, 1, 0);
 		}
 

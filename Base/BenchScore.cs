@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,7 +9,7 @@ using System.Windows.Controls;
 
 namespace BenchMaestro
 {
-    public class BenchScore
+    public class BenchScore : INotifyPropertyChanged
     {
         public int Threads { get; set; }
         public string Benchname { get; set; }
@@ -112,13 +113,13 @@ namespace BenchMaestro
         public string SWFeatures { get; set; }
         public string AlgoFeatures { get; set; }
         public string Algo { get; set; }
-
         public MemoryConfig MEMCFG { get; set; }
         public List<MemoryModule> modules { get; set; }
         public List<String> MemPartNumbers { get; set; }
         public List<int> RunCores { get; set; }
         public List<int> RunLogicals { get; set; }
 
+        public event PropertyChangedEventHandler PropertyChanged;
         public BenchScore(int threads, string benchname)
         {
             Threads = threads;
@@ -212,6 +213,13 @@ namespace BenchMaestro
             Runtime = App.GetRuntime("default");
 
         }
-    }
+        protected void OnChange(string info)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(info));
+            }
+        }
 
+    }
 }

@@ -1422,7 +1422,7 @@ namespace BenchMaestro
                 }
                 */
             }
-            pwin.SizeToContent = SizeToContent.Height;
+            pwin.SizeToContent = SizeToContent.WidthAndHeight;
             pwin.UpdateLayout();
         }
         private static void ScoreExpanderHasExpanded(object sender, RoutedEventArgs args)
@@ -1431,16 +1431,10 @@ namespace BenchMaestro
             IEnumerable<Window> pwins = MainWindow.FindVisualParent<Window>(_sender);
             Window pwin = pwins.FirstOrDefault();
             IEnumerable<Expander> expanders = MainWindow.FindVisualChildren<Expander>(pwin);
+            pwin.Height = pwin.MaxHeight;
             foreach (Expander exp in expanders)
             {
                 exp.IsExpanded = true;
-                /*
-                IEnumerable<ScrollViewer> svs = MainWindow.FindVisualChildren<ScrollViewer>(exp);
-                foreach (ScrollViewer sv in svs)
-                {
-                    sv.Visibility = Visibility.Visible;
-                }
-                */
             }
             IEnumerable<ScrollViewer> elements = MainWindow.FindVisualChildren<ScrollViewer>(_sender).Where(x => x.Tag != null && x.Tag.ToString().StartsWith("Details"));
             if (elements.Any())
@@ -1458,10 +1452,15 @@ namespace BenchMaestro
                     svHeight = _scrollmh - 8;
                 }
                 sv.Height = svHeight > 0 ? svHeight : 0;
+                sv.ClearValue(ScrollViewer.MinWidthProperty);
+                sv.ClearValue(ScrollViewer.MaxWidthProperty);
+                sv.ClearValue(ScrollViewer.WidthProperty);
+                //sv.MinWidth = sv.ExtentWidth + 16;
+                //sv.Width = sv.ExtentWidth + 48;
                 //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
                 //Trace.WriteLine($"ScVis {sv.ComputedVerticalScrollBarVisibility}");
             }
-            pwin.Height = pwin.MaxHeight;
+            pwin.SizeToContent = SizeToContent.WidthAndHeight;
             pwin.UpdateLayout();
         }
         public static void UpdateScore2(string _score)
@@ -1511,6 +1510,29 @@ namespace BenchMaestro
                 Trace.WriteLine($"UpdateFinished2 Exception: {ex}");
             }
         }
+        public static void UpdateHeadersWidth2(Window thisWindow, List<BenchScore> scoreRun)
+        {
+            try
+            {
+                double _minwidth = 0;
+                foreach (BenchScore score in scoreRun)
+                {
+                    if (score.ScoreBox.ActualWidth > _minwidth) _minwidth = score.ScoreBox.ActualWidth;
+                }
+                foreach (BenchScore score in scoreRun)
+                {
+                    if (score.ScoreBox.ActualWidth < _minwidth)
+                    {
+                        thisWindow.Dispatcher.BeginInvoke(new Action(() => { score.ScoreBox.MinWidth = _minwidth; score.ScoreBox.Width = _minwidth; thisWindow.UpdateLayout(); }), DispatcherPriority.Normal);                      
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine($"UpdateHeadersWidth2 Exception: {ex}");
+            }
+        }
+
         public static void UpdateStarted2()
         {
             try
@@ -1612,10 +1634,14 @@ namespace BenchMaestro
             double curheigth = thisWindow.ActualHeight;
             double curmaxheigth = thisWindow.MaxHeight;
             double curminheigth = thisWindow.MinHeight;
+            double curwidth = thisWindow.ActualWidth;
+            double curmaxwidth = thisWindow.MaxWidth;
+            double curminwidth = thisWindow.MinWidth;
             double maxscrollableheight = 0;
 
             IEnumerable<Expander> expanders = MainWindow.FindVisualChildren<Expander>(thisWindow);
 
+            DispatcherOperation operation;
             double _scrollbase = 0;
 
             if (expanders.Any())
@@ -1628,52 +1654,139 @@ namespace BenchMaestro
 
             if (elements.Any() && App.bscreenshotdetails)
             {
+                if (thisWindow.WindowState == WindowState.Maximized) thisWindow.WindowState = WindowState.Normal;
+
                 foreach (var sv in elements)
                 {
                     _scrollbase = sv.TranslatePoint(new System.Windows.Point(0, 0), null).Y;
-                    double _tsh = sv.ExtentHeight;
-                    double svHeight = _tsh + 16;
-                    maxscrollableheight = _tsh > maxscrollableheight ? svHeight : maxscrollableheight;
-                    sv.Height = svHeight;
+                    double svHeight = sv.ExtentHeight + 16;
+                    maxscrollableheight = svHeight > maxscrollableheight ? svHeight : maxscrollableheight;
+                    //sv.Height = svHeight;
+                    //sv.Width = svWidth;
                     //sv.Height = svHeight > 0 ? svHeight : 0;
-                    //Trace.WriteLine($"_svH {svHeight} svaH {sv.ActualHeight} max {maxscrollableheight}");
-                    //Trace.WriteLine($"aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
-                    //Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
+                    Trace.WriteLine($"_svH {svHeight} svaH {sv.ActualHeight} max {maxscrollableheight}");
+                    Trace.WriteLine($"aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
+                    Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
                     thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
                 }
 
                 //Trace.WriteLine($"Sshot 0 ah={thisWindow.ActualHeight} aMh={thisWindow.MaxHeight}");
 
-                thisWindow.MaxHeight = maxscrollableheight + _scrollbase + 16;
+                thisWindow.MaxHeight = maxscrollableheight + _scrollbase + 256;
                 thisWindow.MinHeight = maxscrollableheight + _scrollbase;
                 thisWindow.Height = maxscrollableheight + _scrollbase;
-              
+                App.screenshotminheigth = maxscrollableheight + _scrollbase;
+                
+                foreach (var sv in elements)
+                {
+                    _scrollbase = sv.TranslatePoint(new System.Windows.Point(0, 0), null).Y;
+                    double svWidth = sv.ExtentWidth + 16;
+                    double svHeight = sv.ExtentHeight + 16;
+                    maxscrollableheight = svHeight > maxscrollableheight ? svHeight : maxscrollableheight;
+                    sv.Height = svHeight;
+                    sv.Width = svWidth;
+                    sv.MinHeight = svHeight;
+                    sv.MinWidth = svWidth;
+                    //sv.InvalidateVisual();
+                    //sv.Height = svHeight > 0 ? svHeight : 0;
+                    Trace.WriteLine($"_svH {svHeight} svaH {sv.ActualHeight} max {maxscrollableheight}");
+                    Trace.WriteLine($"aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
+                    Trace.WriteLine($"exp_scroller aH={sv.ActualHeight} eH={sv.ExtentHeight} vH={sv.ViewportHeight} sH={sv.ScrollableHeight}");
+                }
+                thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
+
+                thisWindow.MaxWidth = thisWindow.ActualWidth + 256;
+                thisWindow.MinWidth = thisWindow.ActualWidth;
+
 
                 //Trace.WriteLine($"Sshot 1 ah={thisWindow.ActualHeight} rH={maxscrollableheight + _scrollbase} aMh={thisWindow.MaxHeight}");
 
-                
+
                 thisWindow.Dispatcher.Invoke(new Action(() => { thisWindow.UpdateLayout(); }), DispatcherPriority.Send);
 
                 //Trace.WriteLine($"Sshot 2 ah={thisWindow.ActualHeight} rH={maxscrollableheight + _scrollbase} aMh={thisWindow.MaxHeight}");
 
+                
                 App.screenshotwin = thisWindow;
 
-
             }
+            thisWindow.Focusable = false;
 
-            thisWindow.Dispatcher.Invoke(new Action(() => { App.screenshot = new Screenshot(); App.bitmap = App.screenshot.CaptureActiveWindow(); }), DispatcherPriority.Normal);
+            if (App.bscreenshotdetails)
+            {
+                UIntPtr hWnd = App.screenshot.GetActiveWindow();
+                using (PleaseWait waitWnd = new PleaseWait(curheigth))
+                {
+                    Interlocked.CompareExchange(ref App.bscreenshotrendered, 0, 1);
+                    waitWnd.Owner = thisWindow;
+                    thisWindow.Dispatcher.BeginInvoke(new Action(() => { App.screenshot = new Screenshot(); App.bitmap = App.screenshot.CaptureThisWindow(hWnd); }), DispatcherPriority.Normal);
+                    waitWnd.ShowDialog();
+                    waitWnd.Focus();
+                }
+            }
+            else
+            {
+                thisWindow.Dispatcher.Invoke(new Action(() => { App.screenshot = new Screenshot(); App.bitmap = App.screenshot.CaptureActiveWindow(); }), DispatcherPriority.Normal);
+            }
+            thisWindow.Focusable = true;
 
             App.ss_filename = DateTime.Now.ToString("yyyy-MM-dd_HH_mm_ss_") + WinTitle + ".png";
 
             if (App.bscreenshotdetails)
             {
-                thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
-                thisWindow.SizeToContent = SizeToContent.Manual;
                 thisWindow.MinHeight = curminheigth;
                 thisWindow.MaxHeight = curmaxheigth;
                 thisWindow.Height = curheigth;
-                thisWindow.UpdateLayout();
+
+                thisWindow.MaxWidth = curmaxwidth;
+                thisWindow.MinWidth = curminwidth;
+                thisWindow.Width = curwidth;
+
+                foreach (var sv in elements)
+                {
+                    double _scrollh = curheigth - sv.TranslatePoint(new Point(0, 0), null).Y;
+                    double _scrollmh = curmaxheigth - sv.TranslatePoint(new Point(0, 0), null).Y;
+                    double _scrollth = sv.TranslatePoint(new Point(0, 0), null).Y;
+                    double _tsh = sv.ExtentHeight;
+                    double svHeight = 0;
+                    if (_scrollh >= _tsh - 8)
+                    {
+                        svHeight = _tsh - 8;
+                    }
+                    else if (_scrollh >= _scrollmh - 8)
+                    {
+                        svHeight = _scrollmh - 8;
+                    }
+                    else
+                    {
+                        svHeight = _scrollh - 8;
+                    }
+                    Trace.WriteLine($" svHeight={svHeight} _scrollh={_scrollh} _scrollmh={_scrollmh} _scrollth={_scrollth}");
+                    sv.Height = svHeight > 0 ? svHeight : 0;
+                    sv.MinHeight = 32;
+                    sv.MinWidth = 32;
+                    sv.InvalidateVisual();
+                    sv.InvalidateScrollInfo();
+
+
+                    Trace.WriteLine($" aH={sv.ActualHeight} sH={_scrollh} tH={_scrollth}");
+                    Trace.WriteLine($" tsh={_tsh} eH={sv.ExtentHeight} scH={sv.ViewportHeight}");
+
+                    operation = thisWindow.Dispatcher.BeginInvoke(new Action(() => { thisWindow.UpdateLayout(); }), DispatcherPriority.Normal);
+
+                    operation.Wait();
+
+                }
+
+                thisWindow.SizeToContent = SizeToContent.WidthAndHeight;
             }
+
+            operation = thisWindow.Dispatcher.BeginInvoke(new Action(() => { thisWindow.UpdateLayout(); }), DispatcherPriority.Normal);
+
+            operation.Wait();
+
+            if (operation.Status != DispatcherOperationStatus.Completed) Trace.WriteLine($"Operation not completed: {operation.Status}");
+            
 
             using (var saveWnd = new SaveWindow(App.bitmap))
             {
@@ -1684,6 +1797,7 @@ namespace BenchMaestro
 
             App.bscreenshot = false;
             App.bscreenshotdetails = false;
+            App.screenshotwin = null;
 
         }
 

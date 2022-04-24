@@ -1,11 +1,14 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Threading;
 
 namespace BenchMaestro
@@ -71,6 +74,9 @@ namespace BenchMaestro
         [DllImport("user32.dll")]
         private static extern bool RedrawWindow(UIntPtr hwnd, UIntPtr lprcupdate, UIntPtr hrgnUpdate, int flags);
         //private static extern bool RedrawWindow(UIntPtr hwnd, RECT lprcupdate, UIntPtr hrgnUpdate, int flags);
+        [DllImport("user32.dll")]
+        private static extern long UpdateWindow(UIntPtr hwnd);
+
 
 
         [StructLayout(LayoutKind.Sequential)]
@@ -116,7 +122,7 @@ namespace BenchMaestro
                 if (!success) throw new Win32Exception();
 
                 IntPtr ibitmap = unchecked((IntPtr)(long)(ulong)bitmap);
-                result = Image.FromHbitmap(ibitmap);
+                result = System.Drawing.Image.FromHbitmap(ibitmap);
             }
             finally
             {
@@ -139,6 +145,9 @@ namespace BenchMaestro
             Bitmap bitmap = null;
             try
             {
+                UIntPtr wparamtrue = new UIntPtr(1);
+                UIntPtr wparamfalse = new UIntPtr(0);
+
                 UIntPtr hDC = GetWindowDC(hWnd); //Get the device context of hWnd
                 if (hDC != UIntPtr.Zero)
                 {
@@ -159,85 +168,164 @@ namespace BenchMaestro
                         Rectangle bounds;
                         bounds = new Rectangle(region.left, region.top, region.right - region.left, region.bottom - region.top);
                         Trace.WriteLine($"bounds w:{bounds.Width} h:{bounds.Height}");
+                        int _bwidth = bounds.Width;
+                        int _bheight = bounds.Height;
+                        Window owner = App.screenshotwin;
+                        if (owner != null && App.bscreenshotdetails)
+                        {
+                            _bwidth += 256;
+                            _bheight += 256;
+                        }
 
-                        UIntPtr hbitmap = CreateCompatibleBitmap(hDC, bounds.Width, bounds.Height); //Create a bitmap handle, compatible with hDC
+                        UIntPtr hbitmap = CreateCompatibleBitmap(hDC, _bwidth, _bheight); //Create a bitmap handle, compatible with hDC
                         if (hbitmap != UIntPtr.Zero)
                         {
                             UIntPtr hOld = SelectObject(hMemDC, hbitmap); //Select hbitmap into hMemDC
-                            UIntPtr wparamtrue = new UIntPtr(1);
-                            UIntPtr wparamfalse = new UIntPtr(0);
                             SendMessage(hWnd, WM_SETREDRAW, wparamfalse, IntPtr.Zero);
                             DefWindowProc(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
                             SendMessage(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
-                            SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
-                            RedrawWindow(hWnd, UIntPtr.Zero, UIntPtr.Zero, 0);
-                            Window owner = App.screenshotwin;
-                            if (owner != null && App.bscreenshotdetails)
-                            {
-
-                                App.screenshotwin.InvalidateVisual();
-                                owner.Dispatcher.Invoke(new Action(() => {
-                                    App.screenshotwin.UpdateLayout();
-                                }), DispatcherPriority.Send);
-                                Interlocked.CompareExchange(ref App.bscreenshotrendered, 0, 1);
-                                owner.Dispatcher.Hooks.OperationCompleted += App.SetSSRendered;
-                                App.Current.Dispatcher.Invoke(new Action(() => {
-                                    DateTime _start = DateTime.Now;
-                                    long sync = 0;
-                                    while (sync == 0)
-                                    {
-                                        //Trace.WriteLine($"Waitforsync");
-                                        sync = Interlocked.Read(ref App.bscreenshotrendered);
-                                        TimeSpan _delta = DateTime.Now - _start;
-                                        if (_delta.TotalSeconds > 5)
-                                        {
-                                            //Trace.WriteLine($"Waitfortimeout");
-                                            Interlocked.CompareExchange(ref App.bscreenshotrendered, 1, 0);
-                                        }
-                                    }
-                                    //Trace.WriteLine($"Waitforsyncdone");
-                                }), DispatcherPriority.Background);
-
-
-                                owner.Dispatcher.Hooks.OperationCompleted -= App.SetSSRendered;
-                            }
                             long style = GetWindowLong(hWnd, GWL_STYLE);
                             SetWindowLong(hWnd, GWL_STYLE, style & ~WS_CAPTION);
+                            SendMessage(hWnd, WM_PAINT, hMemDC, IntPtr.Zero);
+                            RedrawWindow(hWnd, UIntPtr.Zero, UIntPtr.Zero, 0);
+                            UpdateWindow(hWnd);
+                            SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
                             PrintWindow(hWnd, hMemDC, 0);
-                            PrintWindow(hWnd, hDC, 0);
+
+                            if (owner != null && App.bscreenshotdetails)
+                            {
+                                Trace.WriteLine($"Details sv updatelayout");
+                                owner.Dispatcher.Invoke(new Action(() => {
+
+                                    Trace.WriteLine($"owner.MinHeight {owner.MinHeight} App.screenshotminheigth {App.screenshotminheigth}");
+                                    owner.MinHeight = App.screenshotminheigth;
+                                    IEnumerable<ScrollViewer> elements = MainWindow.FindVisualChildren<ScrollViewer>(owner).Where(x => x.Tag != null && x.Tag.ToString().StartsWith("Details"));
+                                    foreach (var sv in elements)
+                                    {
+                                        double svHeight = sv.ExtentHeight;
+                                        sv.Height = svHeight;
+                                        sv.InvalidateScrollInfo();
+                                        sv.InvalidateVisual();
+                                        sv.UpdateLayout();
+                                        Trace.WriteLine($"sv {sv.Tag} h:{sv.ActualHeight} eh:{sv.ExtentHeight}");
+                                    }
+                                    owner.SizeToContent = SizeToContent.WidthAndHeight;
+                                }), DispatcherPriority.Send);
+
+                                Trace.WriteLine($"Details 1st updatelayout");
+
+                                owner.Dispatcher.Invoke(new Action(() => {
+
+                                    App.screenshotwin.InvalidateVisual();
+                                    App.screenshotwin.UpdateLayout();
+                                }), DispatcherPriority.Send);
+
+                                DispatcherOperation operation = owner.Dispatcher.BeginInvoke(new Action(() => {
+                                    App.screenshotwin.UpdateLayout();
+                                }), DispatcherPriority.Background);
+
+                                DispatcherOperationStatus opstatus = operation.Wait(TimeSpan.FromSeconds(5));
+
+                                Trace.WriteLine($"UpdateLayout Operation status: {opstatus}");
+
+                                if (opstatus != DispatcherOperationStatus.Completed) Trace.WriteLine($"Operation not completed: {opstatus}");
+
+                                owner.Dispatcher.Hooks.DispatcherInactive += App.SetSSRendered;
+
+                                Interlocked.CompareExchange(ref App.bscreenshotrendered, 0, 1);
+
+                                DateTime _start = DateTime.Now;
+                                long sync = 0;
+                                Trace.WriteLine($"Waitfor Rendered");
+                                while (sync == 0)
+                                {
+                                    TimeSpan _delta = DateTime.Now - _start;
+                                    if (_delta.TotalSeconds > 5)
+                                    {
+                                        Trace.WriteLine($"Waitfor Rendered timeout");
+                                        Interlocked.CompareExchange(ref App.bscreenshotrendered, 1, 0);
+                                    }
+                                    sync = Interlocked.Read(ref App.bscreenshotrendered);
+                                }
+                                Trace.WriteLine($"Waitforsyncdone");
+
+                                owner.Dispatcher.Hooks.DispatcherInactive -= App.SetSSRendered;
+                            }
 
                             SendMessage(hWnd, WM_SETREDRAW, wparamfalse, IntPtr.Zero);
                             DefWindowProc(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
                             SendMessage(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
-                            SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
                             RedrawWindow(hWnd, UIntPtr.Zero, UIntPtr.Zero, 0);
                             style = GetWindowLong(hWnd, GWL_STYLE);
                             SetWindowLong(hWnd, GWL_STYLE, style & ~WS_CAPTION);
+                            SendMessage(hWnd, WM_PAINT, hMemDC, IntPtr.Zero);
+                            RedrawWindow(hWnd, UIntPtr.Zero, UIntPtr.Zero, 0);
+                            UpdateWindow(hWnd);
+                            SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
                             PrintWindow(hWnd, hMemDC, 0);
-                            PrintWindow(hWnd, hDC, 0);
+
+                            if (owner != null && App.bscreenshotdetails)
+                            {
+                                Trace.WriteLine($"Details 2nd updatelayout");
+                                DispatcherOperation operation = owner.Dispatcher.BeginInvoke(new Action(() => {
+                                    App.screenshotwin.UpdateLayout();
+                                }), DispatcherPriority.Send);
+
+                                DispatcherOperationStatus opstatus = operation.Wait();
+                            }
+
+                            for (int i = 0; i < 10; ++i)
+                            {
+                                SendMessage(hWnd, WM_SETREDRAW, wparamfalse, IntPtr.Zero);
+                                DefWindowProc(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
+                                SendMessage(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
+                                SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
+                                style = GetWindowLong(hWnd, GWL_STYLE);
+                                SetWindowLong(hWnd, GWL_STYLE, style & ~WS_CAPTION);
+                                SendMessage(hWnd, WM_PAINT, hMemDC, IntPtr.Zero);
+                                RedrawWindow(hWnd, UIntPtr.Zero, UIntPtr.Zero, 0);
+                                UpdateWindow(hWnd);
+                                PrintWindow(hWnd, hMemDC, 0);
+                            }
+
+                            if (owner != null && App.bscreenshotdetails)
+                            {
+                                Trace.WriteLine($"Details 2nd DC");
+                                UIntPtr hbitmap2 = CreateCompatibleBitmap(hMemDC, (int)owner.ActualWidth, (int)owner.ActualHeight); //Create a bitmap handle, compatible with hDC
+                                UIntPtr hMemDC2 = CreateCompatibleDC(hMemDC); //Create a memory device context, compatible with hDC
+                                SelectObject(hMemDC2, hbitmap2); //Select hbitmap into hMemDC
+                                var success = BitBlt(hMemDC2, 0, 0, (int)owner.ActualWidth, (int)owner.ActualHeight, hMemDC, 0, 0,
+                                    SRCCOPY);
+                                IntPtr ihbitmap2 = unchecked((IntPtr)(long)(ulong)hbitmap2);
+                                bitmap = System.Drawing.Image.FromHbitmap(ihbitmap2); //Create a managed Bitmap out of hbitmap
+                                DeleteObject(hbitmap2); //Free hbitmap
+                                DeleteDC(hMemDC2); //Free hdcMem
+                            }
+                            else
+                            {
+                                IntPtr ihbitmap = unchecked((IntPtr)(long)(ulong)hbitmap);
+                                bitmap = System.Drawing.Image.FromHbitmap(ihbitmap); //Create a managed Bitmap out of hbitmap
+                            }
 
                             SendMessage(hWnd, WM_SETREDRAW, wparamfalse, IntPtr.Zero);
-                            DefWindowProc(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
-                            SendMessage(hWnd, WM_PRINT, hMemDC, (IntPtr)(PRF_CLIENT | PRF_NONCLIENT));
-                            SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
+                            DefWindowProc(hWnd, WM_PRINT, hDC, (IntPtr)PRF_CLIENT);
+                            SendMessage(hWnd, WM_PRINT, hDC, (IntPtr)PRF_CLIENT);
                             RedrawWindow(hWnd, UIntPtr.Zero, UIntPtr.Zero, 0);
                             style = GetWindowLong(hWnd, GWL_STYLE);
                             SetWindowLong(hWnd, GWL_STYLE, style & ~WS_CAPTION);
-                            PrintWindow(hWnd, hMemDC, 0);
+                            SendMessage(hWnd, WM_PAINT, hMemDC, IntPtr.Zero);
+                            UpdateWindow(hWnd);
+                            SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
                             PrintWindow(hWnd, hDC, 0);
 
-                            var success = BitBlt(hMemDC, 0, 0, bounds.Width, bounds.Height, hDC, 0, 0,
-                                SRCCOPY);
-                            IntPtr ihbitmap = unchecked((IntPtr)(long)(ulong)hbitmap);
-                            bitmap = Image.FromHbitmap(ihbitmap); //Create a managed Bitmap out of hbitmap
-                            SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
-
-                            SelectObject(hMemDC, hOld); //Select hOld into hMemDC (the previously replaced object), to leave hMemDC as found
+                            //SelectObject(hMemDC, hOld); //Select hOld into hMemDC (the previously replaced object), to leave hMemDC as found
                             DeleteObject(hbitmap); //Free hbitmap
                         }
                         DeleteDC(hMemDC); //Free hdcMem
                     }
                     ReleaseDC(hWnd, hDC); //Free hDC
+                    SendMessage(hWnd, WM_SETREDRAW, wparamtrue, IntPtr.Zero);
+                    UpdateWindow(hWnd);
                 }
             }
             catch (Exception ex)
@@ -246,6 +334,8 @@ namespace BenchMaestro
             }
             return bitmap;
         }
+
+
         private Bitmap CaptureWindow2(UIntPtr hWnd)
         {
             RECT region;
@@ -273,6 +363,14 @@ namespace BenchMaestro
         public Bitmap CaptureActiveWindow()
         {
             return CaptureWindow(GetForegroundWindow());
+        }
+        public UIntPtr GetActiveWindow()
+        {
+            return GetForegroundWindow();
+        }
+        public Bitmap CaptureThisWindow(UIntPtr hWnd)
+        {
+            return CaptureWindow(hWnd);
         }
 
         public Bitmap CaptureDesktop()

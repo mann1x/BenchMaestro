@@ -119,6 +119,7 @@ namespace BenchMaestro
 		public string MemAddrCmdSetup { get; set; }
 		public string MemCsOdtSetup { get; set; }
 		public string MemCkeSetup { get; set; }
+		public string CpuVtt { get; set; }
 
 		private int EmptyTags()
 		{
@@ -191,6 +192,8 @@ namespace BenchMaestro
 			CPPCTagsLabel = "";
 			WindowsLabel = "";
 			HyperThreading = false;
+			CpuVtt = "";
+
 			MemPartNumbers = new();
 			MemVdimm = "";
 			MemVtt = "";
@@ -301,18 +304,18 @@ namespace BenchMaestro
 				ZenMainInit();
 
 				if (!MemPartNumbers.Any())
-                {
+				{
 					if (HWMonitor.computer.SMBios.MemoryDevices.Length > 0)
-                    {
+					{
 						foreach (var module in HWMonitor.computer.SMBios.MemoryDevices)
-                        {
+						{
 							if (module.Size > 0)
-                            {
+							{
 								MemPartNumbers.Add(
 									$"{module.BankLocator}: {module.PartNumber} ({module.Size / 1024}GB, {module.Speed}MHz)");
-                            }
-                        }
-                    }
+							}
+						}
+					}
 				}
 			}
 			catch (Exception ex)
@@ -630,14 +633,14 @@ namespace BenchMaestro
 				if (MemPartNumbers.Any())
 				{
 					foreach (var mempart in MemPartNumbers)
-                    {
+					{
 						if (_MemoryLabel.Length > 0) _MemoryLabel += $"\n";
 						_MemoryLabel += $"{mempart}";
 					}
 				}
 
 				if (MemVdimm.Length > 0)
-                {
+				{
 					if (_MemoryLabel.Length > 0) _MemoryLabel += $"\n";
 					_MemoryLabel += $"VDIMM: {MemVdimm}";
 					if (MemVtt.Length > 0)
@@ -676,8 +679,9 @@ namespace BenchMaestro
 
 					_CPULabel = "";
 
-					if (ZenSMUVer.Length > 0) _CPULabel += $"SMU Version: {ZenSMUVer} ";
-					if (ZenPTVersion > 0) _CPULabel += $"Power Table: 0x{ZenPTVersion:X} ";
+					if (CpuVtt.Length > 0) _CPULabel += $"VDD18: {CpuVtt} ";
+					if (ZenSMUVer.Length > 0) _CPULabel += $"SMU: v{ZenSMUVer} ";
+					if (ZenPTVersion > 0) _CPULabel += $"PT: 0x{ZenPTVersion:X} ";
 
 					if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
 
@@ -1051,7 +1055,7 @@ namespace BenchMaestro
 					IsCpuEnabled = true,
 					IsGpuEnabled = false,
 					IsMemoryEnabled = false,
-					IsMotherboardEnabled = false,
+					IsMotherboardEnabled = true,
 					IsControllerEnabled = false,
 					IsNetworkEnabled = false,
 					IsStorageEnabled = false
@@ -1088,7 +1092,7 @@ namespace BenchMaestro
 							hybridflag = BitSlice(hybridreg, 15, 15);
 						}
 						if (_cpuid.Data.GetLength(0) >= 0x1A)
-                        {
+						{
 							coretypereg = _cpuid.Data[0x1A, 0];
 							coretype = BitSlice(coretypereg, 24, 31);
 						}
@@ -1099,7 +1103,7 @@ namespace BenchMaestro
 						}
 					}
 					catch (Exception ex)
-                    {
+					{
 						Trace.WriteLine($" Error Reading Hybrid/Coretype: {ex}");
 						hybridreg = 3;
 						coretypereg = 0;
@@ -1184,7 +1188,7 @@ namespace BenchMaestro
 				}
 				
 				if (IntelHybrid)
-                {
+				{
 					string pcoresstr = String.Join(", ", Pcores.ToArray());
 					string plogicalsstr = String.Join(", ", Plogicals.ToArray());
 					string ecoresstr = String.Join(", ", Ecores.ToArray());
@@ -1194,6 +1198,33 @@ namespace BenchMaestro
 					Trace.WriteLine($"E-Cores: {ecoresstr}");
 					Trace.WriteLine($"E-Logicals: {elogicalsstr}");
 				}
+
+				Trace.WriteLine($"Looking for CPU VTT");
+
+				foreach (IHardware hardware in HWMonitor.computer.Hardware)
+				{
+					foreach (IHardware subhardware in hardware.SubHardware)
+					{
+						foreach (ISensor sensor in subhardware.Sensors)
+						{
+							if (sensor.Name == "VTT" && hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage)
+							{
+								CpuVtt = $"{Math.Round((decimal)sensor.Value, 4)}V";
+								Trace.WriteLine($"Found CPU VTT {CpuVtt}");
+							}
+						}
+					}
+
+					foreach (ISensor sensor in hardware.Sensors)
+					{
+						if (sensor.Name == "VTT" && hardware.HardwareType == HardwareType.Motherboard && sensor.SensorType == SensorType.Voltage)
+						{
+							CpuVtt = $"{Math.Round((decimal)sensor.Value, 4)}V";
+							Trace.WriteLine($"Found CPU VTT {CpuVtt}");
+						}
+					}
+				}
+				Trace.WriteLine("\nCpuIdInit Done\n\n");
 			}
 			catch (Exception ex)
 			{
@@ -1330,7 +1361,7 @@ namespace BenchMaestro
 							Trace.WriteLine($"Zen SMU Type: {Zen.smu.SMU_TYPE}");
 						} 
 						else
-                        {
+						{
 							Trace.WriteLine($"ZenCore DLL: CPU not supported");
 						}
 
@@ -2184,15 +2215,15 @@ namespace BenchMaestro
 
 				// Get possible values (index) of a memory option in BIOS
 				/*pack = WMI.InvokeMethod(classInstance, "Getdvalues", "pack", "ID", 0x20007);
-                if (pack != null)
-                {
-                    uint[] DValuesBuffer = (uint[])pack.GetPropertyValue("DValuesBuffer");
-                    for (var i = 0; i < DValuesBuffer.Length; i++)
-                    {
-                        Debug.WriteLine("{0}", DValuesBuffer[i]);
-                    }
-                }
-                */
+				if (pack != null)
+				{
+					uint[] DValuesBuffer = (uint[])pack.GetPropertyValue("DValuesBuffer");
+					for (var i = 0; i < DValuesBuffer.Length; i++)
+					{
+						Debug.WriteLine("{0}", DValuesBuffer[i]);
+					}
+				}
+				*/
 
 
 				// Get function names with their IDs
@@ -2259,7 +2290,7 @@ namespace BenchMaestro
 				{
 					var sensor = AsusWmi.FindSensorByName("DRAM Voltage");
 					if (sensor != null)
-                    {
+					{
 						MemVdimm = sensor.Value;
 						Trace.WriteLine($"Zen ReadMemoryConfig VDIMM ASUSWMI {MemVdimm}");
 					}
@@ -2267,7 +2298,7 @@ namespace BenchMaestro
 
 				var vtt = Convert.ToSingle(Convert.ToDecimal(BMC.Config.MemVtt) / 1000);
 				if (vtt > 0)
-                {
+				{
 					MemVtt = $"{vtt:F4}V";
 					Trace.WriteLine($"Zen ReadMemoryConfig VTT BMC {MemVtt}");
 				}
@@ -2342,7 +2373,7 @@ namespace BenchMaestro
 		private void ReadTimings(uint offset = 0)
 		{
 			try
-            {
+			{
 				uint powerDown = Zen.ReadDword(offset | 0x5012C);
 				uint umcBase = Zen.ReadDword(offset | 0x50200);
 				uint bgsa0 = Zen.ReadDword(offset | 0x500D0);
@@ -2458,7 +2489,7 @@ namespace BenchMaestro
 		}
 
 		public void UpdateLiveCPUTemp(string _value)
-        {
+		{
 			LiveCPUTemp = _value.Length > 0 ? _value : "N/A";
 			//Trace.WriteLine($"{_value}");
 			OnChange("LiveCPUTemp");			

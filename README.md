@@ -34,6 +34,12 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.28 Alpha
+    - Add: CPU VDD18 (PLL) in CPU Information (thx PJVol)
+    - Fix: Threads benchmark columns resized during run
+    - Fix: Lost details in screenshot capture, hopefully (thx The_King, Veii, hahagu)
+    - Fix: More readable hyperlink font in credits (thx Veii)
+    - Fix: Focus main window on load and possibly lost Autoupdater window at boot
 - v1.0.27 Alpha
     - New: Benchmark details only captured if expanded
     - Fix: Lost details in screenshot capture

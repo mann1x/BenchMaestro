@@ -439,41 +439,49 @@
                             </TabItem.Header>
                             <TextBlock Margin="4 4 4 4" Grid.Row="12" Height="Auto">
                                 GPL-3.0 License - Free Open Source software by ManniX - <Hyperlink 
+                                    Foreground="LightSkyBlue"
                                 NavigateUri="https://www.overclock.net/members/mannix-ita.538195/"
                                 RequestNavigate="Hyperlink_RequestNavigate">
                                 OCN: ManniX-ITA</Hyperlink>
                             <LineBreak/>
                             GitHub Project: <Hyperlink 
+                                    Foreground="LightSkyBlue"
                                     NavigateUri="https://github.com/mann1x/BenchMaestro"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     github.com/mann1x/BenchMaestro</Hyperlink>
                             <LineBreak/>
                             Thanks for testing, colors and advice - <Hyperlink 
+                                    Foreground="LightSkyBlue"
                                     NavigateUri="https://www.overclock.net/members/veii.609138/"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     OCN: Veii</Hyperlink>
                             <LineBreak/>
                             Thanks for help, code, Zen CO - <Hyperlink 
+                                    Foreground="LightSkyBlue"
                                     NavigateUri="https://www.overclock.net/members/pjvol.622816/"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     OCN: PJVol</Hyperlink>
                             <LineBreak/>
-                            Thanks to Yuri for his efforts supporting the community - <Hyperlink 
+                            Thanks to Yuri for his efforts supporting the community - <Hyperlink
+                                    Foreground="LightSkyBlue"
                                     NavigateUri="https://www.patreon.com/1usmus/posts"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     Patreon: 1usmus</Hyperlink>
                             <LineBreak/>
                             Credits to Irusanov's Zentimings, ZenCore
                             GitHub Project: <Hyperlink 
+                                    Foreground="LightSkyBlue"
                                     NavigateUri="https://github.com/irusanov/ZenTimings"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     github.com/irusanov/ZenTimings</Hyperlink> - 
                             <Hyperlink 
+                                    Foreground="LightSkyBlue"
                                     NavigateUri="https://zentimings.protonrom.com/"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     Project Home</Hyperlink>
                             <LineBreak/>
                             <Hyperlink 
+                                    Foreground="LightSkyBlue"
                                     NavigateUri="https://www.flaticon.com/free-icons/running-man"
                                     RequestNavigate="Hyperlink_RequestNavigate">
                                     Running man icons created by mynamepong - Flaticon</Hyperlink>

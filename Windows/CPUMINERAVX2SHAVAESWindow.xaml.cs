@@ -91,7 +91,6 @@ namespace BenchMaestro
             SetValue(MinWidthProperty, Width);
             SetValue(MinHeightProperty, Height);
             WindowStartupLocation = WindowStartupLocation.CenterScreen;
-            //ClearValue(SizeToContentProperty);
 
             if (WindowSettings.Default.Initialized)
             {
@@ -124,9 +123,12 @@ namespace BenchMaestro
 
         private void Window_SizeChanged(object sender, EventArgs e)
         {
-            Trace.WriteLine($"SizeChanged");
-            if (WindowSettings.Default.Initialized && WindowIsInit) SaveWinPos();
-            UpdateLayout();
+            if (!App.bscreenshotdetails)
+            {
+                Trace.WriteLine($"SizeChanged");
+                if (WindowSettings.Default.Initialized && WindowIsInit) SaveWinPos();
+                UpdateLayout();
+            }
         }
 
 
@@ -513,7 +515,6 @@ namespace BenchMaestro
             }
         }
 
-
         public void UpdateMainStatus(string _msgstatus)
         {
             try
@@ -531,7 +532,20 @@ namespace BenchMaestro
                 Trace.WriteLine($"UpdateMainStatus Exception: {e}");
             }
         }
-
+        public void UpdateHeadersWidth()
+        {
+            try
+            {
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Module1.UpdateHeadersWidth2(this, scoreRun);
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"UpdateMonitoring Exception: {e}");
+            }
+        }
         public void StartBench()
         {
 
@@ -552,7 +566,8 @@ namespace BenchMaestro
                     UpdateRunSettings,
                     UpdateStarted,
                     UpdateRunStart,
-                    SetLiveBindings
+                    SetLiveBindings,
+                    UpdateHeadersWidth
                     );
                 App.InterlockBench = 0;
             }

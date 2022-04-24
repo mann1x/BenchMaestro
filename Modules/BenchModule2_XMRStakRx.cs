@@ -165,7 +165,8 @@ namespace BenchMaestro
                 Action UpdateRunSettings,
                 Action UpdateStarted,
                 Action UpdateRunStart,
-                Action<BenchScore, bool> SetLiveBindings
+                Action<BenchScore, bool> SetLiveBindings,
+                Action UpdateHeadersWidth
             )
         {
             try
@@ -564,6 +565,8 @@ namespace BenchMaestro
 
                     SetLiveBindings(_scoreRun, true);
 
+                    UpdateHeadersWidth();
+
                     while (App.benchrunning)
                     {
                         if (benchtoken.IsCancellationRequested)
@@ -616,6 +619,8 @@ namespace BenchMaestro
                     _sortrunlogicals = null;
 
                     UpdateMonitoring();
+
+                    UpdateHeadersWidth();
 
                     TimeSpan _postimespan = DateTime.Now - App.IterationPostimeTS;
                     App.IterationPostime = (int)_postimespan.TotalSeconds;

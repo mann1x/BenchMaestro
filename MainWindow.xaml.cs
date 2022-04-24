@@ -105,8 +105,8 @@ namespace BenchMaestro
             }
 
             SizeToContent = SizeToContent.WidthAndHeight;
-            SetValue(MinWidthProperty, Width);
-            SetValue(MinHeightProperty, Height);
+            SetValue(MinWidthProperty, ActualWidth);
+            SetValue(MinHeightProperty, ActualHeight);
             ClearValue(SizeToContentProperty);
 
             WinLoaded = true;
@@ -227,6 +227,11 @@ namespace BenchMaestro
                 BtnNewZenPT.Visibility = Visibility.Visible;
             }
 
+            UpdateLayout();
+
+            Activate();
+            Focus();
+
             AutoUpdater.ReportErrors = false;
             AutoUpdater.InstalledVersion = new Version(App._versionInfo);
             AutoUpdater.DownloadPath = System.IO.Path.GetDirectoryName(Process.GetCurrentProcess().MainModule.FileName);
@@ -235,7 +240,6 @@ namespace BenchMaestro
             AutoUpdater.ParseUpdateInfoEvent += AutoUpdaterOnParseUpdateInfoEvent;
             AutoUpdater.Start(AutoUpdaterUrl);
 
-            UpdateLayout();
         }
         private void AutoUpdaterOnParseUpdateInfoEvent(ParseUpdateInfoEventArgs args)
         {
@@ -416,6 +420,21 @@ namespace BenchMaestro
         }
         private void ButtonReset(object sender, RoutedEventArgs e)
         {
+
+            Trace.WriteLine($" RESETTING CB THREADS");
+
+            t1.IsChecked = false;
+            t2.IsChecked = false;
+            t4.IsChecked = false;
+            t6.IsChecked = false;
+            t8.IsChecked = false;
+            t12.IsChecked = false;
+            t16.IsChecked = false;
+            t20.IsChecked = false;
+            t24.IsChecked = false;
+            t32.IsChecked = false;
+            tMax.IsChecked = false;
+
             WindowSettings.Default.Reset();
             
             App.SettingsInit();
@@ -651,8 +670,9 @@ namespace BenchMaestro
         private void TabItemEnter(object sender, RoutedEventArgs e)
         {
             SizeToContent = SizeToContent.WidthAndHeight;
-            SetValue(MinWidthProperty, Width);
-            SetValue(MinHeightProperty, Height);
+            SetValue(MinWidthProperty, ActualWidth);
+            SetValue(MinHeightProperty, ActualHeight);
+            ClearValue(SizeToContentProperty);
         }
         private void ButtonLogsFolder(object sender, RoutedEventArgs e)
         {

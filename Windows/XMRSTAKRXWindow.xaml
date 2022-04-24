@@ -77,7 +77,7 @@
                         <RowDefinition Height="*"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
-                    <ContentControl  x:Name="LoadingCircle" ContentTemplate="{DynamicResource {x:Static adonisUi:Templates.LoadingCircle}}" Grid.Column="0" Grid.RowSpan="2"
+                <ContentControl  x:Name="LoadingCircle" ContentTemplate="{DynamicResource {x:Static adonisUi:Templates.LoadingCircle}}" Grid.Column="0" Grid.RowSpan="2"
                         Foreground="{DynamicResource {x:Static adonisUi:Brushes.ForegroundBrush}}"
                         Width="30"
                         Height="30"

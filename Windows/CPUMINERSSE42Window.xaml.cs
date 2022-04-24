@@ -125,8 +125,12 @@ namespace BenchMaestro
 
         private void Window_SizeChanged(object sender, EventArgs e)
         {
-            if (WindowSettings.Default.Initialized && WindowIsInit) SaveWinPos();
-            UpdateLayout();
+            if (!App.bscreenshotdetails)
+            {
+                Trace.WriteLine($"SizeChanged");
+                if (WindowSettings.Default.Initialized && WindowIsInit) SaveWinPos();
+                UpdateLayout();
+            }
         }
 
 
@@ -143,25 +147,27 @@ namespace BenchMaestro
         }
         private void SaveWinPos()
         {
-
-            if (WindowState == WindowState.Maximized)
+            if (!App.bscreenshot)
             {
-                WindowSettings.Default.Top = RestoreBounds.Top;
-                WindowSettings.Default.Left = RestoreBounds.Left;
-                WindowSettings.Default.Height = RestoreBounds.Height;
-                WindowSettings.Default.Width = RestoreBounds.Width;
-                WindowSettings.Default.Maximized = true;
+                if (WindowState == WindowState.Maximized)
+                {
+                    WindowSettings.Default.Top = RestoreBounds.Top;
+                    WindowSettings.Default.Left = RestoreBounds.Left;
+                    WindowSettings.Default.Height = RestoreBounds.Height;
+                    WindowSettings.Default.Width = RestoreBounds.Width;
+                    WindowSettings.Default.Maximized = true;
+                }
+                else
+                {
+                    WindowSettings.Default.Top = Top;
+                    WindowSettings.Default.Left = Left;
+                    WindowSettings.Default.Height = Height;
+                    WindowSettings.Default.Width = Width;
+                    WindowSettings.Default.Maximized = false;
+                }
+                WindowSettings.Default.Save();
+                Trace.WriteLine($"Saving Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
             }
-            else
-            {
-                WindowSettings.Default.Top = Top;
-                WindowSettings.Default.Left = Left;
-                WindowSettings.Default.Height = Height;
-                WindowSettings.Default.Width = Width;
-                WindowSettings.Default.Maximized = false;
-            }
-            WindowSettings.Default.Save();
-            Trace.WriteLine($"Saving Window Position {WindowSettings.Default.Top} {WindowSettings.Default.Left} {WindowSettings.Default.Height} {WindowSettings.Default.Width} {WindowSettings.Default.Maximized}");
         }
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
@@ -529,6 +535,20 @@ namespace BenchMaestro
                 Trace.WriteLine($"UpdateMainStatus Exception: {e}");
             }
         }
+        public void UpdateHeadersWidth()
+        {
+            try
+            {
+                Dispatcher.Invoke((Action)(() =>
+                {
+                    Module1.UpdateHeadersWidth2(this, scoreRun);
+                }));
+            }
+            catch (Exception e)
+            {
+                Trace.WriteLine($"UpdateMonitoring Exception: {e}");
+            }
+        }
 
         public void StartBench()
         {
@@ -550,7 +570,8 @@ namespace BenchMaestro
                     UpdateRunSettings,
                     UpdateStarted,
                     UpdateRunStart,
-                    SetLiveBindings
+                    SetLiveBindings,
+                    UpdateHeadersWidth
                     );
                 App.InterlockBench = 0;
             }
