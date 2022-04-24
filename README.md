@@ -34,6 +34,8 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.29 Alpha
+    - Fix: Hopefully for good AutoUpdater not showing at startup
 - v1.0.28 Alpha
     - Add: CPU VDD18 (PLL) in CPU Information (thx PJVol)
     - Fix: Threads benchmark columns resized during run
