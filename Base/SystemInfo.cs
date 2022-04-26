@@ -62,9 +62,9 @@ namespace BenchMaestro
 		public int ZenTDC { get; set; }
 		public int ZenEDC { get; set; }
 		public int ZenTHM { get; set; }
-		public int ZenFCLK { get; set; }
-		public int ZenUCLK { get; set; }
-		public int ZenMCLK { get; set; }
+		public double ZenFCLK { get; set; }
+		public double ZenUCLK { get; set; }
+		public double ZenMCLK { get; set; }
 		public int ZenVDDP { get; set; }
 		public int ZenVCCD { get; set; }
 		public int ZenVIOD { get; set; }
@@ -120,6 +120,9 @@ namespace BenchMaestro
 		public string MemCsOdtSetup { get; set; }
 		public string MemCkeSetup { get; set; }
 		public string CpuVtt { get; set; }
+		public double CpuBusClock { get; set; }
+		public bool CpuSHAExt { get; set; }
+		public bool CpuVAESExt { get; set; }
 
 		private int EmptyTags()
 		{
@@ -193,6 +196,7 @@ namespace BenchMaestro
 			WindowsLabel = "";
 			HyperThreading = false;
 			CpuVtt = "";
+			CpuBusClock = 0;
 
 			MemPartNumbers = new();
 			MemVdimm = "";
@@ -222,6 +226,9 @@ namespace BenchMaestro
 			Ecores = new();
 			Plogicals = new();
 			Elogicals = new();
+
+			CpuSHAExt = false;
+			CpuVAESExt = false;
 
 			try
 			{
@@ -420,9 +427,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (int)Zen.powerTable.Table[74];
-				ZenUCLK = (int)Zen.powerTable.Table[78];
-				ZenMCLK = (int)Zen.powerTable.Table[82];
+				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -434,9 +441,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (int)Zen.powerTable.Table[74];
-				ZenUCLK = (int)Zen.powerTable.Table[78];
-				ZenMCLK = (int)Zen.powerTable.Table[82];
+				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -448,9 +455,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (int)Zen.powerTable.Table[74];
-				ZenUCLK = (int)Zen.powerTable.Table[78];
-				ZenMCLK = (int)Zen.powerTable.Table[82];
+				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -462,9 +469,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (int)Zen.powerTable.Table[74];
-				ZenUCLK = (int)Zen.powerTable.Table[78];
-				ZenMCLK = (int)Zen.powerTable.Table[82];
+				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -476,9 +483,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[8];
 				ZenTHM = (int)Zen.powerTable.Table[16];
 				ZenEDC = (int)Zen.powerTable.Table[12];
-				ZenFCLK = (int)Zen.powerTable.Table[409];
-				ZenUCLK = (int)Zen.powerTable.Table[410];
-				ZenMCLK = (int)Zen.powerTable.Table[411];
+				ZenFCLK = (double)(Zen.powerTable.Table[409] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[410] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[411] / 100 * Math.Round(CpuBusClock, 2));
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[565] * 1000);
 			}
@@ -488,9 +495,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (int)Zen.powerTable.Table[70];
-				ZenUCLK = (int)Zen.powerTable.Table[74];
-				ZenMCLK = (int)Zen.powerTable.Table[78];
+				ZenFCLK = (double)(Zen.powerTable.Table[70] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[125] * 1000);
 				ZenVDDG = (int)(Zen.powerTable.Table[126] * 1000);
@@ -501,9 +508,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (int)Zen.powerTable.Table[70];
-				ZenUCLK = (int)Zen.powerTable.Table[74];
-				ZenMCLK = (int)Zen.powerTable.Table[78];
+				ZenFCLK = (double)(Zen.powerTable.Table[70] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[125] * 1000);
 				ZenVDDG = (int)(Zen.powerTable.Table[126] * 1000);
@@ -520,9 +527,9 @@ namespace BenchMaestro
 					ZenEDC = (int)Zen.powerTable.Table[8];
 				}
 				ZenTHM = (int)Zen.powerTable.Table[4];
-				ZenFCLK = (int)Zen.powerTable.Table[33];
-				ZenUCLK = (int)Zen.powerTable.Table[33];
-				ZenMCLK = (int)Zen.powerTable.Table[33];
+				ZenFCLK = (double)(Zen.powerTable.Table[33] / 100 * Math.Round(CpuBusClock, 2));
+				ZenUCLK = (double)(Zen.powerTable.Table[33] / 100 * Math.Round(CpuBusClock, 2));
+				ZenMCLK = (double)(Zen.powerTable.Table[33] / 100 * Math.Round(CpuBusClock, 2));
 			}
 			Trace.WriteLine($"ZenRefreshStatic done");
 			return true;
@@ -647,6 +654,13 @@ namespace BenchMaestro
 						_MemoryLabel += $" VTT: {MemVtt}";
 				}
 
+				if (ZenStates)
+				{
+					if (_MemoryLabel.Length > 0) _MemoryLabel += " ";
+					if (MEMCFG.Frequency > 0)
+						_MemoryLabel += $"Clock: {MEMCFG.Frequency} MHz";
+				}
+
 				if (_MemoryLabel.Length > 0) MemoryLabel = $"{_MemoryLabel}";
 				if (_MemoryLabel.Length == 0) MemoryLabel = "N/A";
 
@@ -663,7 +677,7 @@ namespace BenchMaestro
 
 					_CPULabel = "";
 
-					if (ZenMCLK > 0 || ZenFCLK > 0 || ZenUCLK > 0) _CPULabel += $"MCLK/FCLK/UCLK: {ZenMCLK}/{ZenFCLK}/{ZenUCLK} ";
+					if (ZenMCLK > 0 || ZenFCLK > 0 || ZenUCLK > 0) _CPULabel += $"MCLK/FCLK/UCLK: {ZenMCLK.ToString("0.##")}/{ZenFCLK.ToString("0.##")}/{ZenUCLK.ToString("0.##")} ";
 					if (ZenBoost > 0) _CPULabel += $"Boost Clock: {ZenBoost} MHz ";
 
 					if (_CPULabel.Length > 0) CPULabel += $"\n{_CPULabel}";
@@ -1050,6 +1064,10 @@ namespace BenchMaestro
 		{
 			try
 			{
+				Trace.WriteLine("");
+				Trace.WriteLine("CpuIdInit");
+				Trace.WriteLine("");
+
 				HWMonitor.computer = new Computer
 				{
 					IsCpuEnabled = true,
@@ -1071,7 +1089,15 @@ namespace BenchMaestro
 				string coretypestr = "";
 				uint avx512 = 0x0;
 				uint avx512reg = 0x0;
+				uint shaflag = 0x0;
+				uint vaesflag = 0x0;
+				string shastr = "";
+				string vaesstr = "";
 				string avx512str = "No";
+				string cpumanufacturer = HWMonitor.computer.SMBios.Processor.ManufacturerName;
+
+				Trace.WriteLine($"CPU Manufacturer: {cpumanufacturer}");
+				Trace.WriteLine("");
 
 				for (int j = 0; j < CPULogicalProcessors; j++)
 				{
@@ -1084,76 +1110,156 @@ namespace BenchMaestro
 					uint offset = LibreHardwareMonitor.Hardware.CPU.CpuId.CPUID_0;
 					uint offsetext = LibreHardwareMonitor.Hardware.CPU.CpuId.CPUID_EXT;
 
-					try
+					if (_cpuid.Vendor == LibreHardwareMonitor.Hardware.CPU.Vendor.Intel)
 					{
-						if (_cpuid.Data.GetLength(0) >= 0x7)
+						try
 						{
-							hybridreg = _cpuid.Data[0x7, 3];
-							hybridflag = BitSlice(hybridreg, 15, 15);
+							if (_cpuid.Data.GetLength(0) >= 0x7)
+							{
+								hybridreg = _cpuid.Data[0x7, 3];
+								hybridflag = BitSlice(hybridreg, 15, 15);
+								vaesflag = BitSlice(_cpuid.Data[0x7, 2], 9, 9);
+								shaflag = BitSlice(_cpuid.Data[0x7, 1], 29, 29);
+							}
+							if (_cpuid.Data.GetLength(0) >= 0x1A)
+							{
+								coretypereg = _cpuid.Data[0x1A, 0];
+								coretype = BitSlice(coretypereg, 24, 31);
+							}
+							if (_cpuid.Data.GetLength(0) >= 0xD)
+							{
+								avx512reg = _cpuid.Data[0xD, 3];
+								avx512 = BitSlice(hybridreg, 5, 5);
+							}
 						}
-						if (_cpuid.Data.GetLength(0) >= 0x1A)
+						catch (Exception ex)
 						{
-							coretypereg = _cpuid.Data[0x1A, 0];
-							coretype = BitSlice(coretypereg, 24, 31);
+							Trace.WriteLine($" Error Reading Hybrid/Coretype: {ex}");
+							hybridreg = 3;
+							coretypereg = 0;
 						}
-						if (_cpuid.Data.GetLength(0) >= 0xD)
+						switch (hybridflag)
 						{
-							avx512reg = _cpuid.Data[0xD, 3];
-							avx512 = BitSlice(hybridreg, 5, 5);
+							case 0:
+								hybridstr = "No";
+								break;
+							case 1:
+								IntelHybrid = true;
+								hybridstr = "Yes";
+								break;
+							default:
+								hybridstr = "Unknown";
+								break;
 						}
+						switch (coretype)
+						{
+							case 0x20:
+								if (!Ecores.Contains(ProcessorInfo.PhysicalCore(j)))
+									Ecores.Add(ProcessorInfo.PhysicalCore(j));
+								Elogicals.Add(j + 1);
+								coretypestr = "E-Core";
+								break;
+							case 0x40:
+								if (!Pcores.Contains(ProcessorInfo.PhysicalCore(j)))
+									Pcores.Add(ProcessorInfo.PhysicalCore(j));
+								Plogicals.Add(j + 1);
+								coretypestr = "P-Core";
+								break;
+							default:
+								coretypestr = "Unknown";
+								break;
+						}
+						switch (avx512)
+						{
+							case 0:
+								avx512str = "No";
+								break;
+							case 1:
+								IntelAVX512 = true;
+								avx512str = "Yes";
+								break;
+							default:
+								avx512str = "Unknown";
+								break;
+						}
+						switch (shaflag)
+						{
+							case 0:
+								shastr = "No";
+								break;
+							case 1:
+								CpuSHAExt = true;
+								shastr = "Yes";
+								break;
+							default:
+								shastr = "Unknown";
+								break;
+						}
+						switch (vaesflag)
+						{
+							case 0:
+								vaesstr = "No";
+								break;
+							case 1:
+								CpuVAESExt = true;
+								vaesstr = "Yes";
+								break;
+							default:
+								vaesstr = "Unknown";
+								break;
+						}
+						Trace.WriteLine($" Hybrid: [{hybridstr}] CoreType: [{coretypestr}] AVX-512: [{avx512str}] SHA: [{shastr}] VAES: [{vaesstr}]");
 					}
-					catch (Exception ex)
+					if (_cpuid.Vendor == LibreHardwareMonitor.Hardware.CPU.Vendor.AMD)
 					{
-						Trace.WriteLine($" Error Reading Hybrid/Coretype: {ex}");
-						hybridreg = 3;
-						coretypereg = 0;
+						try
+						{
+							if (_cpuid.Data.GetLength(0) >= 0x7)
+							{
+								if (_cpuid.Family == 0x17 || _cpuid.Family == 0x19)
+								{
+									shaflag = BitSlice(_cpuid.Data[0x7, 1], 29, 29);
+								}
+								if (_cpuid.Family == 0x19)
+								{
+									vaesflag = BitSlice(_cpuid.Data[0x7, 2], 9, 9);
+								}
+							}
+						}
+						catch (Exception ex)
+						{
+							Trace.WriteLine($" Error Reading SHA/VAES: {ex}");
+							shaflag = 3;
+							vaesflag = 3;
+						}
+						switch (shaflag)
+						{
+							case 0:
+								shastr = "No";
+								break;
+							case 1:
+								CpuSHAExt = true;
+								shastr = "Yes";
+								break;
+							default:
+								shastr = "Unknown";
+								break;
+						}
+						switch (vaesflag)
+						{
+							case 0:
+								vaesstr = "No";
+								break;
+							case 1:
+								CpuVAESExt = true;
+								vaesstr = "Yes";
+								break;
+							default:
+								vaesstr = "Unknown";
+								break;
+						}
+						Trace.WriteLine($" Family: {_cpuid.Family:X}h SHA: [{shastr}] VAES: [{vaesstr}]");
 					}
-					switch (hybridflag)
-					{
-						case 0:
-							hybridstr = "No";
-							break;
-						case 1:
-							IntelHybrid = true;
-							hybridstr = "Yes";
-							break;
-						default:
-							hybridstr = "Unknown";
-							break;
-					}
-					switch (coretype)
-					{
-						case 0x20:
-							if (!Ecores.Contains(ProcessorInfo.PhysicalCore(j)))
-								Ecores.Add(ProcessorInfo.PhysicalCore(j));
-							Elogicals.Add(j + 1);
-							coretypestr = "E-Core";
-							break;
-						case 0x40:
-							if (!Pcores.Contains(ProcessorInfo.PhysicalCore(j)))
-								Pcores.Add(ProcessorInfo.PhysicalCore(j));
-							Plogicals.Add(j + 1);
-							coretypestr = "P-Core";
-							break;
-						default:
-							coretypestr = "Unknown";
-							break;
-					}
-					switch (avx512)
-					{
-						case 0:
-							avx512str = "No";
-							break;
-						case 1:
-							IntelAVX512 = true;
-							avx512str = "Yes";
-							break;
-						default:
-							avx512str = "Unknown";
-							break;
-					}
-					Trace.WriteLine($" Hybrid: [{hybridstr}] CoreType: [{coretypestr}] AVX-512: [{avx512str}]");
-
 					Trace.WriteLine("");
 					Trace.WriteLine(" Function  EAX       EBX       ECX       EDX");
 					string _line = "";
@@ -1224,7 +1330,9 @@ namespace BenchMaestro
 						}
 					}
 				}
-				Trace.WriteLine("\nCpuIdInit Done\n\n");
+				Trace.WriteLine("");
+				Trace.WriteLine("CpuIdInit Done");
+				Trace.WriteLine("");
 			}
 			catch (Exception ex)
 			{
@@ -1374,6 +1482,10 @@ namespace BenchMaestro
 					if (smucheck)
 					{
 						ZenStates = true;
+
+						CpuBusClock = Zen.GetCpuBusClock();
+
+						if (CpuBusClock <= 0) CpuBusClock = 100;
 
 						ReadMemoryModulesInfo();
 
@@ -1576,7 +1688,7 @@ namespace BenchMaestro
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, 26);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 127);
 								App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 128);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 31);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUClock, -1);
@@ -1652,7 +1764,7 @@ namespace BenchMaestro
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 525);
 								App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 526);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
@@ -1715,7 +1827,7 @@ namespace BenchMaestro
 								int _vsoc = (int)Zen.powerTable.Table[45] == 0 ? 44 : 45;
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 347);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
@@ -1780,7 +1892,7 @@ namespace BenchMaestro
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 544);
 								App.hwsensors.InitZen(HWSensorName.CCD2L3Temp, 545);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
@@ -1802,10 +1914,12 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 284 + _coreoffset, _core);
 								}
+
 								for (int _cpu = 1; _cpu <= CPULogicalProcessors; ++_cpu)
 								{
 									App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 								}
+
 								Trace.WriteLine($"Configuring Zen Source done");
 
 							}
@@ -1843,7 +1957,7 @@ namespace BenchMaestro
 								int _vsoc = (int)Zen.powerTable.Table[45] == 0 ? 44 : 45;
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 358);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 70);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 41);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
@@ -1906,7 +2020,7 @@ namespace BenchMaestro
 								int _vsoc = (int)Zen.powerTable.Table[103] == 0 ? 102 : 103;
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 386);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 78);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 99);
 								//App.hwsensors.InitZen(HWSensorName.CPUTemp, 17);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
@@ -1969,7 +2083,7 @@ namespace BenchMaestro
 								int _vsoc = (int)Zen.powerTable.Table[45] == 0 ? 44 : 45;
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 303);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 66);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
 								//App.hwsensors.InitZen(HWSensorName.CPUTemp, 5);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
@@ -2033,7 +2147,7 @@ namespace BenchMaestro
 								int _vsoc = (int)Zen.powerTable.Table[45] == 0 ? 44 : 45;
 								App.hwsensors.InitZen(HWSensorName.SOCVoltage, _vsoc);
 								App.hwsensors.InitZen(HWSensorName.CCD1L3Temp, 459);
-								App.hwsensors.InitZen(HWSensorName.CPUFSB, 66);
+								App.hwsensors.InitZen(HWSensorName.CPUFSB, -1);
 								App.hwsensors.InitZen(HWSensorName.CPUVoltage, 40);
 								App.hwsensors.InitZen(HWSensorName.CPUTemp, -1);
 
@@ -2060,6 +2174,19 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPULogicalsLoad, -1, _cpu);
 								}
 								Trace.WriteLine($"Configuring Zen Source done");
+							}
+
+							float _cpuVcore, _cpuVsoc;
+							(_cpuVcore, _cpuVsoc) = Zen.GetCpuVcc();
+							//Trace.WriteLine($"_cpuVcore: {_cpuVcore} _cpuVsoc: {_cpuVsoc}");
+
+							if (_cpuVcore > 0)
+							{
+								App.hwsensors.InitZen(HWSensorName.CPUVoltage, -1);
+							}
+							if (_cpuVsoc > 0)
+							{
+								App.hwsensors.InitZen(HWSensorName.SOCVoltage, -1);
 							}
 
 							for (int it = 0; it < Zen.powerTable.Table.Length; ++it)
@@ -2412,6 +2539,10 @@ namespace BenchMaestro
 					MEMCFG.Frequency = freqFromRatio;
 				}
 
+				if (CpuBusClock > 0)
+				{
+					MEMCFG.Frequency = MEMCFG.Frequency / 100 * (float)Math.Round(CpuBusClock, 2);
+				}
 
 				MEMCFG.BGS = bgs0 == 0x87654321 && bgs1 == 0x87654321 ? "Disabled" : "Enabled";
 				MEMCFG.BGSAlt = Zen.utils.GetBits(bgsa0, 4, 7) > 0 || Zen.utils.GetBits(bgsa1, 4, 7) > 0

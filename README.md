@@ -34,6 +34,12 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.32 Alpha
+    - Add: Bus Clock, vCore and vSOC voltages monitoring for Zen via ZenCore
+    - Add: Live vCore display for Zen
+    - Add: Add Memory clock for Zen in Info
+    - Add: Detection of SHA and VAES Extensions for AMD and Intel
+    - Fix: FCLK/UCLK/MCLK and Memory frequency real speeds reported, normalized with Bus Clock for Zen
 - v1.0.31 Alpha
     - Fix: Again AutoUpdater not showing at startup
 - v1.0.30 Alpha

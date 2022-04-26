@@ -72,7 +72,7 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUAvgTemp, 1)}", FontSize = 17, FontWeight = FontWeights.Bold, Foreground = App.tempbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUAvgTemp, 1).ToString("0.0")}", FontSize = 17, FontWeight = FontWeights.Bold, Foreground = App.tempbrush });
                     _tb1a.Inlines.Add(new Run { Text = $" {degrees} ", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -80,7 +80,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUMaxTemp, 1)} °C", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUMaxTemp, 1).ToString("0.0")} °C", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -99,7 +99,7 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"Cores: {Math.Round(App.CurrentRun.CoresAvgTemp, 1)}", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"Cores: {Math.Round(App.CurrentRun.CoresAvgTemp, 1).ToString("0.0")}", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
                     _tb1a.Inlines.Add(new Run { Text = $" {degrees} ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.tempbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -107,7 +107,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CoresMaxTemp, 1)} °C", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CoresMaxTemp, 1).ToString("0.0")} °C", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -283,7 +283,7 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUAvgPower, 1)}", FontSize = 17, FontWeight = FontWeights.Bold, Foreground = App.powerbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUAvgPower, 1).ToString("0.0")}", FontSize = 17, FontWeight = FontWeights.Bold, Foreground = App.powerbrush });
                     _tb1a.Inlines.Add(new Run { Text = " W ", FontSize = 14, FontWeight = FontWeights.Normal, Foreground = App.powerbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -293,7 +293,7 @@ namespace BenchMaestro
                     if (App.CurrentRun.CPUMaxPower > 0)
                     {
                         TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                        _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUMaxPower, 1)} W", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                        _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUMaxPower, 1).ToString("0.0")} W", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                         Grid.SetColumn(_tb1b, 1);
                         Grid.SetRow(_tb1b, _row);
                         _tb1b.TextAlignment = TextAlignment.Left;
@@ -313,7 +313,7 @@ namespace BenchMaestro
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"Cores: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.powerbrush });
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CoresAvgPower, 1)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.powerbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CoresAvgPower, 1).ToString("0.0")}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.powerbrush });
                     _tb1a.Inlines.Add(new Run { Text = " W ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.powerbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -321,7 +321,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CoresMaxPower, 1)} W", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CoresMaxPower, 1).ToString("0.0")} W", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -341,7 +341,7 @@ namespace BenchMaestro
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"vCore: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUAvgVoltage, 3)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUAvgVoltage, 3).ToString("0.000")}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
                     _tb1a.Inlines.Add(new Run { Text = " V ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -349,7 +349,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUMaxVoltage, 3)} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUMaxVoltage, 3).ToString("0.000")} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -369,7 +369,7 @@ namespace BenchMaestro
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"VIDs: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CoresAvgVoltage, 3)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CoresAvgVoltage, 3).ToString("0.000")}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
                     _tb1a.Inlines.Add(new Run { Text = " V ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -377,7 +377,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CoresMaxVoltage, 3)} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CoresMaxVoltage, 3).ToString("0.000")} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -397,7 +397,7 @@ namespace BenchMaestro
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"SoC: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.SOCAvgVoltage, 3)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.SOCAvgVoltage, 3).ToString("0.000")}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
                     _tb1a.Inlines.Add(new Run { Text = " V ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -405,7 +405,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.SOCMaxVoltage, 3)} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.SOCMaxVoltage, 3).ToString("0.000")} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -437,7 +437,7 @@ namespace BenchMaestro
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"CPU SA: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUSAAvgVoltage, 3)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUSAAvgVoltage, 3).ToString("0.000")}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
                     _tb1a.Inlines.Add(new Run { Text = " V ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -445,7 +445,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUSAMaxVoltage, 3)} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUSAMaxVoltage, 3).ToString("0.000")} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -465,7 +465,7 @@ namespace BenchMaestro
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
                     _tb1a.Inlines.Add(new Run { Text = $"CPU I/O: ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
-                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUIOAvgVoltage, 3)}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CPUIOAvgVoltage, 3).ToString("0.000")}", FontSize = 14, FontWeight = FontWeights.Bold, Foreground = App.voltbrush });
                     _tb1a.Inlines.Add(new Run { Text = " V ", FontSize = 13, FontWeight = FontWeights.Normal, Foreground = App.voltbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -473,7 +473,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush1, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUIOMaxVoltage, 3)} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CPUIOMaxVoltage, 3).ToString("0.000")} V", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -499,7 +499,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CCDSAvgTemp, 1)} {degrees}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{Math.Round(App.CurrentRun.CCDSAvgTemp, 1).ToString("0.0")} {degrees}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -519,7 +519,7 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"CCD1: {Math.Round(App.CurrentRun.CCD1AvgTemp, 1)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"CCD1: {Math.Round(App.CurrentRun.CCD1AvgTemp, 1).ToString("0.0")}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     _tb1a.Inlines.Add(new Run { Text = $" {degrees} ", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -527,7 +527,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CCD1MaxTemp, 1)} {degrees}", FontSize = 11, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CCD1MaxTemp, 1).ToString("0.0")} {degrees}", FontSize = 11, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -546,7 +546,7 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $"CCD2: {Math.Round(App.CurrentRun.CCD2AvgTemp, 1)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $"CCD2: {Math.Round(App.CurrentRun.CCD2AvgTemp, 1).ToString("0.0")}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     _tb1a.Inlines.Add(new Run { Text = $" {degrees} ", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -554,7 +554,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CCD2MaxTemp, 1)} {degrees}", FontSize = 11, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.CCD2MaxTemp, 1).ToString("0.0")} {degrees}", FontSize = 11, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;
@@ -573,7 +573,7 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto });
 
                     TextBlock _tb1a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1a.Inlines.Add(new Run { Text = $" L3: {Math.Round(App.CurrentRun.L3AvgTemp, 1)}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
+                    _tb1a.Inlines.Add(new Run { Text = $" L3: {Math.Round(App.CurrentRun.L3AvgTemp, 1).ToString("0.0")}", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     _tb1a.Inlines.Add(new Run { Text = $" {degrees} ", FontSize = 12, FontWeight = FontWeights.Normal, Foreground = App.additionbrush });
                     Grid.SetColumn(_tb1a, 0);
                     Grid.SetRow(_tb1a, _row);
@@ -581,7 +581,7 @@ namespace BenchMaestro
                     _gridblock.Children.Add(_tb1a);
 
                     TextBlock _tb1b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
-                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.L3MaxTemp, 1)} {degrees}", FontSize = 11, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
+                    _tb1b.Inlines.Add(new Run { Text = $"{maxchar} {Math.Round(App.CurrentRun.L3MaxTemp, 1).ToString("0.0")} {degrees}", FontSize = 11, FontWeight = FontWeights.Normal, Foreground = App.maxbrush });
                     Grid.SetColumn(_tb1b, 1);
                     Grid.SetRow(_tb1b, _row);
                     _tb1b.TextAlignment = TextAlignment.Left;

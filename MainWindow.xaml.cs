@@ -205,8 +205,6 @@ namespace BenchMaestro
             if (!Avx.IsSupported)
             {
                 BtnBenchCPUMINERAVX.Visibility = Visibility.Collapsed;
-                BtnBenchCPUMINERAVX2SHA.Visibility = Visibility.Collapsed;
-                BtnBenchCPUMINERAVX2SHAVAES.Visibility = Visibility.Collapsed;
             }
             if (!Avx2.IsSupported)
             {
@@ -222,6 +220,17 @@ namespace BenchMaestro
             {
                 BtnBenchCPUMINERAVX512.Visibility = Visibility.Collapsed;
                 BtnBenchCPUMINERAVX512SHAVAES.Visibility = Visibility.Collapsed;
+            }
+
+            if (!App.systemInfo.CpuVAESExt && !App.systemInfo.CpuSHAExt)
+            {
+                BtnBenchCPUMINERAVX2SHAVAES.Visibility = Visibility.Collapsed;
+                BtnBenchCPUMINERAVX512SHAVAES.Visibility = Visibility.Collapsed;
+            }
+
+            if (!App.systemInfo.CpuSHAExt)
+            {
+                BtnBenchCPUMINERAVX2SHA.Visibility = Visibility.Collapsed;
             }
 
             if (App.ZenPTSubject.Length > 0)

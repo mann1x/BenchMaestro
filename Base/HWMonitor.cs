@@ -132,14 +132,6 @@ namespace BenchMaestro
             computer.Open();
         }
 
-        public static void InitZenSensors()
-        {
-            foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Source == HWSensorSource.Zen && sensorItem.Enabled == true))
-            {
-                
-            }
-
-        }
         public static void UpdateZenSensors()
         {
             try
@@ -148,6 +140,7 @@ namespace BenchMaestro
 
                 float _livetdc = 0;
                 float _liveedc = 0;
+                float _livevcore = 0;
 
                 if (!_refreshpt)
                 {
@@ -155,27 +148,49 @@ namespace BenchMaestro
                     return;
                 }
 
+                float _cpuVcore, _cpuVsoc;
+                (_cpuVcore, _cpuVsoc) = App.systemInfo.Zen.GetCpuVcc();
+                //Trace.WriteLine($"_cpuVcore: {_cpuVcore} _cpuVsoc: {_cpuVsoc}");
+
+                float _cpuBusClock;
+                _cpuBusClock = App.systemInfo.Zen.GetCpuBusClock();
+                //Trace.WriteLine($"_cpuBusClock: {_cpuBusClock}");
+
+                if (_cpuVcore > 0)
+                {
+                    App.hwsensors.UpdateZenSensor(HWSensorName.CPUVoltage, _cpuVcore);
+                    _livevcore = _cpuVcore;
+                }
+                if (_cpuVsoc > 0)
+                {
+                    App.hwsensors.UpdateZenSensor(HWSensorName.SOCVoltage, _cpuVsoc);
+                }
+                if (_cpuBusClock > 0)
+                {
+                    App.hwsensors.UpdateZenSensor(HWSensorName.CPUFSB, _cpuBusClock);
+                }
+
                 foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Source == HWSensorSource.Zen && sensorItem.Enabled && sensorItem.ZenPTOffset >= 0))
                 {
-                    if (_sensor.SensorValues == HWSensorValues.Single)
-                    {
-                        //Trace.WriteLine($"Zen Sensor update {_sensor.Name} PTOffset={_sensor.ZenPTOffset}");
-                        float _value = App.systemInfo.Zen.powerTable.Table[_sensor.ZenPTOffset] * _sensor.ZenMulti;
-                        _sensor.Values.Add(_value);
-                        if (_sensor.Name == HWSensorName.CPUTDC) _livetdc = _value;
-                        if (_sensor.Name == HWSensorName.CPUEDC) _liveedc = _value;
-                        //Trace.WriteLine($"Zen Sensor update {_sensor.Name}={_sensor.Values.Last()}");
-                    }
-                    else
-                    {
-                        foreach (HWSensorMultiValues _sensorValues in _sensor.MultiValues)
+                        if (_sensor.SensorValues == HWSensorValues.Single)
                         {
-                            //Trace.WriteLine($"Zen Multi Sensor update {_sensor.Name} PTOffset={_sensorValues.ZenPTOffset}");
-                            _sensorValues.Values.Add(App.systemInfo.Zen.powerTable.Table[_sensorValues.ZenPTOffset] * _sensor.ZenMulti);
-                            //Trace.WriteLine($"Zen Sensor update {_sensor.Name}={_sensorValues.Values.Last()}");
-
+                            //Trace.WriteLine($"Zen Sensor update {_sensor.Name} PTOffset={_sensor.ZenPTOffset}");
+                            float _value = App.systemInfo.Zen.powerTable.Table[_sensor.ZenPTOffset] * _sensor.ZenMulti;
+                            _sensor.Values.Add(_value);
+                            if (_sensor.Name == HWSensorName.CPUTDC) _livetdc = _value;
+                            if (_sensor.Name == HWSensorName.CPUEDC) _liveedc = _value;
+                            //Trace.WriteLine($"Zen Sensor update {_sensor.Name}={_sensor.Values.Last()}");
                         }
-                    }
+                        else
+                        {
+                            foreach (HWSensorMultiValues _sensorValues in _sensor.MultiValues)
+                            {
+                                //Trace.WriteLine($"Zen Multi Sensor update {_sensor.Name} PTOffset={_sensorValues.ZenPTOffset}");
+                                _sensorValues.Values.Add(App.systemInfo.Zen.powerTable.Table[_sensorValues.ZenPTOffset] * _sensor.ZenMulti);
+                                //Trace.WriteLine($"Zen Sensor update {_sensor.Name}={_sensorValues.Values.Last()}");
+
+                            }
+                        }
                 }
 
                 foreach (HWSensorItem _sensor in App.hwsensors.Where(sensorItem => sensorItem.Name == HWSensorName.CPULogicalsLoad))
@@ -226,9 +241,10 @@ namespace BenchMaestro
 
                 float? _cpupower = App.hwsensors.GetValue(HWSensorName.CPUPower);
                 App.systemInfo.UpdateLiveCPUClock($"{Math.Round((double)_cpuload, 0)}% CPU Load");
-                App.systemInfo.UpdateLiveCPUTemp($"{Math.Round((double)_cputemp, 1)}°C");
+                App.systemInfo.UpdateLiveCPUTemp($"{Math.Round((double)_cputemp, 1).ToString("0.0")}°C");
                 App.systemInfo.UpdateLiveCPUPower($"{Math.Round((double)_cpupower, 0)}W");
                 string _liveadditional = "";
+                if (_livevcore > 0) _liveadditional += $"vCore: {Math.Round((double)_livevcore, 4).ToString("0.000")}V\n";
                 if (_livetdc > 0) _liveadditional += $"TDC: {Math.Round((double)_livetdc, 0)}A ";
                 if (_liveedc > 0) _liveadditional += $"EDC: {Math.Round((double)_liveedc, 0)}A ";
                 if (_liveadditional.Length > 0)
