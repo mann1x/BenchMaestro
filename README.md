@@ -34,6 +34,8 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.33 Alpha
+    - Fix: Clocks display issues
 - v1.0.32 Alpha
     - Add: Bus Clock, vCore and vSOC voltages monitoring for Zen via ZenCore
     - Add: Live vCore display for Zen

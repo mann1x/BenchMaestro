@@ -427,9 +427,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[74];
+				ZenUCLK = (int)Zen.powerTable.Table[78];
+				ZenMCLK = (int)Zen.powerTable.Table[82];
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -441,9 +441,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[74];
+				ZenUCLK = (int)Zen.powerTable.Table[78];
+				ZenMCLK = (int)Zen.powerTable.Table[82];
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -455,9 +455,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[74];
+				ZenUCLK = (int)Zen.powerTable.Table[78];
+				ZenMCLK = (int)Zen.powerTable.Table[82];
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -469,9 +469,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[82] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[74];
+				ZenUCLK = (int)Zen.powerTable.Table[78];
+				ZenMCLK = (int)Zen.powerTable.Table[82];
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[137] * 1000);
 				ZenVIOD = (int)(Zen.powerTable.Table[138] * 1000);
@@ -483,9 +483,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[8];
 				ZenTHM = (int)Zen.powerTable.Table[16];
 				ZenEDC = (int)Zen.powerTable.Table[12];
-				ZenFCLK = (double)(Zen.powerTable.Table[409] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[410] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[411] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[409];
+				ZenUCLK = (int)Zen.powerTable.Table[410];
+				ZenMCLK = (int)Zen.powerTable.Table[411];
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[565] * 1000);
 			}
@@ -495,9 +495,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (double)(Zen.powerTable.Table[70] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[70];
+				ZenUCLK = (int)Zen.powerTable.Table[74];
+				ZenMCLK = (int)Zen.powerTable.Table[78];
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[125] * 1000);
 				ZenVDDG = (int)(Zen.powerTable.Table[126] * 1000);
@@ -508,9 +508,9 @@ namespace BenchMaestro
 				ZenTDC = (int)Zen.powerTable.Table[2];
 				ZenTHM = (int)Zen.powerTable.Table[4];
 				ZenEDC = (int)Zen.powerTable.Table[8];
-				ZenFCLK = (double)(Zen.powerTable.Table[70] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[74] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[78] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[70];
+				ZenUCLK = (int)Zen.powerTable.Table[74];
+				ZenMCLK = (int)Zen.powerTable.Table[78];
 				ZenScalar = (int)Zen.GetPBOScalar();
 				ZenVDDP = (int)(Zen.powerTable.Table[125] * 1000);
 				ZenVDDG = (int)(Zen.powerTable.Table[126] * 1000);
@@ -527,10 +527,15 @@ namespace BenchMaestro
 					ZenEDC = (int)Zen.powerTable.Table[8];
 				}
 				ZenTHM = (int)Zen.powerTable.Table[4];
-				ZenFCLK = (double)(Zen.powerTable.Table[33] / 100 * Math.Round(CpuBusClock, 2));
-				ZenUCLK = (double)(Zen.powerTable.Table[33] / 100 * Math.Round(CpuBusClock, 2));
-				ZenMCLK = (double)(Zen.powerTable.Table[33] / 100 * Math.Round(CpuBusClock, 2));
+				ZenFCLK = (int)Zen.powerTable.Table[33];
+				ZenUCLK = (int)Zen.powerTable.Table[33];
+				ZenMCLK = (int)Zen.powerTable.Table[33];
 			}
+
+			if (ZenFCLK > 0 && CpuBusClock > 0) ZenFCLK = Math.Round(ZenFCLK / 100 * CpuBusClock, 0);
+			if (ZenUCLK > 0 && CpuBusClock > 0) ZenUCLK = Math.Round(ZenUCLK / 100 * CpuBusClock, 0);
+			if (ZenMCLK > 0 && CpuBusClock > 0) ZenMCLK = Math.Round(ZenMCLK / 100 * CpuBusClock, 0);
+
 			Trace.WriteLine($"ZenRefreshStatic done");
 			return true;
 		}
@@ -2541,7 +2546,7 @@ namespace BenchMaestro
 
 				if (CpuBusClock > 0)
 				{
-					MEMCFG.Frequency = MEMCFG.Frequency / 100 * (float)Math.Round(CpuBusClock, 2);
+					MEMCFG.Frequency = (float)Math.Round(MEMCFG.Frequency / 100 * CpuBusClock, 0);
 				}
 
 				MEMCFG.BGS = bgs0 == 0x87654321 && bgs1 == 0x87654321 ? "Disabled" : "Enabled";
