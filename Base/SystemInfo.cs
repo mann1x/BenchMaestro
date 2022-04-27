@@ -661,6 +661,7 @@ namespace BenchMaestro
 
 				if (ZenStates)
 				{
+					if (MemVdimm.Length < 1 && MemoryLabel.Length > 0) _MemoryLabel += $"\n";
 					if (_MemoryLabel.Length > 0) _MemoryLabel += " ";
 					if (MEMCFG.Frequency > 0)
 						_MemoryLabel += $"Clock: {MEMCFG.Frequency} MHz";
@@ -1488,9 +1489,13 @@ namespace BenchMaestro
 					{
 						ZenStates = true;
 
-						CpuBusClock = Zen.GetCpuBusClock();
+						Zen.RefreshSensors();
+
+						CpuBusClock = Zen.cpuBusClock;
 
 						if (CpuBusClock <= 0) CpuBusClock = 100;
+
+						double _bclkmulti = CpuBusClock / 100;
 
 						ReadMemoryModulesInfo();
 
@@ -1706,8 +1711,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 41 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 57 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 65 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 81 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 89 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 81 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 89 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 97 + _coreoffset, _core);
 								}
@@ -1786,8 +1791,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 169 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 185 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 201 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 249 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 265 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 249 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 265 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 281 + _coreoffset, _core);
 								}
@@ -1849,8 +1854,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 169 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 177 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 185 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 209 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 217 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 209 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 217 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 225 + _coreoffset, _core);
 								}
@@ -1914,8 +1919,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 172 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 188 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 204 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 252 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 268 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 252 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 268 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 284 + _coreoffset, _core);
 								}
@@ -1979,8 +1984,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 172 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 180 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 188 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 212 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 220 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 212 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 220 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 228 + _coreoffset, _core);
 								}
@@ -2042,8 +2047,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 200 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 208 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 216 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 240 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 248 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 240 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 248 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 256 + _coreoffset, _core);
 								}
@@ -2106,8 +2111,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 147 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 155 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 163 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 187 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 195 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 187 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 195 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 203 + _coreoffset, _core);
 								}
@@ -2169,8 +2174,8 @@ namespace BenchMaestro
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresPower, 147 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresVoltages, 163 + _coreoffset, _core);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresTemps, 179 + _coreoffset, _core);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 227 + _coreoffset, _core, 1000);
-									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 243 + _coreoffset, _core, 1000);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresClocks, 227 + _coreoffset, _core, 1000 * _bclkmulti);
+									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresEffClocks, 243 + _coreoffset, _core, 1000 * _bclkmulti);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresStretch, -1, _core, 1);
 									App.hwsensors.InitZenMulti(HWSensorName.CPUCoresC0, 259 + _coreoffset, _core);
 								}
@@ -2182,7 +2187,8 @@ namespace BenchMaestro
 							}
 
 							float _cpuVcore, _cpuVsoc;
-							(_cpuVcore, _cpuVsoc) = Zen.GetCpuVcc();
+							_cpuVcore = Zen.cpuVcore;
+							_cpuVsoc = Zen.cpuVsoc;
 							//Trace.WriteLine($"_cpuVcore: {_cpuVcore} _cpuVsoc: {_cpuVsoc}");
 
 							if (_cpuVcore > 0)
@@ -2626,46 +2632,74 @@ namespace BenchMaestro
 
 		public void UpdateLiveCPUTemp(string _value)
 		{
-			LiveCPUTemp = _value.Length > 0 ? _value : "N/A";
-			//Trace.WriteLine($"{_value}");
-			OnChange("LiveCPUTemp");			
+			try
+			{
+				LiveCPUTemp = _value.Length > 0 ? _value : "N/A";
+				//Trace.WriteLine($"{_value}");
+				OnChange("LiveCPUTemp");
+			}
+			catch { }
 		}
 		public void UpdateLiveCPUPower(string _value)
 		{
-			LiveCPUPower = _value.Length > 0 ? _value : "N/A";
-			//Trace.WriteLine($"{_value}");
-			OnChange("LiveCPUPower");
+			try
+			{
+				LiveCPUPower = _value.Length > 0 ? _value : "N/A";
+				//Trace.WriteLine($"{_value}");
+				OnChange("LiveCPUPower");
+			}
+			catch { }
 		}
 		public void UpdateLiveCPUClock(string _value)
 		{
-			LiveCPUClock = _value.Length > 0 ? _value : "N/A";
-			//Trace.WriteLine($"{_value}");
-			OnChange("LiveCPUClock");
+			try
+			{
+				LiveCPUClock = _value.Length > 0 ? _value : "N/A";
+				//Trace.WriteLine($"{_value}");
+				OnChange("LiveCPUClock");
+			}
+			catch { }
 		}
 		public void UpdateLiveCPUAdditional(string _value)
 		{
-			LiveCPUAdditional = _value.Length > 0 ? _value : "N/A";
-			//Trace.WriteLine($"{_value}");
-			OnChange("LiveCPUAdditional");
+			try
+			{
+				LiveCPUAdditional = _value.Length > 0 ? _value : "N/A";
+				//Trace.WriteLine($"{_value}");
+				OnChange("LiveCPUAdditional");
+			}
+			catch { }
 		}
 		public void UpdateLiveFinished(string _value)
 		{
-			LiveFinished = _value.Length > 0 ? _value : "N/A";
-			//Trace.WriteLine($"{_value}");
-			OnChange("LiveFinished");
+			try
+			{
+				LiveFinished = _value.Length > 0 ? _value : "N/A";
+				//Trace.WriteLine($"{_value}");
+				OnChange("LiveFinished");
+			}
+			catch { }
 		}
 		public void SetLastVersionOnServer(string _value)
 		{
-			LastVersionOnServer = _value.Length > 0 ? _value : "N/A";
-			//Trace.WriteLine($"{_value}");
-			OnChange("LastVersionOnServer");
+			try
+			{
+				LastVersionOnServer = _value.Length > 0 ? _value : "N/A";
+				//Trace.WriteLine($"{_value}");
+				OnChange("LastVersionOnServer");
+			}
+			catch { }
 		}
 		protected void OnChange(string info)
 		{
-			if (PropertyChanged != null)
+			try
 			{
-				PropertyChanged(this, new PropertyChangedEventArgs(info));
+				if (PropertyChanged != null)
+				{
+					PropertyChanged(this, new PropertyChangedEventArgs(info));
+				}
 			}
+			catch { }
 		}
 		public class UpdateVisitor : IVisitor
 		{

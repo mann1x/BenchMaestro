@@ -236,25 +236,23 @@ namespace BenchMaestro
                     _gridblock.RowDefinitions.Add(new RowDefinition { });
                     _row++;
 
-                    _value = App.CurrentRun.CPUAvgStretch > -99999 ? App.CurrentRun.CPUAvgStretch.ToString() : "N/D";
-                    _value = (App.CurrentRun.CPUAvgStretch > 1)? App.CurrentRun.CPUAvgStretch.ToString() : "None";
+                    _value = (App.CurrentRun.CPUAvgStretch > 1) ? App.CurrentRun.CPUAvgStretch.ToString() : App.CurrentRun.CPUAvgStretch > -99999 ? "None" : "N/D";
 
                     TextBlock _tb3a = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                     _tb3a.Inlines.Add(new Run { Text = $"{avgchar} Stretch: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
                     _tb3a.Inlines.Add(new Run { Text = $"{_value}", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
-                    if (_value != "None") _tb3a.Inlines.Add(new Run { Text = " MHz", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    if (_value != "None" && _value != "N/D") _tb3a.Inlines.Add(new Run { Text = " MHz", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
                     Grid.SetColumn(_tb3a, 0);
                     Grid.SetRow(_tb3a, _row);
                     _tb3a.TextAlignment = TextAlignment.Right;
                     _gridblock.Children.Add(_tb3a);
 
-                    _value = App.CurrentRun.CPUMaxStretch > -99999 ? App.CurrentRun.CPUMaxStretch.ToString() : "N/D";
-                    _value = (App.CurrentRun.CPUMaxStretch > 1) ? App.CurrentRun.CPUMaxStretch.ToString() : "None";
+                    _value = (App.CurrentRun.CPUMaxStretch > 1) ? App.CurrentRun.CPUMaxStretch.ToString() : App.CurrentRun.CPUMaxStretch > -99999 ? "None" : "N/D";
 
                     TextBlock _tb3b = new TextBlock { Background = App.boxbrush2, VerticalAlignment = VerticalAlignment.Center };
                     _tb3b.Inlines.Add(new Run { Text = $" {maxchar} Stretch: ", FontSize = 10, FontWeight = FontWeights.Normal, Foreground = App.blackbrush });
                     _tb3b.Inlines.Add(new Run { Text = $"{_value}", FontSize = 9, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
-                    if (_value != "None") _tb3b.Inlines.Add(new Run { Text = " MHz", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
+                    if (_value != "None" && _value != "N/D") _tb3b.Inlines.Add(new Run { Text = " MHz", FontSize = 10, FontWeight = FontWeights.Bold, Foreground = App.blackbrush });
                     Grid.SetColumn(_tb3b, 1);
                     Grid.SetRow(_tb3b, _row);
                     _tb3b.TextAlignment = TextAlignment.Left;
@@ -722,11 +720,12 @@ namespace BenchMaestro
 
                 void AddDetails(List<DetailsGrid> _thislist, string _header)
                 {
-
                     Trace.WriteLine($"Start {_header}");
 
                     Thickness dthickness = new Thickness(4, 3, 4, 3);
                     GridLength _rowheigth = new GridLength(1, GridUnitType.Star);
+
+                    bool anyprinted = false;
 
                     if (_thislist == null) return;
 
@@ -768,6 +767,7 @@ namespace BenchMaestro
 
                         foreach (DetailsGrid _item in _thislist.Where(x => x.Val1 > -99999 || x.Val2 > -99999))
                         {
+                            anyprinted = true;
                             string Label = _item.Label.ToString();
                             string Unit = _item.Unit.ToString();
 
@@ -843,9 +843,8 @@ namespace BenchMaestro
                             }
                             Trace.WriteLine($"Finish {_header}");
                         }
-                        if (_index == 0) _tbh.Visibility = Visibility.Collapsed;
+                        if (!anyprinted) _tbh.Visibility = Visibility.Collapsed;
                     }
-
                 }
 
                 void AddDetailAvgMax(double _avg, double _max, string _header, string _unit, string _format)

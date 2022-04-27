@@ -137,6 +137,7 @@ namespace BenchMaestro
             try
             {
                 bool _refreshpt = App.systemInfo.ZenRefreshPowerTable();
+                App.systemInfo.Zen.RefreshSensors();
 
                 float _livetdc = 0;
                 float _liveedc = 0;
@@ -149,12 +150,16 @@ namespace BenchMaestro
                 }
 
                 float _cpuVcore, _cpuVsoc;
-                (_cpuVcore, _cpuVsoc) = App.systemInfo.Zen.GetCpuVcc();
+                _cpuVcore = App.systemInfo.Zen.cpuVcore;
+                _cpuVsoc = App.systemInfo.Zen.cpuVsoc;
                 //Trace.WriteLine($"_cpuVcore: {_cpuVcore} _cpuVsoc: {_cpuVsoc}");
 
                 float _cpuBusClock;
-                _cpuBusClock = App.systemInfo.Zen.GetCpuBusClock();
+                _cpuBusClock = App.systemInfo.Zen.cpuBusClock;
                 //Trace.WriteLine($"_cpuBusClock: {_cpuBusClock}");
+
+                //Trace.WriteLine($"Test: {App.systemInfo.Zen.teststring}");
+
 
                 if (_cpuVcore > 0)
                 {
@@ -175,7 +180,7 @@ namespace BenchMaestro
                         if (_sensor.SensorValues == HWSensorValues.Single)
                         {
                             //Trace.WriteLine($"Zen Sensor update {_sensor.Name} PTOffset={_sensor.ZenPTOffset}");
-                            float _value = App.systemInfo.Zen.powerTable.Table[_sensor.ZenPTOffset] * _sensor.ZenMulti;
+                            float _value = (float)(App.systemInfo.Zen.powerTable.Table[_sensor.ZenPTOffset] * _sensor.ZenMulti);
                             _sensor.Values.Add(_value);
                             if (_sensor.Name == HWSensorName.CPUTDC) _livetdc = _value;
                             if (_sensor.Name == HWSensorName.CPUEDC) _liveedc = _value;
@@ -186,7 +191,7 @@ namespace BenchMaestro
                             foreach (HWSensorMultiValues _sensorValues in _sensor.MultiValues)
                             {
                                 //Trace.WriteLine($"Zen Multi Sensor update {_sensor.Name} PTOffset={_sensorValues.ZenPTOffset}");
-                                _sensorValues.Values.Add(App.systemInfo.Zen.powerTable.Table[_sensorValues.ZenPTOffset] * _sensor.ZenMulti);
+                                _sensorValues.Values.Add((float)(App.systemInfo.Zen.powerTable.Table[_sensorValues.ZenPTOffset] * _sensor.ZenMulti));
                                 //Trace.WriteLine($"Zen Sensor update {_sensor.Name}={_sensorValues.Values.Last()}");
 
                             }
@@ -220,22 +225,22 @@ namespace BenchMaestro
                     }
                 }
 
-                float? _cputemp = App.systemInfo.Zen.GetCpuTemperature();
+                float _cputemp = App.systemInfo.Zen.cpuTemp;
                 float? _cpuload = cpuLoad.GetTotalLoad();
                 App.hwsensors.UpdateZenSensor(HWSensorName.CPULoad, _cpuload);
                 App.hwsensors.UpdateZenSensor(HWSensorName.CPUTemp, _cputemp);
-                //Trace.WriteLine($"Zen CPU Temp {App.systemInfo.Zen.GetCpuTemperature()}");
+                //Trace.WriteLine($"Zen CPU Temp {App.systemInfo.Zen.cpuTemp}");
 
                 if (App.systemInfo.ZenPerCCDTemp)
                 {
                     {
-                        float? ccd1temp = App.systemInfo.Zen.GetSingleCcdTemperature(0);
+                        float ccd1temp = App.systemInfo.Zen.ccd1Temp;
                         //Trace.WriteLine($"CCD1T={ccd1temp}");
-                        if (ccd1temp != null) App.hwsensors.UpdateZenSensor(HWSensorName.CCD1Temp, ccd1temp);
-                        float? ccd2temp = App.systemInfo.Zen.GetSingleCcdTemperature(1);
+                        if (App.systemInfo.Zen.ccd1TempSupported) App.hwsensors.UpdateZenSensor(HWSensorName.CCD1Temp, ccd1temp);
+                        float ccd2temp = App.systemInfo.Zen.ccd2Temp;
                         //Trace.WriteLine($"CCD2T={ccd2temp}");
-                        if (ccd2temp != null) App.hwsensors.UpdateZenSensor(HWSensorName.CCD2Temp, ccd2temp);
-                        if (ccd1temp != null && ccd2temp != null) App.hwsensors.UpdateZenSensor(HWSensorName.CCDSTemp, (ccd1temp + ccd2temp) / 2);
+                        if (App.systemInfo.Zen.ccd2TempSupported) App.hwsensors.UpdateZenSensor(HWSensorName.CCD2Temp, ccd2temp);
+                        if (App.systemInfo.Zen.ccd1TempSupported && App.systemInfo.Zen.ccd2TempSupported) App.hwsensors.UpdateZenSensor(HWSensorName.CCDSTemp, (ccd1temp + ccd2temp) / 2);
                     }
                 }
 

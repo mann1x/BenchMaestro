@@ -99,7 +99,7 @@ namespace BenchMaestro
     }
     public static class HWSensors
     {
-        public static void InitZen(this List<HWSensorItem> _sensors, HWSensorName _name, int _offset, int _multi = 1, bool _enabled = true)
+        public static void InitZen(this List<HWSensorItem> _sensors, HWSensorName _name, int _offset, double _multi = 1, bool _enabled = true)
         {
             try
             {
@@ -121,7 +121,7 @@ namespace BenchMaestro
                 Trace.WriteLine($"HWSensor InitZen Exception: {ex}");
             }
         }
-        public static void InitZenMulti(this List<HWSensorItem> _sensors, HWSensorName _name, int _offset, int _index, int _multi = 1, bool _enabled = true)
+        public static void InitZenMulti(this List<HWSensorItem> _sensors, HWSensorName _name, int _offset, int _index, double _multi = 1, bool _enabled = true)
         {
             try
             {
@@ -637,7 +637,7 @@ namespace BenchMaestro
 
         public float? ValueOffset { get; set; }
         public int ZenPTOffset { get; set; }
-        public int ZenMulti { get; set; }
+        public double ZenMulti { get; set; }
 
         public HWSensorConfig ConfigType { get; set; }
         public HWSensorValues SensorValues { get; set; }

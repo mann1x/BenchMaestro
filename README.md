@@ -34,6 +34,12 @@ You can compile with Visual Studio 2019 and .NET Core 5.
 
 ## Changelog:
 
+- v1.0.34 Alpha
+    - New: Reworked ZenCore monitoring
+    - Fix: Memory clocks display issue in Info when VDIMM not available
+    - Fix: Various streching display issues
+    - Fix: Zen Clocks from PowerTable normalized to BCLK for Zen (thx LicSqualo)
+    - Fix: Rare unhandled exception when clearing live data display
 - v1.0.33 Alpha
     - Fix: Clocks display issues
 - v1.0.32 Alpha
